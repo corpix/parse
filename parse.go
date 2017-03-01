@@ -19,4 +19,10 @@
 // THE SOFTWARE.
 package parse
 
-type Range struct{}
+import (
+	"io"
+)
+
+func Parse(rule Rule, input io.Reader) (*Tree, error) {
+	return nil, nil
+}

@@ -19,4 +19,10 @@
 // THE SOFTWARE.
 package parse
 
-type Alternation struct{}
+type Tree struct {
+	Rule
+	Start int
+	End   int
+	Child *Tree
+	Data  []byte
+}

@@ -19,4 +19,4 @@
 // THE SOFTWARE.
 package parse
 
-type Grouping struct{}
+type Either []Rule

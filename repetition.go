@@ -19,4 +19,4 @@
 // THE SOFTWARE.
 package parse
 
-type Repetition struct{}
+type Repetition Rule

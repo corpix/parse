@@ -19,4 +19,4 @@
 // THE SOFTWARE.
 package parse
 
-type Relation interface{}
+type Chain []Rule
