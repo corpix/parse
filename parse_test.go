@@ -60,6 +60,9 @@ func TestParse(t *testing.T) {
 			"bar",
 			Terminal("foo"),
 			nil,
+			// FIXME: Probably it should fail with 'b'
+			// The fact that it fails with 'bar' is a
+			// implementation detail
 			NewErrUnexpectedToken([]byte("bar"), 1),
 		},
 		{
