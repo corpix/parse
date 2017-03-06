@@ -32,6 +32,7 @@ func TestParse(t *testing.T) {
 		syntax Rule
 		tree   *Tree
 		err    error
+		parser *Parser
 	}{
 		{
 			"",
@@ -43,6 +44,7 @@ func TestParse(t *testing.T) {
 				End:   0,
 			},
 			nil,
+			DefaultParser,
 		},
 		{
 			"foo",
@@ -54,18 +56,21 @@ func TestParse(t *testing.T) {
 				End:   3,
 			},
 			nil,
+			DefaultParser,
 		},
 		{
 			"bar",
 			Terminal("foo"),
 			nil,
 			NewErrUnexpectedToken([]byte("b"), 1),
+			DefaultParser,
 		},
 		{
 			"foobar",
 			Terminal("foo"),
 			nil,
 			NewErrUnexpectedToken([]byte("b"), 4),
+			DefaultParser,
 		},
 		{
 			"foo bar",
@@ -105,11 +110,19 @@ func TestParse(t *testing.T) {
 				},
 			},
 			nil,
+			DefaultParser,
+		},
+		{
+			"foo",
+			Chain{Chain{Chain{Chain{Terminal("foo")}}}},
+			nil,
+			NewErrNestingTooDeep(4, 1),
+			NewParser(3),
 		},
 	}
 
 	for k, sample := range samples {
-		tree, err := DefaultParser.Parse(
+		tree, err := sample.parser.Parse(
 			sample.syntax,
 			[]byte(sample.text),
 		)

@@ -57,6 +57,13 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		err     error
 	)
 
+	if depth > p.maxDepth {
+		return nil, NewErrNestingTooDeep(
+			depth,
+			p.humanizePosition(position),
+		)
+	}
+
 	tree = &Tree{}
 
 	switch v := rule.(type) {

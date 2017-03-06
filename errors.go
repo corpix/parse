@@ -96,3 +96,20 @@ func NewErrUnexpectedToken(token []byte, position int) error {
 }
 
 //
+
+type ErrNestringTooDeep struct {
+	nesting  int
+	position int
+}
+
+func (e *ErrNestringTooDeep) Error() string {
+	return fmt.Sprintf(
+		"Nesting too deep, counted to '%d' levels at position %d",
+		e.nesting,
+		e.position,
+	)
+}
+
+func NewErrNestingTooDeep(nesting int, position int) error {
+	return &ErrNestringTooDeep{nesting, position}
+}
