@@ -180,6 +180,42 @@ func TestBoundsGetBounds(t *testing.T) {
 	}
 }
 
+func TestGetTreeBounds(t *testing.T) {
+	samples := []struct {
+		tree   *Tree
+		bounds *Bounds
+	}{
+		{
+			&Tree{},
+			&Bounds{0, 0},
+		},
+		{
+			&Tree{
+				Start: 0,
+				End:   0,
+			},
+			&Bounds{0, 0},
+		},
+		{
+			&Tree{
+				Start: 1,
+				End:   25,
+			},
+			&Bounds{1, 25},
+		},
+	}
+
+	for k, sample := range samples {
+		bounds := GetTreeBounds(sample.tree)
+		assert.Equal(
+			t,
+			sample.bounds,
+			bounds,
+			spew.Sdump(k, sample),
+		)
+	}
+}
+
 func TestGetTreesBounds(t *testing.T) {
 	samples := []struct {
 		trees  []*Tree
