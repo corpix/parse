@@ -52,7 +52,6 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree    *Tree
 		subTree *Tree
 		buf     []byte
-		bufLen  int
 		bounds  *Bounds
 		err     error
 	)
@@ -68,14 +67,13 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 
 	switch v := rule.(type) {
 	case Terminal:
-		buf = input[:len(v)]
-		bufLen = len(buf)
-
-		if bufLen < len(v) {
+		bufLen := len(v)
+		if len(input) < bufLen {
 			return nil, NewErrUnexpectedEOF(
 				p.humanizePosition(position),
 			)
 		}
+		buf = input[:bufLen]
 
 		if !bytes.EqualFold(buf, []byte(v)) {
 			return nil, NewErrUnexpectedToken(
@@ -84,16 +82,45 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 			)
 		}
 
-		tree.Rule = v
-		tree.Data = buf
 		tree.Start = position
 		tree.End = position + bufLen
+		tree.Rule = v
+		tree.Data = buf
 	case Either:
-	case Chain:
 		for _, r := range v {
 			subTree, err = p.parse(
 				r,
-				input[position:],
+				input,
+				position,
+				depth+1,
+			)
+			if err != nil {
+				switch err.(type) {
+				case *ErrUnexpectedToken, *ErrUnexpectedEOF:
+					continue
+				default:
+					return nil, err
+				}
+			}
+
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		tree.Start = subTree.Start
+		tree.End = subTree.End
+		tree.Rule = v
+		tree.Data = input[:subTree.End-subTree.Start]
+		tree.Childs = make([]*Tree, 1)
+		tree.Childs[0] = subTree
+	case Chain:
+		buf = input
+		for _, r := range v {
+			subTree, err = p.parse(
+				r,
+				buf,
 				position,
 				depth+1,
 			)
@@ -101,6 +128,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 				return nil, err
 			}
 			position = subTree.End
+			buf = buf[subTree.End-subTree.Start:]
 
 			tree.Childs = append(
 				tree.Childs,
@@ -109,10 +137,10 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		}
 
 		bounds = GetTreesBounds(tree.Childs)
-		tree.Rule = v
-		tree.Data = input[bounds.Starting:bounds.Closing]
 		tree.Start = bounds.Starting
 		tree.End = bounds.Closing
+		tree.Rule = v
+		tree.Data = input[:bounds.Closing-bounds.Starting]
 	case Repetition:
 	default:
 		return nil, NewErrUnsupportedRule(rule)

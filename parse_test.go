@@ -119,6 +119,63 @@ func TestParse(t *testing.T) {
 			NewErrNestingTooDeep(4, 1),
 			NewParser(3),
 		},
+
+		//
+
+		{
+			"foobar",
+			Chain{
+				Either{Terminal("foo"), Terminal("bar")},
+				Either{Terminal("foo"), Terminal("bar")},
+			},
+			&Tree{
+				Rule: Chain{
+					Either{Terminal("foo"), Terminal("bar")},
+					Either{Terminal("foo"), Terminal("bar")},
+				},
+				Data:  []byte("foobar"),
+				Start: 0,
+				End:   6,
+				Childs: []*Tree{
+					{
+						Rule: Either{
+							Terminal("foo"),
+							Terminal("bar"),
+						},
+						Data:  []byte("foo"),
+						Start: 0,
+						End:   3,
+						Childs: []*Tree{
+							{
+								Rule:  Terminal("foo"),
+								Data:  []byte("foo"),
+								Start: 0,
+								End:   3,
+							},
+						},
+					},
+					{
+						Rule: Either{
+							Terminal("foo"),
+							Terminal("bar"),
+						},
+						Data:  []byte("bar"),
+						Start: 3,
+						End:   6,
+						Childs: []*Tree{
+							{
+								Rule:  Terminal("bar"),
+								Data:  []byte("bar"),
+								Start: 3,
+								End:   6,
+							},
+						},
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
 	}
 
 	for k, sample := range samples {
@@ -126,7 +183,7 @@ func TestParse(t *testing.T) {
 			sample.syntax,
 			[]byte(sample.text),
 		)
-		msg := spew.Sdump(k, sample)
+		msg := spew.Sdump(k, sample.text)
 		assert.Equal(t, sample.err, err, msg)
 		assert.Equal(t, sample.tree, tree, msg)
 	}
