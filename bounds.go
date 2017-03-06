@@ -88,3 +88,16 @@ func getBounds(position, depth int, tokens []byte, starting []byte, closing []by
 	}
 	return res, nil
 }
+
+func GetTreesBounds(trees []*Tree) *Bounds {
+	treesLen := len(trees)
+
+	if treesLen == 0 {
+		return &Bounds{0, 0}
+	}
+
+	return &Bounds{
+		trees[0].Start,
+		trees[treesLen-1].End,
+	}
+}

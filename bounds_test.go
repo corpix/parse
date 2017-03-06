@@ -179,3 +179,73 @@ func TestBoundsGetBounds(t *testing.T) {
 		}
 	}
 }
+
+func TestGetTreesBounds(t *testing.T) {
+	samples := []struct {
+		trees  []*Tree
+		bounds *Bounds
+	}{
+		{
+			[]*Tree{},
+			&Bounds{0, 0},
+		},
+		{
+			[]*Tree{
+				{
+					Start: 0,
+					End:   0,
+				},
+			},
+			&Bounds{0, 0},
+		},
+		{
+			[]*Tree{
+				{
+					Start: 0,
+					End:   5,
+				},
+			},
+			&Bounds{0, 5},
+		},
+		{
+			[]*Tree{
+				{
+					Start: 0,
+					End:   3,
+				},
+				{
+					Start: 3,
+					End:   9,
+				},
+			},
+			&Bounds{0, 9},
+		},
+		{
+			[]*Tree{
+				{
+					Start: 0,
+					End:   3,
+				},
+				{
+					Start: -1,
+					End:   999,
+				},
+				{
+					Start: 3,
+					End:   9,
+				},
+			},
+			&Bounds{0, 9},
+		},
+	}
+
+	for k, sample := range samples {
+		bounds := GetTreesBounds(sample.trees)
+		assert.Equal(
+			t,
+			sample.bounds,
+			bounds,
+			spew.Sdump(k, sample),
+		)
+	}
+}

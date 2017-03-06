@@ -21,8 +21,8 @@ package parse
 
 type Tree struct {
 	Rule
-	Start int
-	End   int
-	Child []*Tree
-	Data  []byte
+	Start  int
+	End    int
+	Childs []*Tree
+	Data   []byte
 }

@@ -20,7 +20,6 @@
 package parse
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -40,8 +39,8 @@ func TestParse(t *testing.T) {
 			&Tree{
 				Rule:  Terminal(""),
 				Data:  []byte{},
-				Start: 1,
-				End:   1,
+				Start: 0,
+				End:   0,
 			},
 			nil,
 		},
@@ -51,8 +50,8 @@ func TestParse(t *testing.T) {
 			&Tree{
 				Rule:  Terminal("foo"),
 				Data:  []byte("foo"),
-				Start: 1,
-				End:   4,
+				Start: 0,
+				End:   3,
 			},
 			nil,
 		},
@@ -60,10 +59,7 @@ func TestParse(t *testing.T) {
 			"bar",
 			Terminal("foo"),
 			nil,
-			// FIXME: Probably it should fail with 'b'
-			// The fact that it fails with 'bar' is a
-			// implementation detail
-			NewErrUnexpectedToken([]byte("bar"), 1),
+			NewErrUnexpectedToken([]byte("b"), 1),
 		},
 		{
 			"foobar",
@@ -71,12 +67,52 @@ func TestParse(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken([]byte("b"), 4),
 		},
+		{
+			"foo bar",
+			Chain{
+				Terminal("foo"),
+				Terminal(" "),
+				Terminal("bar"),
+			},
+			&Tree{
+				Rule: Chain{
+					Terminal("foo"),
+					Terminal(" "),
+					Terminal("bar"),
+				},
+				Data:  []byte("foo bar"),
+				Start: 0,
+				End:   7,
+				Childs: []*Tree{
+					{
+						Rule:  Terminal("foo"),
+						Data:  []byte("foo"),
+						Start: 0,
+						End:   3,
+					},
+					{
+						Rule:  Terminal(" "),
+						Data:  []byte(" "),
+						Start: 3,
+						End:   4,
+					},
+					{
+						Rule:  Terminal("bar"),
+						Data:  []byte("bar"),
+						Start: 4,
+						End:   7,
+					},
+				},
+			},
+			nil,
+		},
 	}
 
 	for k, sample := range samples {
-		reader := bytes.NewBufferString(sample.text)
-		tree, err := Parse(sample.syntax, reader)
-
+		tree, err := DefaultParser.Parse(
+			sample.syntax,
+			[]byte(sample.text),
+		)
 		msg := spew.Sdump(k, sample)
 		assert.Equal(t, sample.err, err, msg)
 		assert.Equal(t, sample.tree, tree, msg)

@@ -21,82 +21,108 @@ package parse
 
 import (
 	"bytes"
-	"io"
 )
 
-func Parse(rule Rule, input io.Reader) (*Tree, error) {
-	tree, err := parse(rule, input, 1, 0)
+var (
+	DefaultParser = NewParser(128)
+)
+
+type Parser struct {
+	maxDepth int
+}
+
+func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
+	tree, err := p.parse(rule, input, 0, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	// FIXME: Could we do better?
-	buf := make([]byte, 1)
-	read, err := input.Read(buf)
-	if err != nil && err != io.EOF {
-		return nil, err
-	}
-	if read > 0 {
-		return nil, NewErrUnexpectedToken(buf, tree.End)
+	if tree.End < len(input) {
+		return nil, NewErrUnexpectedToken(
+			input[tree.End:tree.End+1],
+			p.humanizePosition(tree.End),
+		)
 	}
 
 	return tree, nil
 }
 
-func parse(rule Rule, input io.Reader, position int, depth int) (*Tree, error) {
+func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree, error) {
 	var (
 		tree    *Tree
 		subTree *Tree
-		err     error
 		buf     []byte
-		read    int
+		bufLen  int
+		bounds  *Bounds
+		err     error
 	)
 
 	tree = &Tree{}
 
 	switch v := rule.(type) {
 	case Terminal:
-		buf = make([]byte, len(v))
-		read, err = input.Read(buf)
-		if err != nil && err != io.EOF {
-			return nil, err
-		}
+		buf = input[:len(v)]
+		bufLen = len(buf)
 
-		if read < len(buf) {
-			return nil, NewErrUnexpectedEOF(position)
+		if bufLen < len(v) {
+			return nil, NewErrUnexpectedEOF(
+				p.humanizePosition(position),
+			)
 		}
 
 		if !bytes.EqualFold(buf, []byte(v)) {
-			return nil, NewErrUnexpectedToken(buf, position)
+			return nil, NewErrUnexpectedToken(
+				buf[:1],
+				p.humanizePosition(position),
+			)
 		}
 
 		tree.Rule = v
 		tree.Data = buf
 		tree.Start = position
-		tree.End = position + read
-
-		position = tree.End
+		tree.End = position + bufLen
 	case Either:
 	case Chain:
 		for _, r := range v {
-			subTree, err = parse(
+			subTree, err = p.parse(
 				r,
-				input,
+				input[position:],
 				position,
 				depth+1,
 			)
 			if err != nil {
 				return nil, err
 			}
-			tree.Child = append(
-				tree.Child,
+			position = subTree.End
+
+			tree.Childs = append(
+				tree.Childs,
 				subTree,
 			)
 		}
+
+		bounds = GetTreesBounds(tree.Childs)
+		tree.Rule = v
+		tree.Data = input[bounds.Starting:bounds.Closing]
+		tree.Start = bounds.Starting
+		tree.End = bounds.Closing
 	case Repetition:
 	default:
 		return nil, NewErrUnsupportedRule(rule)
 	}
 
 	return tree, nil
+}
+
+// FIXME: We need position starting from 0
+// to simplify code, but human readable errors and
+// dumps should contain position starting from 1
+// I am not sure this is ok to implement it in this manner
+// but at this time let it be so.
+func (p *Parser) humanizePosition(position int) int {
+	return position + 1
+}
+
+func NewParser(maxDepth int) *Parser {
+	return &Parser{maxDepth}
 }
