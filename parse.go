@@ -25,7 +25,22 @@ import (
 )
 
 func Parse(rule Rule, input io.Reader) (*Tree, error) {
-	return parse(rule, input, 1, 0)
+	tree, err := parse(rule, input, 1, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME: Could we do better?
+	buf := make([]byte, 1)
+	read, err := input.Read(buf)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	if read > 0 {
+		return nil, NewErrUnexpectedToken(buf, tree.End)
+	}
+
+	return tree, nil
 }
 
 func parse(rule Rule, input io.Reader, position int, depth int) (*Tree, error) {
@@ -43,6 +58,9 @@ func parse(rule Rule, input io.Reader, position int, depth int) (*Tree, error) {
 	case Terminal:
 		buf = make([]byte, len(v))
 		read, err = input.Read(buf)
+		if err != nil && err != io.EOF {
+			return nil, err
+		}
 
 		if read < len(buf) {
 			return nil, NewErrUnexpectedEOF(position)

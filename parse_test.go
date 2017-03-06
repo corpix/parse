@@ -56,6 +56,18 @@ func TestParse(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			"bar",
+			Terminal("foo"),
+			nil,
+			NewErrUnexpectedToken([]byte("bar"), 1),
+		},
+		{
+			"foobar",
+			Terminal("foo"),
+			nil,
+			NewErrUnexpectedToken([]byte("b"), 4),
+		},
 	}
 
 	for k, sample := range samples {
