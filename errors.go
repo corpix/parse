@@ -43,3 +43,56 @@ func NewErrBoundIncomplete(position int, starting, closing []byte) error {
 }
 
 //
+
+type ErrUnsupportedRule struct {
+	Rule
+}
+
+func (e *ErrUnsupportedRule) Error() string {
+	return fmt.Sprintf(
+		"Unsupported rule type '%T'",
+		e.Rule,
+	)
+}
+
+func NewErrUnsupportedRule(rule Rule) error {
+	return &ErrUnsupportedRule{rule}
+}
+
+//
+
+type ErrUnexpectedEOF struct {
+	position int
+}
+
+func (e *ErrUnexpectedEOF) Error() string {
+	return fmt.Sprintf(
+		"Unexpected EOF at position '%d'",
+		e.position,
+	)
+}
+
+func NewErrUnexpectedEOF(position int) error {
+	return &ErrUnexpectedEOF{position}
+}
+
+//
+
+type ErrUnexpectedToken struct {
+	token    []byte
+	position int
+}
+
+func (e *ErrUnexpectedToken) Error() string {
+	return fmt.Sprintf(
+		"Unexpected token '%s' at position '%d'",
+		e.token,
+		e.position,
+	)
+}
+
+func NewErrUnexpectedToken(token []byte, position int) error {
+	return &ErrUnexpectedToken{token, position}
+}
+
+//

@@ -23,6 +23,6 @@ type Tree struct {
 	Rule
 	Start int
 	End   int
-	Child *Tree
+	Child []*Tree
 	Data  []byte
 }

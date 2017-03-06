@@ -21,64 +21,49 @@ package parse
 
 import (
 	"bytes"
-	"io"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/stretchr/testify/assert"
 )
 
-func Parse(rule Rule, input io.Reader) (*Tree, error) {
-	return parse(rule, input, 1, 0)
-}
-
-func parse(rule Rule, input io.Reader, position int, depth int) (*Tree, error) {
-	var (
-		tree    *Tree
-		subTree *Tree
-		err     error
-		buf     []byte
-		read    int
-	)
-
-	tree = &Tree{}
-
-	switch v := rule.(type) {
-	case Terminal:
-		buf = make([]byte, len(v))
-		read, err = input.Read(buf)
-
-		if read < len(buf) {
-			return nil, NewErrUnexpectedEOF(position)
-		}
-
-		if !bytes.EqualFold(buf, []byte(v)) {
-			return nil, NewErrUnexpectedToken(buf, position)
-		}
-
-		tree.Rule = v
-		tree.Data = buf
-		tree.Start = position
-		tree.End = position + read
-
-		position = tree.End
-	case Either:
-	case Chain:
-		for _, r := range v {
-			subTree, err = parse(
-				r,
-				input,
-				position,
-				depth+1,
-			)
-			if err != nil {
-				return nil, err
-			}
-			tree.Child = append(
-				tree.Child,
-				subTree,
-			)
-		}
-	case Repetition:
-	default:
-		return nil, NewErrUnsupportedRule(rule)
+func TestParse(t *testing.T) {
+	samples := []struct {
+		text   string
+		syntax Rule
+		tree   *Tree
+		err    error
+	}{
+		{
+			"",
+			Terminal(""),
+			&Tree{
+				Rule:  Terminal(""),
+				Data:  []byte{},
+				Start: 1,
+				End:   1,
+			},
+			nil,
+		},
+		{
+			"foo",
+			Terminal("foo"),
+			&Tree{
+				Rule:  Terminal("foo"),
+				Data:  []byte("foo"),
+				Start: 1,
+				End:   4,
+			},
+			nil,
+		},
 	}
 
-	return tree, nil
+	for k, sample := range samples {
+		reader := bytes.NewBufferString(sample.text)
+		tree, err := Parse(sample.syntax, reader)
+
+		msg := spew.Sdump(k, sample)
+		assert.Equal(t, sample.err, err, msg)
+		assert.Equal(t, sample.tree, tree, msg)
+	}
 }
