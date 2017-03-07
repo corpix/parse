@@ -20,3 +20,8 @@
 package parse
 
 type Chain []Rule
+
+func NewChain(v ...Rule) *Chain {
+	chain := Chain(v)
+	return &chain
+}

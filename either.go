@@ -20,3 +20,8 @@
 package parse
 
 type Either []Rule
+
+func NewEither(v ...Rule) *Either {
+	either := Either(v)
+	return &either
+}

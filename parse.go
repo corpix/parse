@@ -41,6 +41,7 @@ func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 		return nil, NewErrUnexpectedToken(
 			input[tree.End:tree.End+1],
 			p.humanizePosition(tree.End),
+			rule,
 		)
 	}
 
@@ -65,29 +66,42 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 
 	tree = &Tree{}
 
+	if rule == nil {
+		return nil, NewErrEmptyRule(rule)
+	}
+
 	switch v := rule.(type) {
-	case Terminal:
-		bufLen := len(v)
-		if len(input) < bufLen {
+	case *Terminal:
+		length := len(*v)
+		if length == 0 {
+			return nil, NewErrEmptyRule(v)
+		}
+
+		if len(input) < length {
 			return nil, NewErrUnexpectedEOF(
 				p.humanizePosition(position),
 			)
 		}
-		buf = input[:bufLen]
+		buf = input[:length]
 
-		if !bytes.EqualFold(buf, []byte(v)) {
+		if !bytes.EqualFold(buf, []byte(*v)) {
 			return nil, NewErrUnexpectedToken(
 				buf[:1],
 				p.humanizePosition(position),
+				v,
 			)
 		}
 
 		tree.Start = position
-		tree.End = position + bufLen
+		tree.End = position + length
 		tree.Rule = v
 		tree.Data = buf
-	case Either:
-		for _, r := range v {
+	case *Either:
+		if len(*v) == 0 {
+			return nil, NewErrEmptyRule(v)
+		}
+
+		for _, r := range *v {
 			subTree, err = p.parse(
 				r,
 				input,
@@ -109,15 +123,19 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 			return nil, err
 		}
 
+		tree.Childs = make([]*Tree, 1)
+		tree.Childs[0] = subTree
 		tree.Start = subTree.Start
 		tree.End = subTree.End
 		tree.Rule = v
 		tree.Data = input[:subTree.End-subTree.Start]
-		tree.Childs = make([]*Tree, 1)
-		tree.Childs[0] = subTree
-	case Chain:
+	case *Chain:
+		if len(*v) == 0 {
+			return nil, NewErrEmptyRule(v)
+		}
+
 		buf = input
-		for _, r := range v {
+		for _, r := range *v {
 			subTree, err = p.parse(
 				r,
 				buf,
@@ -141,7 +159,53 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.End = bounds.Closing
 		tree.Rule = v
 		tree.Data = input[:bounds.Closing-bounds.Starting]
-	case Repetition:
+	case *Repetition:
+		found := false
+		buf = input
+
+	repetitionLoop:
+		for {
+			subTree, err = p.parse(
+				v.Rule,
+				buf,
+				position,
+				depth+1,
+			)
+			if err != nil {
+				switch err.(type) {
+				case *ErrUnexpectedToken, *ErrUnexpectedEOF:
+					break repetitionLoop
+				default:
+					return nil, err
+				}
+			}
+
+			movePos := subTree.End - subTree.Start
+			position += movePos
+			buf = buf[movePos:]
+
+			tree.Childs = append(
+				tree.Childs,
+				subTree,
+			)
+			found = true
+		}
+		if !found {
+			if err != nil {
+				return nil, err
+			}
+			return nil, NewErrUnexpectedToken(
+				input[:1],
+				position,
+				v,
+			)
+		}
+
+		bounds = GetTreesBounds(tree.Childs)
+		tree.Start = bounds.Starting
+		tree.End = bounds.Closing
+		tree.Rule = v
+		tree.Data = input[:bounds.Closing-bounds.Starting]
 	default:
 		return nil, NewErrUnsupportedRule(rule)
 	}

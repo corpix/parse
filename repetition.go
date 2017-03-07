@@ -19,4 +19,10 @@
 // THE SOFTWARE.
 package parse
 
-type Repetition Rule
+type Repetition struct {
+	Rule
+}
+
+func NewRepetition(v Rule) *Repetition {
+	return &Repetition{v}
+}

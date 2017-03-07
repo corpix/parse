@@ -20,3 +20,8 @@
 package parse
 
 type Terminal []byte
+
+func NewTerminal(v string) *Terminal {
+	terminal := Terminal(v)
+	return &terminal
+}

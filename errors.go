@@ -24,17 +24,17 @@ import (
 )
 
 type ErrBoundIncomplete struct {
-	starting []byte
-	closing  []byte
-	position int
+	Starting []byte
+	Closing  []byte
+	Position int
 }
 
 func (e *ErrBoundIncomplete) Error() string {
 	return fmt.Sprintf(
 		"Bound start token '%s' found but close token '%s' is not, bound incomplete at position %d",
-		string(e.starting),
-		string(e.closing),
-		e.position,
+		string(e.Starting),
+		string(e.Closing),
+		e.Position,
 	)
 }
 
@@ -62,13 +62,13 @@ func NewErrUnsupportedRule(rule Rule) error {
 //
 
 type ErrUnexpectedEOF struct {
-	position int
+	Position int
 }
 
 func (e *ErrUnexpectedEOF) Error() string {
 	return fmt.Sprintf(
 		"Unexpected EOF at position '%d'",
-		e.position,
+		e.Position,
 	)
 }
 
@@ -79,37 +79,57 @@ func NewErrUnexpectedEOF(position int) error {
 //
 
 type ErrUnexpectedToken struct {
-	token    []byte
-	position int
+	Token    []byte
+	Position int
+	Rule
 }
 
 func (e *ErrUnexpectedToken) Error() string {
 	return fmt.Sprintf(
-		"Unexpected token '%s' at position '%d'",
-		e.token,
-		e.position,
+		"Unexpected token '%s' at position '%d' while applying '%#v'",
+		e.Token,
+		e.Position,
+		e.Rule,
 	)
 }
 
-func NewErrUnexpectedToken(token []byte, position int) error {
-	return &ErrUnexpectedToken{token, position}
+func NewErrUnexpectedToken(token []byte, position int, rule Rule) error {
+	return &ErrUnexpectedToken{token, position, rule}
 }
 
 //
 
-type ErrNestringTooDeep struct {
-	nesting  int
-	position int
+type ErrNestingTooDeep struct {
+	Nesting  int
+	Position int
 }
 
-func (e *ErrNestringTooDeep) Error() string {
+func (e *ErrNestingTooDeep) Error() string {
 	return fmt.Sprintf(
 		"Nesting too deep, counted to '%d' levels at position %d",
-		e.nesting,
-		e.position,
+		e.Nesting,
+		e.Position,
 	)
 }
 
 func NewErrNestingTooDeep(nesting int, position int) error {
-	return &ErrNestringTooDeep{nesting, position}
+	return &ErrNestingTooDeep{nesting, position}
+}
+
+//
+
+type ErrEmptyRule struct {
+	Rule
+}
+
+func (e *ErrEmptyRule) Error() string {
+	return fmt.Sprintf(
+		"Empty rule '%T' is '%#v' is not allowed",
+		e.Rule,
+		e.Rule,
+	)
+}
+
+func NewErrEmptyRule(rule Rule) error {
+	return &ErrEmptyRule{rule}
 }
