@@ -469,9 +469,9 @@ func TestParse(t *testing.T) {
 									NewTerminal("2"),
 									NewTerminal("1"),
 								),
-								Data:  []byte("1234"),
+								Data:  []byte("1"),
 								Start: 4,
-								End:   8,
+								End:   5,
 								Childs: []*Tree{
 									{
 										Rule:  NewTerminal("1"),
@@ -479,18 +479,57 @@ func TestParse(t *testing.T) {
 										Start: 4,
 										End:   5,
 									},
+								},
+							},
+							{
+								Rule: NewEither(
+									NewTerminal("4"),
+									NewTerminal("3"),
+									NewTerminal("2"),
+									NewTerminal("1"),
+								),
+								Data:  []byte("2"),
+								Start: 5,
+								End:   6,
+								Childs: []*Tree{
 									{
 										Rule:  NewTerminal("2"),
 										Data:  []byte("2"),
 										Start: 5,
 										End:   6,
 									},
+								},
+							},
+							{
+								Rule: NewEither(
+									NewTerminal("4"),
+									NewTerminal("3"),
+									NewTerminal("2"),
+									NewTerminal("1"),
+								),
+								Data:  []byte("3"),
+								Start: 6,
+								End:   7,
+								Childs: []*Tree{
 									{
 										Rule:  NewTerminal("3"),
 										Data:  []byte("3"),
 										Start: 6,
 										End:   7,
 									},
+								},
+							},
+							{
+								Rule: NewEither(
+									NewTerminal("4"),
+									NewTerminal("3"),
+									NewTerminal("2"),
+									NewTerminal("1"),
+								),
+								Data:  []byte("4"),
+								Start: 7,
+								End:   8,
+								Childs: []*Tree{
 									{
 										Rule:  NewTerminal("4"),
 										Data:  []byte("4"),
@@ -528,52 +567,3 @@ func TestParse(t *testing.T) {
 		assert.EqualValues(t, sample.tree, tree, msg)
 	}
 }
-
-// func TestTemporary(t *testing.T) {
-// 	number := NewEither(
-// 		NewTerminal("0"),
-// 		NewTerminal("1"),
-// 		NewTerminal("2"),
-// 		NewTerminal("3"),
-// 		NewTerminal("4"),
-// 		NewTerminal("5"),
-// 		NewTerminal("6"),
-// 		NewTerminal("7"),
-// 		NewTerminal("8"),
-// 		NewTerminal("9"),
-// 	)
-// 	leftBracket := NewTerminal("(")
-// 	rightBracket := NewTerminal(")")
-
-// 	typeDefinition := NewEither()
-
-// 	wrap := NewChain(
-// 		NewTerminal("Wrap"),
-// 		leftBracket,
-// 		typeDefinition,
-// 		rightBracket,
-// 	)
-// 	node := NewChain(
-// 		NewTerminal("Node"),
-// 		leftBracket,
-// 		typeDefinition,
-// 		rightBracket,
-// 	)
-// 	integer := NewChain(
-// 		NewTerminal("Int"),
-// 		leftBracket,
-// 		NewRepetition(number),
-// 		rightBracket,
-// 	)
-
-// 	*typeDefinition = append(*typeDefinition, wrap)
-// 	*typeDefinition = append(*typeDefinition, node)
-// 	*typeDefinition = append(*typeDefinition, integer)
-
-// 	spew.Dump(
-// 		DefaultParser.Parse(
-// 			typeDefinition,
-// 			[]byte("Wrap(Node(Int(5)))"),
-// 		),
-// 	)
-// }
