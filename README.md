@@ -109,7 +109,9 @@ func main() {
 }
 ```
 
-Save this code into some file, `main.go` for example and run:
+Save this code into some file, `main.go` for example.
+
+Run it:
 
 ``` shell
 go run main.go
