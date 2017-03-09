@@ -39,16 +39,18 @@ func TestParse(t *testing.T) {
 
 		{
 			"",
-			NewTerminal(""),
+			NewTerminal("empty", ""),
 			nil,
-			NewErrEmptyRule(NewTerminal("")),
+			NewErrEmptyRule(
+				NewTerminal("empty", ""),
+			),
 			DefaultParser,
 		},
 		{
 			"foo",
-			NewTerminal("foo"),
+			NewTerminal("foo", "foo"),
 			&Tree{
-				Rule:  NewTerminal("foo"),
+				Rule:  NewTerminal("foo", "foo"),
 				Data:  []byte("foo"),
 				Start: 0,
 				End:   3,
@@ -58,23 +60,23 @@ func TestParse(t *testing.T) {
 		},
 		{
 			"bar",
-			NewTerminal("foo"),
+			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("b"),
 				1,
-				NewTerminal("foo"),
+				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
 		},
 		{
 			"foobar",
-			NewTerminal("foo"),
+			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("b"),
 				4,
-				NewTerminal("foo"),
+				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
 		},
@@ -83,42 +85,44 @@ func TestParse(t *testing.T) {
 
 		{
 			"",
-			NewChain(),
+			NewChain("empty"),
 			nil,
-			NewErrEmptyRule(NewChain()),
+			NewErrEmptyRule(NewChain("empty")),
 			DefaultParser,
 		},
 		{
 			"foo bar",
 			NewChain(
-				NewTerminal("foo"),
-				NewTerminal(" "),
-				NewTerminal("bar"),
+				"chain of foo bar",
+				NewTerminal("foo", "foo"),
+				NewTerminal("space", " "),
+				NewTerminal("bar", "bar"),
 			),
 			&Tree{
 				Rule: NewChain(
-					NewTerminal("foo"),
-					NewTerminal(" "),
-					NewTerminal("bar"),
+					"chain of foo bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("space", " "),
+					NewTerminal("bar", "bar"),
 				),
 				Data:  []byte("foo bar"),
 				Start: 0,
 				End:   7,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("foo"),
+						Rule:  NewTerminal("foo", "foo"),
 						Data:  []byte("foo"),
 						Start: 0,
 						End:   3,
 					},
 					{
-						Rule:  NewTerminal(" "),
+						Rule:  NewTerminal("space", " "),
 						Data:  []byte(" "),
 						Start: 3,
 						End:   4,
 					},
 					{
-						Rule:  NewTerminal("bar"),
+						Rule:  NewTerminal("bar", "bar"),
 						Data:  []byte("bar"),
 						Start: 4,
 						End:   7,
@@ -131,10 +135,14 @@ func TestParse(t *testing.T) {
 		{
 			"foo",
 			NewChain(
+				"deep",
 				NewChain(
+					"deep",
 					NewChain(
+						"deep",
 						NewChain(
-							NewTerminal("foo"),
+							"deep",
+							NewTerminal("foo", "foo"),
 						),
 					),
 				),
@@ -148,30 +156,32 @@ func TestParse(t *testing.T) {
 
 		{
 			"",
-			NewEither(),
+			NewEither("empty"),
 			nil,
-			NewErrEmptyRule(NewEither()),
+			NewErrEmptyRule(NewEither("empty")),
 			DefaultParser,
 		},
 		{
 			"1",
 			NewEither(
-				NewTerminal("1"),
-				NewTerminal("2"),
-				NewTerminal("3"),
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
 			),
 			&Tree{
 				Rule: NewEither(
-					NewTerminal("1"),
-					NewTerminal("2"),
-					NewTerminal("3"),
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
 				),
 				Data:  []byte("1"),
 				Start: 0,
 				End:   1,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("1"),
+						Rule:  NewTerminal("one", "1"),
 						Data:  []byte("1"),
 						Start: 0,
 						End:   1,
@@ -184,22 +194,24 @@ func TestParse(t *testing.T) {
 		{
 			"1",
 			NewEither(
-				NewTerminal("3"),
-				NewTerminal("2"),
-				NewTerminal("1"),
+				"number",
+				NewTerminal("three", "3"),
+				NewTerminal("two", "2"),
+				NewTerminal("one", "1"),
 			),
 			&Tree{
 				Rule: NewEither(
-					NewTerminal("3"),
-					NewTerminal("2"),
-					NewTerminal("1"),
+					"number",
+					NewTerminal("three", "3"),
+					NewTerminal("two", "2"),
+					NewTerminal("one", "1"),
 				),
 				Data:  []byte("1"),
 				Start: 0,
 				End:   1,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("1"),
+						Rule:  NewTerminal("one", "1"),
 						Data:  []byte("1"),
 						Start: 0,
 						End:   1,
@@ -212,22 +224,24 @@ func TestParse(t *testing.T) {
 		{
 			"2",
 			NewEither(
-				NewTerminal("1"),
-				NewTerminal("2"),
-				NewTerminal("3"),
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
 			),
 			&Tree{
 				Rule: NewEither(
-					NewTerminal("1"),
-					NewTerminal("2"),
-					NewTerminal("3"),
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
 				),
 				Data:  []byte("2"),
 				Start: 0,
 				End:   1,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("2"),
+						Rule:  NewTerminal("two", "2"),
 						Data:  []byte("2"),
 						Start: 0,
 						End:   1,
@@ -240,15 +254,16 @@ func TestParse(t *testing.T) {
 		{
 			"4",
 			NewEither(
-				NewTerminal("1"),
-				NewTerminal("2"),
-				NewTerminal("3"),
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
 			),
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("4"),
 				1,
-				NewTerminal("3"),
+				NewTerminal("three", "3"),
 			),
 			DefaultParser,
 		},
@@ -258,18 +273,22 @@ func TestParse(t *testing.T) {
 		{
 			"123",
 			NewRepetition(
+				"numbers",
 				NewEither(
-					NewTerminal("1"),
-					NewTerminal("2"),
-					NewTerminal("3"),
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
 				),
 			),
 			&Tree{
 				Rule: NewRepetition(
+					"numbers",
 					NewEither(
-						NewTerminal("1"),
-						NewTerminal("2"),
-						NewTerminal("3"),
+						"number",
+						NewTerminal("one", "1"),
+						NewTerminal("two", "2"),
+						NewTerminal("three", "3"),
 					),
 				),
 				Data:  []byte("123"),
@@ -278,16 +297,17 @@ func TestParse(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
-							NewTerminal("1"),
-							NewTerminal("2"),
-							NewTerminal("3"),
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
 						),
 						Data:  []byte("1"),
 						Start: 0,
 						End:   1,
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("1"),
+								Rule:  NewTerminal("one", "1"),
 								Data:  []byte("1"),
 								Start: 0,
 								End:   1,
@@ -296,16 +316,17 @@ func TestParse(t *testing.T) {
 					},
 					{
 						Rule: NewEither(
-							NewTerminal("1"),
-							NewTerminal("2"),
-							NewTerminal("3"),
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
 						),
 						Data:  []byte("2"),
 						Start: 1,
 						End:   2,
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("2"),
+								Rule:  NewTerminal("two", "2"),
 								Data:  []byte("2"),
 								Start: 1,
 								End:   2,
@@ -314,16 +335,17 @@ func TestParse(t *testing.T) {
 					},
 					{
 						Rule: NewEither(
-							NewTerminal("1"),
-							NewTerminal("2"),
-							NewTerminal("3"),
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
 						),
 						Data:  []byte("3"),
 						Start: 2,
 						End:   3,
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("3"),
+								Rule:  NewTerminal("three", "3"),
 								Data:  []byte("3"),
 								Start: 2,
 								End:   3,
@@ -341,24 +363,30 @@ func TestParse(t *testing.T) {
 		{
 			"foobar",
 			NewChain(
+				"chain of foo bar",
 				NewEither(
-					NewTerminal("foo"),
-					NewTerminal("bar"),
+					"foo and bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("bar", "bar"),
 				),
 				NewEither(
-					NewTerminal("foo"),
-					NewTerminal("bar"),
+					"foo and bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("bar", "bar"),
 				),
 			),
 			&Tree{
 				Rule: NewChain(
+					"chain of foo bar",
 					NewEither(
-						NewTerminal("foo"),
-						NewTerminal("bar"),
+						"foo and bar",
+						NewTerminal("foo", "foo"),
+						NewTerminal("bar", "bar"),
 					),
 					NewEither(
-						NewTerminal("foo"),
-						NewTerminal("bar"),
+						"foo and bar",
+						NewTerminal("foo", "foo"),
+						NewTerminal("bar", "bar"),
 					),
 				),
 				Data:  []byte("foobar"),
@@ -367,15 +395,16 @@ func TestParse(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
-							NewTerminal("foo"),
-							NewTerminal("bar"),
+							"foo and bar",
+							NewTerminal("foo", "foo"),
+							NewTerminal("bar", "bar"),
 						),
 						Data:  []byte("foo"),
 						Start: 0,
 						End:   3,
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("foo"),
+								Rule:  NewTerminal("foo", "foo"),
 								Data:  []byte("foo"),
 								Start: 0,
 								End:   3,
@@ -384,15 +413,16 @@ func TestParse(t *testing.T) {
 					},
 					{
 						Rule: NewEither(
-							NewTerminal("foo"),
-							NewTerminal("bar"),
+							"foo and bar",
+							NewTerminal("foo", "foo"),
+							NewTerminal("bar", "bar"),
 						),
 						Data:  []byte("bar"),
 						Start: 3,
 						End:   6,
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("bar"),
+								Rule:  NewTerminal("bar", "bar"),
 								Data:  []byte("bar"),
 								Start: 3,
 								End:   6,
@@ -407,55 +437,63 @@ func TestParse(t *testing.T) {
 		{
 			"foo(1234)",
 			NewChain(
-				NewTerminal("foo"),
-				NewTerminal("("),
+				"foo func",
+				NewTerminal("foo", "foo"),
+				NewTerminal("left bracket", "("),
 				NewRepetition(
+					"numbers",
 					NewEither(
-						NewTerminal("4"),
-						NewTerminal("3"),
-						NewTerminal("2"),
-						NewTerminal("1"),
+						"number",
+						NewTerminal("four", "4"),
+						NewTerminal("three", "3"),
+						NewTerminal("two", "2"),
+						NewTerminal("one", "1"),
 					),
 				),
-				NewTerminal(")"),
+				NewTerminal("right bracket", ")"),
 			),
 			&Tree{
 				Rule: NewChain(
-					NewTerminal("foo"),
-					NewTerminal("("),
+					"foo func",
+					NewTerminal("foo", "foo"),
+					NewTerminal("left bracket", "("),
 					NewRepetition(
+						"numbers",
 						NewEither(
-							NewTerminal("4"),
-							NewTerminal("3"),
-							NewTerminal("2"),
-							NewTerminal("1"),
+							"number",
+							NewTerminal("four", "4"),
+							NewTerminal("three", "3"),
+							NewTerminal("two", "2"),
+							NewTerminal("one", "1"),
 						),
 					),
-					NewTerminal(")"),
+					NewTerminal("right bracket", ")"),
 				),
 				Data:  []byte("foo(1234)"),
 				Start: 0,
 				End:   9,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("foo"),
+						Rule:  NewTerminal("foo", "foo"),
 						Data:  []byte("foo"),
 						Start: 0,
 						End:   3,
 					},
 					{
-						Rule:  NewTerminal("("),
+						Rule:  NewTerminal("left bracket", "("),
 						Data:  []byte("("),
 						Start: 3,
 						End:   4,
 					},
 					{
 						Rule: NewRepetition(
+							"numbers",
 							NewEither(
-								NewTerminal("4"),
-								NewTerminal("3"),
-								NewTerminal("2"),
-								NewTerminal("1"),
+								"number",
+								NewTerminal("four", "4"),
+								NewTerminal("three", "3"),
+								NewTerminal("two", "2"),
+								NewTerminal("one", "1"),
 							),
 						),
 						Data:  []byte("1234"),
@@ -464,17 +502,18 @@ func TestParse(t *testing.T) {
 						Childs: []*Tree{
 							{
 								Rule: NewEither(
-									NewTerminal("4"),
-									NewTerminal("3"),
-									NewTerminal("2"),
-									NewTerminal("1"),
+									"number",
+									NewTerminal("four", "4"),
+									NewTerminal("three", "3"),
+									NewTerminal("two", "2"),
+									NewTerminal("one", "1"),
 								),
 								Data:  []byte("1"),
 								Start: 4,
 								End:   5,
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("1"),
+										Rule:  NewTerminal("one", "1"),
 										Data:  []byte("1"),
 										Start: 4,
 										End:   5,
@@ -483,17 +522,18 @@ func TestParse(t *testing.T) {
 							},
 							{
 								Rule: NewEither(
-									NewTerminal("4"),
-									NewTerminal("3"),
-									NewTerminal("2"),
-									NewTerminal("1"),
+									"number",
+									NewTerminal("four", "4"),
+									NewTerminal("three", "3"),
+									NewTerminal("two", "2"),
+									NewTerminal("one", "1"),
 								),
 								Data:  []byte("2"),
 								Start: 5,
 								End:   6,
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("2"),
+										Rule:  NewTerminal("two", "2"),
 										Data:  []byte("2"),
 										Start: 5,
 										End:   6,
@@ -502,17 +542,18 @@ func TestParse(t *testing.T) {
 							},
 							{
 								Rule: NewEither(
-									NewTerminal("4"),
-									NewTerminal("3"),
-									NewTerminal("2"),
-									NewTerminal("1"),
+									"number",
+									NewTerminal("four", "4"),
+									NewTerminal("three", "3"),
+									NewTerminal("two", "2"),
+									NewTerminal("one", "1"),
 								),
 								Data:  []byte("3"),
 								Start: 6,
 								End:   7,
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("3"),
+										Rule:  NewTerminal("three", "3"),
 										Data:  []byte("3"),
 										Start: 6,
 										End:   7,
@@ -521,17 +562,18 @@ func TestParse(t *testing.T) {
 							},
 							{
 								Rule: NewEither(
-									NewTerminal("4"),
-									NewTerminal("3"),
-									NewTerminal("2"),
-									NewTerminal("1"),
+									"number",
+									NewTerminal("four", "4"),
+									NewTerminal("three", "3"),
+									NewTerminal("two", "2"),
+									NewTerminal("one", "1"),
 								),
 								Data:  []byte("4"),
 								Start: 7,
 								End:   8,
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("4"),
+										Rule:  NewTerminal("four", "4"),
 										Data:  []byte("4"),
 										Start: 7,
 										End:   8,
@@ -541,7 +583,7 @@ func TestParse(t *testing.T) {
 						},
 					},
 					{
-						Rule:  NewTerminal(")"),
+						Rule:  NewTerminal("right bracket", ")"),
 						Data:  []byte(")"),
 						Start: 8,
 						End:   9,

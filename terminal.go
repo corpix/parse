@@ -19,9 +19,19 @@
 // THE SOFTWARE.
 package parse
 
-type Terminal []byte
+type Terminal struct {
+	id    string
+	value []byte
+}
 
-func NewTerminal(v string) *Terminal {
-	terminal := Terminal(v)
-	return &terminal
+func (r *Terminal) IsTerminal() bool {
+	return true
+}
+
+func (r *Terminal) ID() string {
+	return r.id
+}
+
+func NewTerminal(id string, v string) *Terminal {
+	return &Terminal{id, []byte(v)}
 }

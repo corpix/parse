@@ -19,9 +19,19 @@
 // THE SOFTWARE.
 package parse
 
-type Chain []Rule
+type Chain struct {
+	id    string
+	rules []Rule
+}
 
-func NewChain(v ...Rule) *Chain {
-	chain := Chain(v)
-	return &chain
+func (r *Chain) IsTerminal() bool {
+	return true
+}
+
+func (r *Chain) ID() string {
+	return r.id
+}
+
+func NewChain(id string, rules ...Rule) *Chain {
+	return &Chain{id, rules}
 }

@@ -20,9 +20,18 @@
 package parse
 
 type Repetition struct {
-	Rule
+	id   string
+	rule Rule
 }
 
-func NewRepetition(v Rule) *Repetition {
-	return &Repetition{v}
+func (r *Repetition) IsTerminal() bool {
+	return true
+}
+
+func (r *Repetition) ID() string {
+	return r.id
+}
+
+func NewRepetition(id string, rule Rule) *Repetition {
+	return &Repetition{id, rule}
 }

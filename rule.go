@@ -19,4 +19,7 @@
 // THE SOFTWARE.
 package parse
 
-type Rule interface{}
+type Rule interface {
+	IsTerminal() bool
+	ID() string
+}

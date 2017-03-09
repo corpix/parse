@@ -19,9 +19,19 @@
 // THE SOFTWARE.
 package parse
 
-type Either []Rule
+type Either struct {
+	id    string
+	rules []Rule
+}
 
-func NewEither(v ...Rule) *Either {
-	either := Either(v)
-	return &either
+func (r *Either) IsTerminal() bool {
+	return false
+}
+
+func (r *Either) ID() string {
+	return r.id
+}
+
+func NewEither(id string, rules ...Rule) *Either {
+	return &Either{id, rules}
 }

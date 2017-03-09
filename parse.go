@@ -72,7 +72,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 
 	switch v := rule.(type) {
 	case *Terminal:
-		length := len(*v)
+		length := len(v.value)
 		if length == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
@@ -84,7 +84,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		}
 		buf = input[:length]
 
-		if !bytes.EqualFold(buf, []byte(*v)) {
+		if !bytes.EqualFold(buf, v.value) {
 			return nil, NewErrUnexpectedToken(
 				buf[:1],
 				p.humanizePosition(position),
@@ -97,11 +97,11 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Rule = v
 		tree.Data = buf
 	case *Either:
-		if len(*v) == 0 {
+		if len(v.rules) == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
 
-		for _, r := range *v {
+		for _, r := range v.rules {
 			subTree, err = p.parse(
 				r,
 				input,
@@ -130,12 +130,12 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Rule = v
 		tree.Data = input[:subTree.End-subTree.Start]
 	case *Chain:
-		if len(*v) == 0 {
+		if len(v.rules) == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
 
 		buf = input
-		for _, r := range *v {
+		for _, r := range v.rules {
 			subTree, err = p.parse(
 				r,
 				buf,
@@ -166,7 +166,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 	repetitionLoop:
 		for {
 			subTree, err = p.parse(
-				v.Rule,
+				v.rule,
 				buf,
 				position,
 				depth+1,
