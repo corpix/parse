@@ -20,23 +20,33 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-type Either struct {
-	id    string
-	rules []Rule
-}
+import (
+	"testing"
 
-func (r *Either) IsTerminal() bool {
-	return false
-}
+	"github.com/stretchr/testify/assert"
+)
 
-func (r *Either) ID() string {
-	return r.id
-}
+func TestChainAdd(t *testing.T) {
+	chain := NewChain("chain")
+	chain.Add(NewTerminal("terminal", "hello"))
 
-func (r *Either) Add(rule Rule) {
-	r.rules = append(r.rules, rule)
-}
+	assert.EqualValues(
+		t,
+		NewChain(
+			"chain",
+			NewTerminal("terminal", "hello"),
+		),
+		chain,
+	)
 
-func NewEither(id string, rules ...Rule) *Either {
-	return &Either{id, rules}
+	chain.Add(NewTerminal("otherTerminal", "hello"))
+	assert.EqualValues(
+		t,
+		NewChain(
+			"chain",
+			NewTerminal("terminal", "hello"),
+			NewTerminal("otherTerminal", "hello"),
+		),
+		chain,
+	)
 }

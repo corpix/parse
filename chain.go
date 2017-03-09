@@ -33,6 +33,10 @@ func (r *Chain) ID() string {
 	return r.id
 }
 
+func (r *Chain) Add(rule Rule) {
+	r.rules = append(r.rules, rule)
+}
+
 func NewChain(id string, rules ...Rule) *Chain {
 	return &Chain{id, rules}
 }
