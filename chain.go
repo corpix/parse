@@ -26,7 +26,7 @@ type Chain struct {
 }
 
 func (r *Chain) IsTerminal() bool {
-	return true
+	return false
 }
 
 func (r *Chain) ID() string {

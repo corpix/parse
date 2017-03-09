@@ -223,6 +223,10 @@ func (p *Parser) humanizePosition(position int) int {
 	return position + 1
 }
 
+func Parse(rule Rule, input []byte) (*Tree, error) {
+	return DefaultParser.Parse(rule, input)
+}
+
 func NewParser(maxDepth int) *Parser {
 	return &Parser{maxDepth}
 }

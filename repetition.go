@@ -26,7 +26,7 @@ type Repetition struct {
 }
 
 func (r *Repetition) IsTerminal() bool {
-	return true
+	return false
 }
 
 func (r *Repetition) ID() string {
