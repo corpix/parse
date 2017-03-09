@@ -13,6 +13,26 @@ It generates syntax tree which could be used to fold the data inside into someth
 ``` go
 package main
 
+// Copyright © 2017 Dmitry Moskowski
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 import (
 	"github.com/davecgh/go-spew/spew"
 
@@ -83,9 +103,9 @@ func main() {
 		panic(err)
 	}
 
-	spew.Dump(tree.Rule.ID())
-	spew.Printf("Rule is terminal? %#v\n", tree.Rule.IsTerminal())
-	spew.Dump(tree.Data)
+	s := spew.NewDefaultConfig()
+	s.MaxDepth = 1
+	s.Dump(tree)
 }
 ```
 
@@ -93,10 +113,17 @@ Save this code into some file, `main.go` for example and run:
 
 ``` shell
 go run main.go
-(string) (len=11) "expressions"
-Rule is terminal? (bool)false
-([]uint8) (len=25 cap=32) {
- 00000000  35 20 2b 20 33 20 2a 20  28 34 20 2d 20 33 29 20  |5 + 3 * (4 - 3) |
- 00000010  2f 20 28 37 20 2b 20 33  29                       |/ (7 + 3)|
-}
+(*parse.Tree)(0xc4200163c0)({
+ Rule: (*parse.Repetition)(0xc420010480)({
+  <max depth reached>
+ }),
+ Start: (int) 0,
+ End: (int) 25,
+ Childs: ([]*parse.Tree) (len=25 cap=32) {
+  <max depth reached>
+ },
+ Data: ([]uint8) (len=25 cap=32) {
+  <max depth reached>
+ }
+})
 ```

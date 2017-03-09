@@ -90,15 +90,7 @@ func main() {
 		panic(err)
 	}
 
-	spew.Dump(tree.Rule.ID())
-	spew.Printf("Rule is terminal? %#v\n", tree.Rule.IsTerminal())
-	spew.Dump(tree.Data)
+	s := spew.NewDefaultConfig()
+	s.MaxDepth = 1
+	s.Dump(tree)
 }
-
-// $ go run main.go
-// (string) (len=11) "expressions"
-// Rule is terminal? (bool)false
-// ([]uint8) (len=25 cap=32) {
-// 	00000000  35 20 2b 20 33 20 2a 20  28 34 20 2d 20 33 29 20  |5 + 3 * (4 - 3) |
-// 		00000010  2f 20 28 37 20 2b 20 33  29                       |/ (7 + 3)|
-// }
