@@ -108,3 +108,89 @@ func TestScan(t *testing.T) {
 		assert.EqualValues(t, sample.result, buf, msg)
 	}
 }
+
+func TestScanAlterChilds(t *testing.T) {
+	samples := []struct {
+		grammar Rule
+		input   string
+		result  []string
+		err     error
+	}{
+		{
+			grammar: NewRepetition(
+				"numbers",
+				NewEither(
+					"number",
+					NewTerminal("1", "1"),
+					NewTerminal("2", "2"),
+				),
+			),
+			input: "12",
+			result: []string{
+				"numbers",
+				"number",
+				"number",
+				"1",
+				"2",
+			},
+			err: nil,
+		},
+		{
+			grammar: NewRepetition(
+				"numbers",
+				NewEither(
+					"number",
+					NewTerminal("1", "1"),
+				),
+			),
+			input: "1",
+			result: []string{
+				"numbers",
+				"number",
+				"1",
+			},
+			err: nil,
+		},
+		{
+			grammar: NewRepetition(
+				"numbers",
+				NewEither(
+					"number",
+					NewTerminal("1", "1"),
+					NewTerminal("2", "2"),
+					NewTerminal("3", "3"),
+				),
+			),
+			input: "123",
+			result: []string{
+				"numbers",
+				"number",
+				"number",
+				"number",
+				"1",
+				"2",
+				"3",
+			},
+			err: nil,
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		tree, err := Parse(
+			sample.grammar,
+			[]byte(sample.input),
+		)
+		assert.Equal(t, sample.err, err, msg)
+
+		buf := []string{}
+		Scan(
+			tree,
+			func(tree *Tree) {
+				buf = append(buf, tree.ID())
+				tree.Childs = nil
+			},
+		)
+		assert.EqualValues(t, sample.result, buf, msg)
+	}
+}
