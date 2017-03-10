@@ -33,8 +33,6 @@ func Scan(tree *Tree, fn func(*Tree)) {
 	current = tree
 	for {
 
-		fn(current)
-
 		if current.Childs != nil {
 			for _, v := range current.Childs {
 				stack = append(
@@ -43,6 +41,8 @@ func Scan(tree *Tree, fn func(*Tree)) {
 				)
 			}
 		}
+
+		fn(current)
 
 		if len(stack) == 0 {
 			break
