@@ -25,13 +25,17 @@ import (
 )
 
 var (
+	// DefaultParser is a Parser with default settings.
 	DefaultParser = NewParser(128)
 )
 
+// Parser represents a parser which use Rule's
+// to parse the input.
 type Parser struct {
 	maxDepth int
 }
 
+// Parse parses input with Rule's.
 func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 	tree, err := p.parse(rule, input, 0, 0)
 	if err != nil {
@@ -223,10 +227,12 @@ func (p *Parser) humanizePosition(position int) int {
 	return position + 1
 }
 
+// Parse is a shortcut to call the DefaultParser.Parse().
 func Parse(rule Rule, input []byte) (*Tree, error) {
 	return DefaultParser.Parse(rule, input)
 }
 
+// NewParser constructs new *Parser.
 func NewParser(maxDepth int) *Parser {
 	return &Parser{maxDepth}
 }

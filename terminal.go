@@ -20,19 +20,24 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Terminal is a Rule which is literal in input.
 type Terminal struct {
 	id    string
 	value []byte
 }
 
+// IsTerminal indicates the variability of Rule.
 func (r *Terminal) IsTerminal() bool {
 	return true
 }
 
+// ID indicates the ID which was given to the rule
+// on creation. ID could be not unique.
 func (r *Terminal) ID() string {
 	return r.id
 }
 
+// NewTerminal constructs a new *Terminal.
 func NewTerminal(id string, v string) *Terminal {
 	return &Terminal{id, []byte(v)}
 }

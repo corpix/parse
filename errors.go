@@ -24,6 +24,10 @@ import (
 	"fmt"
 )
 
+// ErrBoundIncomplete is an error which mean
+// that a closing token was not
+// found in the input which is making a requested
+// logical «bound» to be incomplete.
 type ErrBoundIncomplete struct {
 	Starting []byte
 	Closing  []byte
@@ -39,12 +43,15 @@ func (e *ErrBoundIncomplete) Error() string {
 	)
 }
 
+// NewErrBoundIncomplete constructs new ErrBoundIncomplete.
 func NewErrBoundIncomplete(position int, starting, closing []byte) error {
 	return &ErrBoundIncomplete{starting, closing, position}
 }
 
 //
 
+// ErrUnsupportedRule is an error which mean
+// that parser support for specifier Rule is not implemented.
 type ErrUnsupportedRule struct {
 	Rule
 }
@@ -56,12 +63,16 @@ func (e *ErrUnsupportedRule) Error() string {
 	)
 }
 
+// NewErrUnsupportedRule constructs new ErrUnsupportedRule.
 func NewErrUnsupportedRule(rule Rule) error {
 	return &ErrUnsupportedRule{rule}
 }
 
 //
 
+// ErrUnexpectedEOF is an error which mean
+// that EOF was meat while parser wanted more
+// input.
 type ErrUnexpectedEOF struct {
 	Position int
 }
@@ -73,12 +84,16 @@ func (e *ErrUnexpectedEOF) Error() string {
 	)
 }
 
+// NewErrUnexpectedEOF constructs new ErrUnexpectedEOF.
 func NewErrUnexpectedEOF(position int) error {
 	return &ErrUnexpectedEOF{position}
 }
 
 //
 
+// ErrUnexpectedToken is an error which mean
+// that token read from current position in input
+// is not expected by the current Rule.
 type ErrUnexpectedToken struct {
 	Token    []byte
 	Position int
@@ -94,12 +109,15 @@ func (e *ErrUnexpectedToken) Error() string {
 	)
 }
 
+// NewErrUnexpectedToken constructs new ErrUnexpectedToken.
 func NewErrUnexpectedToken(token []byte, position int, rule Rule) error {
 	return &ErrUnexpectedToken{token, position, rule}
 }
 
 //
 
+// ErrNestingTooDeep is an error which mean
+// the Rule nesting is too deep.
 type ErrNestingTooDeep struct {
 	Nesting  int
 	Position int
@@ -113,12 +131,15 @@ func (e *ErrNestingTooDeep) Error() string {
 	)
 }
 
+// NewErrNestingTooDeep constructs new ErrNestingTooDeep.
 func NewErrNestingTooDeep(nesting int, position int) error {
 	return &ErrNestingTooDeep{nesting, position}
 }
 
 //
 
+// ErrEmptyRule is an error which mean
+// a Rule with empty content was passed to the parser.
 type ErrEmptyRule struct {
 	Rule
 }
@@ -131,6 +152,7 @@ func (e *ErrEmptyRule) Error() string {
 	)
 }
 
+// NewErrEmptyRule constructs new ErrEmptyRule.
 func NewErrEmptyRule(rule Rule) error {
 	return &ErrEmptyRule{rule}
 }

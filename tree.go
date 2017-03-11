@@ -20,6 +20,9 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Tree represents a single Rule match with corresponding
+// information about the input, position and matched Rule.
+// It will be recursive in case of nested Rule match.
 type Tree struct {
 	Rule
 	Start  int

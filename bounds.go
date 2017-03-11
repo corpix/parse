@@ -24,22 +24,26 @@ import (
 	"bytes"
 )
 
+// Bounds represents a starting and ending points of something.
+// It could be a position of '(' and ')' in 'foo(bar)' for example.
 type Bounds struct {
 	Starting int
 	Closing  int
 }
 
-func GetBounds(position int, tokens []byte, starting []byte, closing []byte) (*Bounds, error) {
+// GetBounds duty is to find a bounds of starting and closing
+// inside data
+func GetBounds(position int, data []byte, starting []byte, closing []byte) (*Bounds, error) {
 	return getBounds(
 		position,
 		0,
-		tokens,
+		data,
 		starting,
 		closing,
 	)
 }
 
-func getBounds(position, depth int, tokens []byte, starting []byte, closing []byte) (*Bounds, error) {
+func getBounds(position, depth int, data []byte, starting []byte, closing []byte) (*Bounds, error) {
 	var (
 		startingWasFound bool
 		err              error
@@ -48,10 +52,10 @@ func getBounds(position, depth int, tokens []byte, starting []byte, closing []by
 	)
 
 	res := &Bounds{}
-	tokensLength := len(tokens)
+	dataLength := len(data)
 
-	for k := 0; k < tokensLength; {
-		tail = tokens[k:]
+	for k := 0; k < dataLength; {
+		tail = data[k:]
 		switch {
 		case bytes.HasPrefix(tail, closing):
 			if startingWasFound {
@@ -82,7 +86,7 @@ func getBounds(position, depth int, tokens []byte, starting []byte, closing []by
 
 	if startingWasFound {
 		return nil, NewErrBoundIncomplete(
-			position+(tokensLength-1),
+			position+(dataLength-1),
 			starting,
 			closing,
 		)
@@ -90,6 +94,7 @@ func getBounds(position, depth int, tokens []byte, starting []byte, closing []by
 	return res, nil
 }
 
+// GetTreeBounds constructs a *Bounds from the *Tree.
 func GetTreeBounds(tree *Tree) *Bounds {
 	return &Bounds{
 		tree.Start,
@@ -97,6 +102,8 @@ func GetTreeBounds(tree *Tree) *Bounds {
 	}
 }
 
+// GetTreesBounds constructs a *Bounds from a slice of *Tree.
+// It watches only first and last element.
 func GetTreesBounds(trees []*Tree) *Bounds {
 	if len(trees) == 0 {
 		return &Bounds{0, 0}

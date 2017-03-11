@@ -20,19 +20,25 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Repetition is a Rule which is repeating in the input
+// one or more times.
 type Repetition struct {
 	id   string
 	rule Rule
 }
 
+// IsTerminal indicates the variability of Rule.
 func (r *Repetition) IsTerminal() bool {
 	return false
 }
 
+// ID indicates the ID which was given to the rule
+// on creation. ID could be not unique.
 func (r *Repetition) ID() string {
 	return r.id
 }
 
+// NewRepetition constructs new *Repetition.
 func NewRepetition(id string, rule Rule) *Repetition {
 	return &Repetition{id, rule}
 }

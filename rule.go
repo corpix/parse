@@ -20,7 +20,11 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Rule represents a general Rule interface.
 type Rule interface {
+	// IsTerminal indicates the variability of Rule.
 	IsTerminal() bool
+	// ID indicates the ID which was given to the rule
+	// on creation. ID could be not unique.
 	ID() string
 }
