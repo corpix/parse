@@ -20,7 +20,8 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-func Scan(tree *Tree, fn func(*Tree)) {
+// Walk walks the Tree level by level.
+func Walk(tree *Tree, fn func(*Tree)) {
 	var (
 		current *Tree
 		stack   = []*Tree{}

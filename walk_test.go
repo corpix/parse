@@ -26,7 +26,7 @@ import (
 	"testing"
 )
 
-func TestScan(t *testing.T) {
+func TestWalk(t *testing.T) {
 	samples := []struct {
 		grammar Rule
 		input   string
@@ -101,7 +101,7 @@ func TestScan(t *testing.T) {
 		assert.Equal(t, sample.err, err, msg)
 
 		buf := []string{}
-		Scan(
+		Walk(
 			tree,
 			func(tree *Tree) { buf = append(buf, tree.ID()) },
 		)
@@ -109,7 +109,7 @@ func TestScan(t *testing.T) {
 	}
 }
 
-func TestScanAlterChilds(t *testing.T) {
+func TestWalkAlterChilds(t *testing.T) {
 	samples := []struct {
 		grammar Rule
 		input   string
@@ -184,7 +184,7 @@ func TestScanAlterChilds(t *testing.T) {
 		assert.Equal(t, sample.err, err, msg)
 
 		buf := []string{}
-		Scan(
+		Walk(
 			tree,
 			func(tree *Tree) {
 				buf = append(buf, tree.ID())
