@@ -21,9 +21,10 @@ package parse
 // THE SOFTWARE.
 
 import (
+	"testing"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestWalk(t *testing.T) {
