@@ -31,6 +31,7 @@ func TestIterator(t *testing.T) {
 		input   string
 		result  []string
 		err     error
+		walker  func(*Tree, func(*Tree))
 	}{
 		{
 			grammar: NewRepetition(
@@ -49,7 +50,8 @@ func TestIterator(t *testing.T) {
 				"1",
 				"2",
 			},
-			err: nil,
+			err:    nil,
+			walker: WalkBFS,
 		},
 		{
 			grammar: NewRepetition(
@@ -65,7 +67,8 @@ func TestIterator(t *testing.T) {
 				"number",
 				"1",
 			},
-			err: nil,
+			err:    nil,
+			walker: WalkBFS,
 		},
 		{
 			grammar: NewRepetition(
@@ -87,7 +90,8 @@ func TestIterator(t *testing.T) {
 				"2",
 				"3",
 			},
-			err: nil,
+			err:    nil,
+			walker: WalkBFS,
 		},
 	}
 	for k, sample := range samples {
@@ -100,7 +104,7 @@ func TestIterator(t *testing.T) {
 		assert.Equal(t, sample.err, err, msg)
 
 		buf := []string{}
-		iter := NewIterator()
+		iter := NewIterator(sample.walker)
 		go iter.Start(tree)
 		for node := range iter.Unwrap() {
 			buf = append(buf, node.ID())

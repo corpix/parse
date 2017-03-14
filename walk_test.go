@@ -28,58 +28,71 @@ import (
 
 func TestWalk(t *testing.T) {
 	samples := []struct {
-		grammar Rule
-		input   string
-		result  []string
-		err     error
+		tree   *Tree
+		data   []string
+		walker func(*Tree, func(*Tree))
 	}{
+		// BFS
+
 		{
-			grammar: NewRepetition(
-				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-					NewTerminal("2", "2"),
-				),
-			),
-			input: "12",
-			result: []string{
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("2")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
 				"number",
 				"number",
 				"1",
 				"2",
 			},
-			err: nil,
+			walker: WalkBFS,
 		},
 		{
-			grammar: NewRepetition(
-				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-				),
-			),
-			input: "1",
-			result: []string{
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
 				"number",
 				"1",
 			},
-			err: nil,
+			walker: WalkBFS,
 		},
 		{
-			grammar: NewRepetition(
-				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-					NewTerminal("2", "2"),
-					NewTerminal("3", "3"),
-				),
-			),
-			input: "123",
-			result: []string{
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("2")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("3")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
 				"number",
 				"number",
@@ -88,109 +101,126 @@ func TestWalk(t *testing.T) {
 				"2",
 				"3",
 			},
-			err: nil,
+			walker: WalkBFS,
 		},
-	}
-	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
 
-		tree, err := Parse(
-			sample.grammar,
-			[]byte(sample.input),
-		)
-		assert.Equal(t, sample.err, err, msg)
+		// DFS
 
-		buf := []string{}
-		Walk(
-			tree,
-			func(tree *Tree) { buf = append(buf, tree.ID()) },
-		)
-		assert.EqualValues(t, sample.result, buf, msg)
-	}
-}
-
-func TestWalkAlterChilds(t *testing.T) {
-	samples := []struct {
-		grammar Rule
-		input   string
-		result  []string
-		err     error
-	}{
 		{
-			grammar: NewRepetition(
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("2")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-					NewTerminal("2", "2"),
-				),
-			),
-			input: "12",
-			result: []string{
-				"numbers",
-				"number",
 				"number",
 				"1",
+				"number",
 				"2",
 			},
-			err: nil,
+			walker: WalkDFS,
 		},
 		{
-			grammar: NewRepetition(
-				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-				),
-			),
-			input: "1",
-			result: []string{
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
 				"number",
 				"1",
 			},
-			err: nil,
+			walker: WalkDFS,
 		},
 		{
-			grammar: NewRepetition(
+			tree: &Tree{
+				Data: []byte("numbers"),
+				Childs: []*Tree{
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("1")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("2")}},
+					},
+					{
+						Data:   []byte("number"),
+						Childs: []*Tree{{Data: []byte("3")}},
+					},
+				},
+			},
+			data: []string{
 				"numbers",
-				NewEither(
-					"number",
-					NewTerminal("1", "1"),
-					NewTerminal("2", "2"),
-					NewTerminal("3", "3"),
-				),
-			),
-			input: "123",
-			result: []string{
-				"numbers",
-				"number",
-				"number",
 				"number",
 				"1",
+				"number",
 				"2",
+				"number",
 				"3",
 			},
-			err: nil,
+			walker: WalkDFS,
+		},
+		{
+			tree: &Tree{
+				Data: []byte("data"),
+				Childs: []*Tree{
+					{
+						Data: []byte("numbers"),
+						Childs: []*Tree{
+							{
+								Data:   []byte("number"),
+								Childs: []*Tree{{Data: []byte("1")}},
+							},
+							{
+								Data:   []byte("number"),
+								Childs: []*Tree{{Data: []byte("2")}},
+							},
+							{
+								Data:   []byte("number"),
+								Childs: []*Tree{{Data: []byte("3")}},
+							},
+						},
+					},
+					{Data: []byte("colon")},
+				},
+			},
+			data: []string{
+				"data",
+				"numbers",
+				"number",
+				"1",
+				"number",
+				"2",
+				"number",
+				"3",
+				"colon",
+			},
+			walker: WalkDFS,
 		},
 	}
 	for k, sample := range samples {
 		msg := spew.Sdump(k, sample)
 
-		tree, err := Parse(
-			sample.grammar,
-			[]byte(sample.input),
-		)
-		assert.Equal(t, sample.err, err, msg)
-
 		buf := []string{}
-		Walk(
-			tree,
-			func(tree *Tree) {
-				buf = append(buf, tree.ID())
-				tree.Childs = nil
-			},
+		sample.walker(
+			sample.tree,
+			func(tree *Tree) { buf = append(buf, string(tree.Data)) },
 		)
-		assert.EqualValues(t, sample.result, buf, msg)
+		assert.EqualValues(t, sample.data, buf, msg)
 	}
 }

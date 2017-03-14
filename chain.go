@@ -42,6 +42,10 @@ func (r *Chain) Add(rule Rule) {
 	r.rules = append(r.rules, rule)
 }
 
+func (r *Chain) String() string {
+	return r.id
+}
+
 // NewChain constructs new Chain.
 func NewChain(id string, rules ...Rule) *Chain {
 	return &Chain{id, rules}

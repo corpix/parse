@@ -21,11 +21,12 @@ package parse
 // THE SOFTWARE.
 
 type Iterator struct {
-	c chan *Tree
+	c      chan *Tree
+	walker func(*Tree, func(*Tree))
 }
 
 func (i *Iterator) Start(tree *Tree) {
-	Walk(
+	i.walker(
 		tree,
 		func(t *Tree) { i.c <- t },
 	)
@@ -40,6 +41,9 @@ func (i *Iterator) Unwrap() <-chan *Tree {
 	return i.c
 }
 
-func NewIterator() *Iterator {
-	return &Iterator{make(chan *Tree)}
+func NewIterator(walker func(*Tree, func(*Tree))) *Iterator {
+	return &Iterator{
+		c:      make(chan *Tree),
+		walker: walker,
+	}
 }

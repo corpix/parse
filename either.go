@@ -43,6 +43,10 @@ func (r *Either) Add(rule Rule) {
 	r.rules = append(r.rules, rule)
 }
 
+func (r *Either) String() string {
+	return r.id
+}
+
 // NewEither constructs *Either Rule.
 func NewEither(id string, rules ...Rule) *Either {
 	return &Either{id, rules}

@@ -38,6 +38,10 @@ func (r *Repetition) ID() string {
 	return r.id
 }
 
+func (r *Repetition) String() string {
+	return r.id
+}
+
 // NewRepetition constructs new *Repetition.
 func NewRepetition(id string, rule Rule) *Repetition {
 	return &Repetition{id, rule}

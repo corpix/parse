@@ -37,6 +37,10 @@ func (r *Terminal) ID() string {
 	return r.id
 }
 
+func (r *Terminal) String() string {
+	return r.id
+}
+
 // NewTerminal constructs a new *Terminal.
 func NewTerminal(id string, v string) *Terminal {
 	return &Terminal{id, []byte(v)}
