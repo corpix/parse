@@ -23,7 +23,7 @@ package parse
 // Chain represents a chain of Rule's to match in the data.
 type Chain struct {
 	id    string
-	rules []Rule
+	Rules []Rule
 }
 
 // IsTerminal indicates the variability of Rule.
@@ -39,7 +39,7 @@ func (r *Chain) ID() string {
 
 // Add appends a Rule to the Chain.
 func (r *Chain) Add(rule Rule) {
-	r.rules = append(r.rules, rule)
+	r.Rules = append(r.Rules, rule)
 }
 
 func (r *Chain) String() string {

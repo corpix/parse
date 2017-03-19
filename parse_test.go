@@ -64,7 +64,7 @@ func TestParse(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("b"),
+				output([]byte("bar")),
 				1,
 				NewTerminal("foo", "foo"),
 			),
@@ -75,7 +75,7 @@ func TestParse(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("b"),
+				output([]byte("bar")),
 				4,
 				NewTerminal("foo", "foo"),
 			),
@@ -356,6 +356,153 @@ func TestParse(t *testing.T) {
 				},
 			},
 			nil,
+			DefaultParser,
+		},
+		{
+			"123",
+			NewRepetitionTimesVariadic(
+				"numbers",
+				2,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+			),
+			&Tree{
+				Rule: NewRepetitionTimesVariadic(
+					"numbers",
+					2,
+					NewEither(
+						"number",
+						NewTerminal("one", "1"),
+						NewTerminal("two", "2"),
+						NewTerminal("three", "3"),
+					),
+				),
+				Data:  []byte("123"),
+				Start: 0,
+				End:   3,
+				Childs: []*Tree{
+					{
+						Rule: NewEither(
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
+						),
+						Data:  []byte("1"),
+						Start: 0,
+						End:   1,
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("one", "1"),
+								Data:  []byte("1"),
+								Start: 0,
+								End:   1,
+							},
+						},
+					},
+					{
+						Rule: NewEither(
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
+						),
+						Data:  []byte("2"),
+						Start: 1,
+						End:   2,
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("two", "2"),
+								Data:  []byte("2"),
+								Start: 1,
+								End:   2,
+							},
+						},
+					},
+					{
+						Rule: NewEither(
+							"number",
+							NewTerminal("one", "1"),
+							NewTerminal("two", "2"),
+							NewTerminal("three", "3"),
+						),
+						Data:  []byte("3"),
+						Start: 2,
+						End:   3,
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("three", "3"),
+								Data:  []byte("3"),
+								Start: 2,
+								End:   3,
+							},
+						},
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"1234",
+			NewRepetitionTimes(
+				"numbers",
+				3,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("4"),
+				4,
+				NewRepetitionTimes(
+					"numbers",
+					3,
+					NewEither(
+						"number",
+						NewTerminal("one", "1"),
+						NewTerminal("two", "2"),
+						NewTerminal("three", "3"),
+					),
+				),
+			),
+			DefaultParser,
+		},
+		{
+			"123",
+			NewRepetitionTimes(
+				"numbers",
+				2,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("3"),
+				3,
+				NewRepetitionTimes(
+					"numbers",
+					2,
+					NewEither(
+						"number",
+						NewTerminal("one", "1"),
+						NewTerminal("two", "2"),
+						NewTerminal("three", "3"),
+					),
+				),
+			),
 			DefaultParser,
 		},
 

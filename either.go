@@ -24,7 +24,7 @@ package parse
 // One of the rules in a list must match.
 type Either struct {
 	id    string
-	rules []Rule
+	Rules []Rule
 }
 
 // IsTerminal indicates the variability of Rule.
@@ -40,7 +40,7 @@ func (r *Either) ID() string {
 
 // Add appends a Rule into Either list.
 func (r *Either) Add(rule Rule) {
-	r.rules = append(r.rules, rule)
+	r.Rules = append(r.Rules, rule)
 }
 
 func (r *Either) String() string {

@@ -23,7 +23,7 @@ package parse
 // Terminal is a Rule which is literal in input.
 type Terminal struct {
 	id    string
-	value []byte
+	Value []byte
 }
 
 // IsTerminal indicates the variability of Rule.

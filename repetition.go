@@ -23,8 +23,10 @@ package parse
 // Repetition is a Rule which is repeating in the input
 // one or more times.
 type Repetition struct {
-	id   string
-	rule Rule
+	id       string
+	Rule     Rule
+	Times    int
+	Variadic bool
 }
 
 // IsTerminal indicates the variability of Rule.
@@ -42,7 +44,28 @@ func (r *Repetition) String() string {
 	return r.id
 }
 
-// NewRepetition constructs new *Repetition.
+// NewRepetition constructs new *Repetition which repeats exactly `times`.
+func NewRepetitionTimes(id string, times int, rule Rule) *Repetition {
+	return &Repetition{
+		id:       id,
+		Rule:     rule,
+		Times:    times,
+		Variadic: false,
+	}
+}
+
+// NewRepetitionTimesVariadic constructs new variadic *Repetition
+// which repeats exactly `times` or more.
+func NewRepetitionTimesVariadic(id string, times int, rule Rule) *Repetition {
+	return &Repetition{
+		id:       id,
+		Rule:     rule,
+		Times:    times,
+		Variadic: true,
+	}
+}
+
+// NewRepetition constructs new *Repetition which releat one or more times.
 func NewRepetition(id string, rule Rule) *Repetition {
-	return &Repetition{id, rule}
+	return NewRepetitionTimesVariadic(id, 1, rule)
 }

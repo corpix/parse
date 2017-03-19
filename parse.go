@@ -44,7 +44,7 @@ func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 
 	if tree.End < len(input) {
 		return nil, NewErrUnexpectedToken(
-			input[tree.End:tree.End+1],
+			output(input[tree.End:]),
 			p.humanizePosition(tree.End),
 			rule,
 		)
@@ -77,7 +77,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 
 	switch v := rule.(type) {
 	case *Terminal:
-		length := len(v.value)
+		length := len(v.Value)
 		if length == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
@@ -89,9 +89,9 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		}
 		buf = input[:length]
 
-		if !bytes.EqualFold(buf, v.value) {
+		if !bytes.EqualFold(buf, v.Value) {
 			return nil, NewErrUnexpectedToken(
-				buf[:1],
+				output(buf),
 				p.humanizePosition(position),
 				v,
 			)
@@ -102,11 +102,11 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Rule = v
 		tree.Data = buf
 	case *Either:
-		if len(v.rules) == 0 {
+		if len(v.Rules) == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
 
-		for _, r := range v.rules {
+		for _, r := range v.Rules {
 			subTree, err = p.parse(
 				r,
 				input,
@@ -135,12 +135,12 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Rule = v
 		tree.Data = input[:subTree.End-subTree.Start]
 	case *Chain:
-		if len(v.rules) == 0 {
+		if len(v.Rules) == 0 {
 			return nil, NewErrEmptyRule(v)
 		}
 
 		buf = input
-		for _, r := range v.rules {
+		for _, r := range v.Rules {
 			subTree, err = p.parse(
 				r,
 				buf,
@@ -165,13 +165,13 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Rule = v
 		tree.Data = input[:bounds.Closing-bounds.Starting]
 	case *Repetition:
-		found := false
+		seen := 0
 		buf = input
 
 	repetitionLoop:
 		for {
 			subTree, err = p.parse(
-				v.rule,
+				v.Rule,
 				buf,
 				position,
 				depth+1,
@@ -184,8 +184,17 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 					return nil, err
 				}
 			}
+			seen++
 
 			movePos := subTree.End - subTree.Start
+			if !v.Variadic && seen > v.Times {
+				return nil, NewErrUnexpectedToken(
+					output(input[position:]),
+					position+movePos,
+					v,
+				)
+			}
+
 			position += movePos
 			buf = buf[movePos:]
 
@@ -193,14 +202,13 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 				tree.Childs,
 				subTree,
 			)
-			found = true
 		}
-		if !found {
+		if seen < v.Times {
 			if err != nil {
 				return nil, err
 			}
 			return nil, NewErrUnexpectedToken(
-				input[:1],
+				input,
 				position,
 				v,
 			)
