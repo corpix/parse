@@ -142,17 +142,19 @@ func NewErrNestingTooDeep(nesting int, position int) error {
 // a Rule with empty content was passed to the parser.
 type ErrEmptyRule struct {
 	Rule
+	Inside Rule
 }
 
 func (e *ErrEmptyRule) Error() string {
 	return fmt.Sprintf(
-		"Empty rule '%T' is '%#v' is not allowed",
+		"Empty rule of type '%T' = '%#v' inside '%#v' rule",
 		e.Rule,
 		e.Rule,
+		e.Inside,
 	)
 }
 
 // NewErrEmptyRule constructs new ErrEmptyRule.
-func NewErrEmptyRule(rule Rule) error {
-	return &ErrEmptyRule{rule}
+func NewErrEmptyRule(rule Rule, inside Rule) error {
+	return &ErrEmptyRule{rule, inside}
 }

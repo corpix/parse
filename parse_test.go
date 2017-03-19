@@ -44,6 +44,7 @@ func TestParse(t *testing.T) {
 			nil,
 			NewErrEmptyRule(
 				NewTerminal("empty", ""),
+				nil,
 			),
 			DefaultParser,
 		},
@@ -88,7 +89,20 @@ func TestParse(t *testing.T) {
 			"",
 			NewChain("empty"),
 			nil,
-			NewErrEmptyRule(NewChain("empty")),
+			NewErrEmptyRule(
+				NewChain("empty"),
+				nil,
+			),
+			DefaultParser,
+		},
+		{
+			"",
+			NewChain("empty", NewChain("emptyInside")),
+			nil,
+			NewErrEmptyRule(
+				NewChain("emptyInside"),
+				NewChain("empty", NewChain("emptyInside")),
+			),
 			DefaultParser,
 		},
 		{
@@ -159,7 +173,10 @@ func TestParse(t *testing.T) {
 			"",
 			NewEither("empty"),
 			nil,
-			NewErrEmptyRule(NewEither("empty")),
+			NewErrEmptyRule(
+				NewEither("empty"),
+				nil,
+			),
 			DefaultParser,
 		},
 		{

@@ -37,7 +37,7 @@ type Parser struct {
 
 // Parse parses input with Rule's.
 func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
-	tree, err := p.parse(rule, input, 0, 0)
+	tree, err := p.parse(rule, input, nil, 0, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 	return tree, nil
 }
 
-func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree, error) {
+func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth int) (*Tree, error) {
 	var (
 		tree    *Tree
 		subTree *Tree
@@ -72,14 +72,14 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 	tree = &Tree{}
 
 	if rule == nil {
-		return nil, NewErrEmptyRule(rule)
+		return nil, NewErrEmptyRule(rule, parent)
 	}
 
 	switch v := rule.(type) {
 	case *Terminal:
 		length := len(v.Value)
 		if length == 0 {
-			return nil, NewErrEmptyRule(v)
+			return nil, NewErrEmptyRule(v, parent)
 		}
 
 		if len(input) < length {
@@ -103,13 +103,14 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Data = buf
 	case *Either:
 		if len(v.Rules) == 0 {
-			return nil, NewErrEmptyRule(v)
+			return nil, NewErrEmptyRule(v, parent)
 		}
 
 		for _, r := range v.Rules {
 			subTree, err = p.parse(
 				r,
 				input,
+				v,
 				position,
 				depth+1,
 			)
@@ -136,7 +137,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 		tree.Data = input[:subTree.End-subTree.Start]
 	case *Chain:
 		if len(v.Rules) == 0 {
-			return nil, NewErrEmptyRule(v)
+			return nil, NewErrEmptyRule(v, parent)
 		}
 
 		buf = input
@@ -144,6 +145,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 			subTree, err = p.parse(
 				r,
 				buf,
+				v,
 				position,
 				depth+1,
 			)
@@ -173,6 +175,7 @@ func (p *Parser) parse(rule Rule, input []byte, position int, depth int) (*Tree,
 			subTree, err = p.parse(
 				v.Rule,
 				buf,
+				v,
 				position,
 				depth+1,
 			)
