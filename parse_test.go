@@ -27,6 +27,111 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseInputIntegrity(t *testing.T) {
+	samples := []struct {
+		input   string
+		grammar Rule
+		err     error
+	}{
+		{"foo", NewTerminal("foo", "foo"), nil},
+		{
+			"foo bar",
+			NewChain(
+				"chain of foo bar",
+				NewTerminal("foo", "foo"),
+				NewTerminal("space", " "),
+				NewTerminal("bar", "bar"),
+			),
+			nil,
+		},
+		{
+			"1",
+			NewEither(
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
+			),
+			nil,
+		},
+		{
+			"123",
+			NewRepetition(
+				"numbers",
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+			),
+			nil,
+		},
+		{
+			"123",
+			NewRepetitionTimesVariadic(
+				"numbers",
+				2,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+			),
+			nil,
+		},
+		{
+			"foobar",
+			NewChain(
+				"chain of foo bar",
+				NewEither(
+					"foo and bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("bar", "bar"),
+				),
+				NewEither(
+					"foo and bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("bar", "bar"),
+				),
+			),
+			nil,
+		},
+		{
+			"foo(1234)",
+			NewChain(
+				"foo func",
+				NewTerminal("foo", "foo"),
+				NewTerminal("left bracket", "("),
+				NewRepetition(
+					"numbers",
+					NewEither(
+						"number",
+						NewTerminal("four", "4"),
+						NewTerminal("three", "3"),
+						NewTerminal("two", "2"),
+						NewTerminal("one", "1"),
+					),
+				),
+				NewTerminal("right bracket", ")"),
+			),
+			nil,
+		},
+	}
+
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		input := make([]byte, len(sample.input))
+		copy(input, []byte(sample.input))
+		_, err := Parse(sample.grammar, input)
+
+		assert.Equal(t, []byte(sample.input), input, msg)
+		assert.Equal(t, sample.err, err, msg)
+	}
+}
+
 func TestParse(t *testing.T) {
 	samples := []struct {
 		text   string
