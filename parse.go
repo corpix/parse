@@ -91,7 +91,7 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 
 		if !bytes.EqualFold(buf, v.Value) {
 			return nil, NewErrUnexpectedToken(
-				ShowInput(buf),
+				ShowInput(input),
 				p.humanizePosition(position),
 				v,
 			)
