@@ -35,9 +35,10 @@ func TestShowInput(t *testing.T) {
 		{"hello", "hello"},
 		{"hello\ngoodbye", "hello..."},
 		{"hello\ngoodbye\ngoodbye", "hello..."},
+		{"Array(FixedString(16))", "Array(FixedString(16))"},
 		{
 			"hello so long so long so long so long so long",
-			"hello so long so long so long...",
+			"hello so long so long...",
 		},
 		{
 			"hello so long so long so long",

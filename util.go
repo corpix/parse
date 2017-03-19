@@ -33,24 +33,24 @@ func ShowInput(buf []byte) []byte {
 		ellipsis           = []byte("...")
 	)
 
-	if len(buf) > hardLimit {
-		n = hardLimit
-	} else {
-		for k, v := range buf {
-			switch {
-			case v == '\n':
-			case v == ' ' && k > spaceBreakTreshold:
-			default:
-				continue
-			}
-			n = k + len(ellipsis)
-			break
+	for k, v := range buf {
+		switch {
+		case v == '\n':
+		case v == ' ' && k > spaceBreakTreshold:
+		default:
+			continue
 		}
+		n = k + len(ellipsis)
+		break
 	}
 	if n == 0 {
 		bufCopy = make([]byte, len(buf))
 		copy(bufCopy, buf)
 		return buf
+	}
+
+	if n > hardLimit {
+		n = hardLimit
 	}
 
 	bufCopy = make([]byte, n)
