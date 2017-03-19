@@ -394,6 +394,103 @@ func TestParse(t *testing.T) {
 		// Repetition
 
 		{
+			"",
+			NewRepetitionTimesVariadic(
+				"maybe",
+				0,
+				NewTerminal("terminal", "t"),
+			),
+			nil,
+			NewErrUnexpectedEOF(1),
+			DefaultParser,
+		},
+		{
+			"f",
+			NewRepetition(
+				"set",
+				NewEither(
+					"variant",
+					NewTerminal("terminal", "f"),
+					NewRepetitionTimesVariadic(
+						"maybe",
+						0,
+						NewTerminal("terminal", "t"),
+					),
+				),
+			),
+			&Tree{
+				Rule: NewRepetition(
+					"set",
+					NewEither(
+						"variant",
+						NewTerminal("terminal", "f"),
+						NewRepetitionTimesVariadic(
+							"maybe",
+							0,
+							NewTerminal("terminal", "t"),
+						),
+					),
+				),
+				Start: 0,
+				End:   1,
+				Data:  []byte("f"),
+				Childs: []*Tree{
+					{
+						Rule: NewEither(
+							"variant",
+							NewTerminal("terminal", "f"),
+							NewRepetitionTimesVariadic(
+								"maybe",
+								0,
+								NewTerminal("terminal", "t"),
+							),
+						),
+						Start: 0,
+						End:   1,
+						Data:  []byte("f"),
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("terminal", "f"),
+								Start: 0,
+								End:   1,
+								Data:  []byte("f"),
+							},
+						},
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"t",
+			NewRepetitionTimesVariadic(
+				"maybe",
+				0,
+				NewTerminal("terminal", "t"),
+			),
+			&Tree{
+				Rule: NewRepetitionTimesVariadic(
+					"maybe",
+					0,
+					NewTerminal("terminal", "t"),
+				),
+				Start: 0,
+				End:   1,
+				Data:  []byte("t"),
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("terminal", "t"),
+						Start: 0,
+						End:   1,
+						Data:  []byte("t"),
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
 			"123",
 			NewRepetition(
 				"numbers",

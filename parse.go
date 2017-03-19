@@ -206,6 +206,9 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 				subTree,
 			)
 		}
+		if err != nil && len(tree.Childs) == 0 {
+			return nil, err
+		}
 		if seen < v.Times {
 			if err != nil {
 				return nil, err
