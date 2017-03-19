@@ -1,5 +1,9 @@
 package parse
 
+import (
+	"fmt"
+)
+
 // Copyright © 2017 Dmitry Moskowski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,7 +42,11 @@ func (r *Terminal) ID() string {
 }
 
 func (r *Terminal) String() string {
-	return r.id
+	return fmt.Sprintf(
+		"%s(%s)",
+		r.id,
+		r.Value,
+	)
 }
 
 // NewTerminal constructs a new *Terminal.

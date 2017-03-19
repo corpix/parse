@@ -20,33 +20,58 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Chain represents a chain of Rule's to match in the data.
-type Chain struct {
-	id    string
-	Rules Rules
-}
+import (
+	"testing"
 
-// IsTerminal indicates the variability of Rule.
-func (r *Chain) IsTerminal() bool {
-	return false
-}
+	"github.com/davecgh/go-spew/spew"
+	"github.com/stretchr/testify/assert"
+)
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Chain) ID() string {
-	return r.id
-}
+func TestRepetitionString(t *testing.T) {
+	samples := []struct {
+		grammar Rule
+		result  string
+	}{
+		{
+			NewRepetition(
+				"foo&bar",
+				NewEither(
+					"terminals",
+					NewTerminal("foo", "Foo"),
+					NewTerminal("bar", "Bar"),
+				),
+			),
+			"foo&bar(times=1, variadic=true, terminals{foo(Foo), bar(Bar)})",
+		},
+		{
+			NewRepetitionTimes(
+				"foo&bar",
+				5,
+				NewEither(
+					"terminals",
+					NewTerminal("foo", "Foo"),
+					NewTerminal("bar", "Bar"),
+				),
+			),
+			"foo&bar(times=5, variadic=false, terminals{foo(Foo), bar(Bar)})",
+		},
+		{
+			NewRepetitionTimesVariadic(
+				"foo&bar",
+				5,
+				NewEither(
+					"terminals",
+					NewTerminal("foo", "Foo"),
+					NewTerminal("bar", "Bar"),
+				),
+			),
+			"foo&bar(times=5, variadic=true, terminals{foo(Foo), bar(Bar)})",
+		},
+	}
 
-// Add appends a Rule to the Chain.
-func (r *Chain) Add(rule Rule) {
-	r.Rules = append(r.Rules, rule)
-}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
 
-func (r *Chain) String() string {
-	return r.id + r.Rules.String()
-}
-
-// NewChain constructs new Chain.
-func NewChain(id string, rules ...Rule) *Chain {
-	return &Chain{id, Rules(rules)}
+		assert.Equal(t, sample.result, sample.grammar.String(), msg)
+	}
 }

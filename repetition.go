@@ -20,6 +20,10 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import (
+	"fmt"
+)
+
 // Repetition is a Rule which is repeating in the input
 // one or more times.
 type Repetition struct {
@@ -41,7 +45,13 @@ func (r *Repetition) ID() string {
 }
 
 func (r *Repetition) String() string {
-	return r.id
+	return fmt.Sprintf(
+		"%s(times=%d, variadic=%v, %s)",
+		r.id,
+		r.Times,
+		r.Variadic,
+		r.Rule.String(),
+	)
 }
 
 // NewRepetition constructs new *Repetition which repeats exactly `times`.

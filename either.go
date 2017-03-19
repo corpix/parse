@@ -20,11 +20,11 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Chain represents a list of Rule's to match in the data.
+// Either represents a list of Rule's to match in the data.
 // One of the rules in a list must match.
 type Either struct {
 	id    string
-	Rules []Rule
+	Rules Rules
 }
 
 // IsTerminal indicates the variability of Rule.
@@ -44,10 +44,10 @@ func (r *Either) Add(rule Rule) {
 }
 
 func (r *Either) String() string {
-	return r.id
+	return r.id + r.Rules.String()
 }
 
 // NewEither constructs *Either Rule.
 func NewEither(id string, rules ...Rule) *Either {
-	return &Either{id, rules}
+	return &Either{id, Rules(rules)}
 }

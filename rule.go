@@ -27,4 +27,7 @@ type Rule interface {
 	// ID indicates the ID which was given to the rule
 	// on creation. ID could be not unique.
 	ID() string
+
+	// String prints rule representation.
+	String() string
 }

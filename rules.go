@@ -20,33 +20,18 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Chain represents a chain of Rule's to match in the data.
-type Chain struct {
-	id    string
-	Rules Rules
-}
+type Rules []Rule
 
-// IsTerminal indicates the variability of Rule.
-func (r *Chain) IsTerminal() bool {
-	return false
-}
+func (rs Rules) String() string {
+	s := "{"
+	delimited := len(rs) - 1
+	for k, v := range rs {
+		s += v.String()
+		if k < delimited {
+			s += ", "
+		}
+	}
+	s += "}"
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Chain) ID() string {
-	return r.id
-}
-
-// Add appends a Rule to the Chain.
-func (r *Chain) Add(rule Rule) {
-	r.Rules = append(r.Rules, rule)
-}
-
-func (r *Chain) String() string {
-	return r.id + r.Rules.String()
-}
-
-// NewChain constructs new Chain.
-func NewChain(id string, rules ...Rule) *Chain {
-	return &Chain{id, Rules(rules)}
+	return s
 }
