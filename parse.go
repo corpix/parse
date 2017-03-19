@@ -44,7 +44,7 @@ func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 
 	if tree.End < len(input) {
 		return nil, NewErrUnexpectedToken(
-			output(input[tree.End:]),
+			ShowInput(input[tree.End:]),
 			p.humanizePosition(tree.End),
 			rule,
 		)
@@ -91,7 +91,7 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 
 		if !bytes.EqualFold(buf, v.Value) {
 			return nil, NewErrUnexpectedToken(
-				output(buf),
+				ShowInput(buf),
 				p.humanizePosition(position),
 				v,
 			)
@@ -192,7 +192,7 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 			movePos := subTree.End - subTree.Start
 			if !v.Variadic && seen > v.Times {
 				return nil, NewErrUnexpectedToken(
-					output(input[position:]),
+					ShowInput(input[position:]),
 					position+movePos,
 					v,
 				)

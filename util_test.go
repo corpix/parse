@@ -1,7 +1,5 @@
 package parse
 
-import ()
-
 // Copyright © 2017 Dmitry Moskowski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,43 +20,47 @@ import ()
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// ShowInput return a byte slice of input and formats it with ellipsis,
-// preparing it to be printed to human.
-func ShowInput(buf []byte) []byte {
-	var (
-		bufCopy            []byte
-		n                  int
-		hardLimit          = 32
-		spaceBreakTreshold = hardLimit / 2
-		ellipsis           = []byte("...")
-	)
+import (
+	"testing"
 
-	if len(buf) > hardLimit {
-		n = hardLimit
-	} else {
-		for k, v := range buf {
-			switch {
-			case v == '\n':
-			case v == ' ' && k > spaceBreakTreshold:
-			default:
-				continue
-			}
-			n = k + len(ellipsis)
-			break
-		}
-	}
-	if n == 0 {
-		bufCopy = make([]byte, len(buf))
-		copy(bufCopy, buf)
-		return buf
-	}
+	"github.com/davecgh/go-spew/spew"
+	"github.com/stretchr/testify/assert"
+)
 
-	bufCopy = make([]byte, n)
-	copy(bufCopy, buf)
-
-	for k, v := range ellipsis {
-		bufCopy[n-k-1] = v
+func TestShowInput(t *testing.T) {
+	samples := []struct {
+		input  string
+		output string
+	}{
+		{"hello", "hello"},
+		{"hello\ngoodbye", "hello..."},
+		{"hello\ngoodbye\ngoodbye", "hello..."},
+		{
+			"hello so long so long so long so long so long",
+			"hello so long so long so long...",
+		},
+		{
+			"hello so long so long so long",
+			"hello so long so long...",
+		},
+		{
+			"hello lo lo lo lo lo",
+			"hello lo lo lo lo...",
+		},
+		{
+			"hello lo lo lo lo",
+			"hello lo lo lo lo",
+		},
 	}
 
-	return bufCopy
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		input := make([]byte, len(sample.input))
+		copy(input, []byte(sample.input))
+
+		output := ShowInput(input)
+		assert.Equal(t, []byte(sample.input), input, msg)
+		assert.Equal(t, []byte(sample.output), output, msg)
+	}
 }

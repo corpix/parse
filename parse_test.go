@@ -65,7 +65,7 @@ func TestParse(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				output([]byte("bar")),
+				ShowInput([]byte("bar")),
 				1,
 				NewTerminal("foo", "foo"),
 			),
@@ -76,7 +76,7 @@ func TestParse(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				output([]byte("bar")),
+				ShowInput([]byte("bar")),
 				4,
 				NewTerminal("foo", "foo"),
 			),
