@@ -23,7 +23,6 @@ package parse
 import (
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,26 +49,4 @@ func TestEitherAdd(t *testing.T) {
 		),
 		chain,
 	)
-}
-
-func TestEitherString(t *testing.T) {
-	samples := []struct {
-		grammar Rule
-		result  string
-	}{
-		{
-			NewEither(
-				"foo/bar",
-				NewTerminal("foo", "Foo"),
-				NewTerminal("bar", "Bar"),
-			),
-			"foo/bar{foo(Foo), bar(Bar)}",
-		},
-	}
-
-	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-
-		assert.Equal(t, sample.result, sample.grammar.String(), msg)
-	}
 }

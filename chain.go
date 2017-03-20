@@ -26,15 +26,27 @@ type Chain struct {
 	Rules Rules
 }
 
-// IsTerminal indicates the variability of Rule.
-func (r *Chain) IsTerminal() bool {
-	return false
-}
-
 // ID indicates the ID which was given to the rule
 // on creation. ID could be not unique.
 func (r *Chain) ID() string {
 	return r.id
+}
+
+// GetChilds returns a slice of Rule which is
+// children for current Rule.
+func (r *Chain) GetChilds() Treers {
+	treers := make(Treers, len(r.Rules))
+	for k, v := range r.Rules {
+		treers[k] = v
+	}
+	return treers
+}
+
+// GetParameters returns a KV rule parameters.
+func (r *Chain) GetParameters() map[string]interface{} {
+	return map[string]interface{}{
+		"ID": r.id,
+	}
 }
 
 // Add appends a Rule to the Chain.
@@ -42,11 +54,10 @@ func (r *Chain) Add(rule Rule) {
 	r.Rules = append(r.Rules, rule)
 }
 
-func (r *Chain) String() string {
-	return r.id + r.Rules.String()
-}
-
 // NewChain constructs new Chain.
 func NewChain(id string, rules ...Rule) *Chain {
-	return &Chain{id, Rules(rules)}
+	return &Chain{
+		id,
+		Rules(rules),
+	}
 }

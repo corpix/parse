@@ -30,3 +30,20 @@ type Tree struct {
 	Childs []*Tree
 	Data   []byte
 }
+
+// ID returns current node identifier.
+func (t *Tree) ID() string {
+	if t.Rule != nil {
+		return t.Rule.ID()
+	}
+	return ""
+}
+
+// GetChilds returns a slice of the Treer with children nodes.
+func (t *Tree) GetChilds() Treers {
+	treer := make(Treers, len(t.Childs))
+	for k, v := range t.Childs {
+		treer[k] = v
+	}
+	return treer
+}

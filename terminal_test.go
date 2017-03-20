@@ -19,31 +19,3 @@ package parse
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-import (
-	"testing"
-
-	"github.com/davecgh/go-spew/spew"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestTerminalString(t *testing.T) {
-	samples := []struct {
-		grammar Rule
-		result  string
-	}{
-		{
-			NewTerminal(
-				"foo&bar",
-				"foo bar",
-			),
-			"foo&bar(foo bar)",
-		},
-	}
-
-	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-
-		assert.Equal(t, sample.result, sample.grammar.String(), msg)
-	}
-}

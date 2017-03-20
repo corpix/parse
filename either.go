@@ -27,15 +27,27 @@ type Either struct {
 	Rules Rules
 }
 
-// IsTerminal indicates the variability of Rule.
-func (r *Either) IsTerminal() bool {
-	return false
-}
-
 // ID indicates the ID which was given to the rule
 // on creation. ID could be not unique.
 func (r *Either) ID() string {
 	return r.id
+}
+
+// GetChilds returns a slice of Rule which is
+// children for current Rule.
+func (r *Either) GetChilds() Treers {
+	treers := make(Treers, len(r.Rules))
+	for k, v := range r.Rules {
+		treers[k] = v
+	}
+	return treers
+}
+
+// GetParameters returns a KV rule parameters.
+func (r *Either) GetParameters() map[string]interface{} {
+	return map[string]interface{}{
+		"ID": r.id,
+	}
 }
 
 // Add appends a Rule into Either list.
@@ -43,11 +55,10 @@ func (r *Either) Add(rule Rule) {
 	r.Rules = append(r.Rules, rule)
 }
 
-func (r *Either) String() string {
-	return r.id + r.Rules.String()
-}
-
 // NewEither constructs *Either Rule.
 func NewEither(id string, rules ...Rule) *Either {
-	return &Either{id, Rules(rules)}
+	return &Either{
+		id,
+		Rules(rules),
+	}
 }

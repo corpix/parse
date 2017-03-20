@@ -1,9 +1,5 @@
 package parse
 
-import (
-	"fmt"
-)
-
 // Copyright © 2017 Dmitry Moskowski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,23 +26,24 @@ type Terminal struct {
 	Value []byte
 }
 
-// IsTerminal indicates the variability of Rule.
-func (r *Terminal) IsTerminal() bool {
-	return true
-}
-
 // ID indicates the ID which was given to the rule
 // on creation. ID could be not unique.
 func (r *Terminal) ID() string {
 	return r.id
 }
 
-func (r *Terminal) String() string {
-	return fmt.Sprintf(
-		"%s(%s)",
-		r.id,
-		r.Value,
-	)
+// GetChilds returns a slice of Rule which is
+// children for current Rule.
+func (r *Terminal) GetChilds() Treers {
+	return nil
+}
+
+// GetParameters returns a KV rule parameters.
+func (r *Terminal) GetParameters() map[string]interface{} {
+	return map[string]interface{}{
+		"ID":    r.id,
+		"Value": r.Value,
+	}
 }
 
 // NewTerminal constructs a new *Terminal.

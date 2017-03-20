@@ -21,17 +21,3 @@ package parse
 // THE SOFTWARE.
 
 type Rules []Rule
-
-func (rs Rules) String() string {
-	s := "{"
-	delimited := len(rs) - 1
-	for k, v := range rs {
-		s += v.String()
-		if k < delimited {
-			s += ", "
-		}
-	}
-	s += "}"
-
-	return s
-}

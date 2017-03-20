@@ -20,9 +20,7 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import (
-	"fmt"
-)
+import ()
 
 // Repetition is a Rule which is repeating in the input
 // one or more times.
@@ -33,25 +31,25 @@ type Repetition struct {
 	Variadic bool
 }
 
-// IsTerminal indicates the variability of Rule.
-func (r *Repetition) IsTerminal() bool {
-	return false
-}
-
 // ID indicates the ID which was given to the rule
 // on creation. ID could be not unique.
 func (r *Repetition) ID() string {
 	return r.id
 }
 
-func (r *Repetition) String() string {
-	return fmt.Sprintf(
-		"%s(times=%d, variadic=%v, %s)",
-		r.id,
-		r.Times,
-		r.Variadic,
-		r.Rule.String(),
-	)
+// GetParameters returns a KV rule parameters.
+func (r *Repetition) GetParameters() map[string]interface{} {
+	return map[string]interface{}{
+		"ID":       r.id,
+		"Times":    r.Times,
+		"Variadic": r.Variadic,
+	}
+}
+
+// GetChilds returns a slice of Rule which is
+// children for current Rule.
+func (r *Repetition) GetChilds() Treers {
+	return Treers{r.Rule}
 }
 
 // NewRepetition constructs new *Repetition which repeats exactly `times`.

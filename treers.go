@@ -20,9 +20,4 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Rule represents a general Rule interface.
-type Rule interface {
-	Treer
-	// Parameters returns a KV rule parameters.
-	GetParameters() map[string]interface{}
-}
+type Treers []Treer

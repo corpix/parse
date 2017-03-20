@@ -21,7 +21,13 @@ package parse
 // THE SOFTWARE.
 
 import (
+	e "errors"
 	"fmt"
+)
+
+var (
+	ErrStopIteration = e.New("Stop iteration")
+	ErrSkipBranch    = e.New("Skip branch")
 )
 
 // ErrBoundIncomplete is an error which mean
