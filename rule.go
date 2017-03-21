@@ -20,9 +20,86 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import (
+	"fmt"
+	"sort"
+)
+
 // Rule represents a general Rule interface.
 type Rule interface {
 	Treer
 	// Parameters returns a KV rule parameters.
 	GetParameters() map[string]interface{}
+}
+
+const (
+	circularLabel = "<circular>"
+)
+
+func ruleShow(rule Rule, childs string) string {
+	var (
+		parameters = rule.GetParameters()
+		paramKeys  = []string{}
+		params     = ""
+	)
+	for k, _ := range parameters {
+		paramKeys = append(
+			paramKeys,
+			k,
+		)
+	}
+	sort.Strings(paramKeys)
+	for k, v := range paramKeys {
+		if k > 0 {
+			params += ", "
+		}
+		params += fmt.Sprintf(
+			"%s: %v",
+			v,
+			parameters[v],
+		)
+	}
+
+	return fmt.Sprintf(
+		"%T(%s)(%s)",
+		rule,
+		params,
+		childs,
+	)
+}
+
+func ruleString(visited map[Rule]bool, rule Rule) string {
+	var (
+		child string
+	)
+
+	if _, ok := visited[rule]; ok {
+		child = circularLabel
+	} else {
+		visited[rule] = true
+
+		childs := rule.GetChilds()
+		if len(childs) > 0 {
+			for k, v := range childs {
+				if k > 0 {
+					child += ", "
+				}
+				child += ruleString(
+					visited,
+					v.(Rule),
+				)
+			}
+		}
+	}
+
+	return ruleShow(
+		rule,
+		child,
+	)
+}
+
+// RulesString folds a nested(maybe circular)
+// rule into a string representation.
+func RuleString(rule Rule) string {
+	return ruleString(map[Rule]bool{}, rule)
 }
