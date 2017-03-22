@@ -10,7 +10,7 @@ This project is in **alpha state**, API may change in future.
 
 ## Limitations
 
-- Has no concept of `string literal`, you could parse `"foo\"bar"` but you should fold the AST by hands
+- Has no concept of `string literal`, you could parse `"foo\"bar"` but you should fold the AST by hands.
   This may change in future, I think we could introduce a separate rule type for this.
 - Line reporting in AST is not implemented at this time, it reports only position in the string.
   This will change in the future, I think we could introduce an option to create a parser
