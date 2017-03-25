@@ -55,9 +55,9 @@ type RuleFormatter struct {
 	MaxLineLen int
 }
 
-func (rs *RuleFormatter) indent(depth int, s string) string {
+func (rs *RuleFormatter) indent(s string) string {
 	if rs.Pretty {
-		indent := strings.Repeat(space, rs.Spaces*depth)
+		indent := strings.Repeat(space, rs.Spaces)
 		lines := strings.Split(s, newLine)
 		for k, v := range lines {
 			lines[k] = indent + v
@@ -83,9 +83,6 @@ func (rs *RuleFormatter) single(rule Rule, depth int, childs string) string {
 	for k, v := range paramKeys {
 		if k > 0 {
 			params += delimiter
-			if rs.Pretty {
-				params += newLine
-			}
 		}
 		params += fmt.Sprintf(
 			"%s: %v",
@@ -94,14 +91,8 @@ func (rs *RuleFormatter) single(rule Rule, depth int, childs string) string {
 		)
 	}
 
-	if rs.Pretty && len(params) > rs.MaxLineLen {
-		params = newLine + rs.indent(depth, params) + newLine
-	} else {
-		// XXX: roll back params if line too short.
-		params = strings.Join(strings.Split(params, newLine), "")
-	}
 	if rs.Pretty && len(childs) > 0 {
-		childs = newLine + rs.indent(depth, childs) + newLine
+		childs = newLine + rs.indent(childs) + newLine
 	}
 	return fmt.Sprintf(
 		"%T(%s)(%s)",
@@ -139,8 +130,14 @@ func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) str
 		}
 	}
 
+	if depth == 0 {
+		return rs.single(
+			rule,
+			depth,
+			child,
+		)
+	}
 	return rs.indent(
-		depth,
 		rs.single(
 			rule,
 			depth,
