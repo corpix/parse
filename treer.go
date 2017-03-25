@@ -93,8 +93,7 @@ func WalkTreerBFS(tree Treer, fn func(int, Treer) error) error {
 }
 
 // WalkTreerIDChainBFS is a walker which reports nesting as chain of
-// Treer node ID's on every iteration for custom walker func and uses
-// WalkerTreerBFS.
+// Treer node ID's on every iteration and uses WalkerTreerBFS.
 func WalkTreerIDChainBFS(tree Treer, fn func([]string, int, Treer) error) error {
 	type nodeInfo struct {
 		left  int
@@ -213,8 +212,7 @@ func WalkTreerDFS(tree Treer, fn func(int, Treer) error) error {
 }
 
 // WalkTreerIDChainDFS is a walker which reports nesting as chain of
-// Treer node ID's on every iteration for custom walker func and uses
-// WalkerTreerDFS.
+// Treer node ID's on every iteration and uses WalkerTreerDFS.
 func WalkTreerIDChainDFS(tree Treer, fn func([]string, int, Treer) error) error {
 	var (
 		chain         []string
