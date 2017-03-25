@@ -91,7 +91,7 @@ func (rs *RuleFormatter) single(rule Rule, depth int, childs string) string {
 		)
 	}
 
-	if rs.Pretty && len(childs) > 0 {
+	if rs.Pretty && len(childs) > 0 && len(childs) > rs.MaxLineLen {
 		childs = newLine + rs.indent(childs) + newLine
 	}
 	return fmt.Sprintf(
