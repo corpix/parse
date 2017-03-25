@@ -81,6 +81,12 @@ func TestRuleString(t *testing.T) {
 		assert.Equal(
 			t,
 			sample.result,
+			sample.grammar.String(),
+			msg,
+		)
+		assert.Equal(
+			t,
+			sample.result,
 			RuleString(sample.grammar),
 			msg,
 		)
