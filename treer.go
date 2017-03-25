@@ -1,7 +1,5 @@
 package parse
 
-import ()
-
 // Copyright © 2017 Dmitry Moskowski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -94,6 +92,73 @@ func WalkTreerBFS(tree Treer, fn func(int, Treer) error) error {
 	return nil
 }
 
+// WalkTreerIDChainBFS is a walker which reports nesting as chain of
+// Treer node ID's on every iteration for custom walker func and uses
+// WalkerTreerBFS.
+func WalkTreerIDChainBFS(tree Treer, fn func([]string, int, Treer) error) error {
+	type nodeInfo struct {
+		left  int
+		chain []string
+	}
+	var (
+		childs     Treers
+		childsLen  int
+		chain      []string
+		chainCopy  []string
+		parent     Treer
+		parentInfo *nodeInfo
+
+		parents = map[Treer]Treer{}
+		info    = map[Treer]*nodeInfo{}
+	)
+	defer func() {
+		// XXX: They could be a bit heavy
+		// It is a good idea to clean them
+		// after return to make GC life easy.
+		parents = nil
+		info = nil
+	}()
+
+	return WalkTreerBFS(
+		tree,
+		func(level int, tree Treer) error {
+			parent = parents[tree]
+			childs = tree.GetChilds()
+			for _, v := range childs {
+				parents[v] = tree
+			}
+
+			if parent != nil {
+				parentInfo = info[parent]
+				chain = append(
+					parentInfo.chain,
+					tree.ID(),
+				)
+
+				parentInfo.left--
+				if parentInfo.left == 0 {
+					delete(info, parent)
+					delete(parents, parent)
+				}
+			} else {
+				chain = []string{tree.ID()}
+			}
+			chainCopy = make([]string, len(chain))
+			copy(chainCopy, chain)
+
+			childsLen = len(childs)
+			if childsLen > 0 {
+				info[tree] = &nodeInfo{
+					left:  childsLen,
+					chain: chainCopy,
+				}
+			}
+
+			return fn(chainCopy, level, tree)
+		},
+	)
+}
+
 // WalkTreerDFS walks the Treer childs from top to leafs.
 // See: https://en.wikipedia.org/wiki/Depth-first_search
 func WalkTreerDFS(tree Treer, fn func(int, Treer) error) error {
@@ -145,4 +210,37 @@ func WalkTreerDFS(tree Treer, fn func(int, Treer) error) error {
 	}
 
 	return nil
+}
+
+// WalkTreerIDChainDFS is a walker which reports nesting as chain of
+// Treer node ID's on every iteration for custom walker func and uses
+// WalkerTreerDFS.
+func WalkTreerIDChainDFS(tree Treer, fn func([]string, int, Treer) error) error {
+	var (
+		chain         []string
+		chainCopy     []string
+		previousLevel int
+	)
+
+	return WalkTreerDFS(
+		tree,
+		func(level int, tree Treer) error {
+			if level <= previousLevel {
+				chain = chain[:level]
+			}
+			previousLevel = level
+
+			chain = append(
+				chain,
+				tree.ID(),
+			)
+			chainCopy = make([]string, len(chain))
+			copy(
+				chainCopy,
+				chain,
+			)
+
+			return fn(chainCopy, level, tree)
+		},
+	)
 }

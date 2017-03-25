@@ -22,6 +22,7 @@ package parse
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -731,5 +732,435 @@ func TestWalkTreer(t *testing.T) {
 		)
 		assert.Equal(t, sample.err, err, msg)
 		assert.EqualValues(t, sample.trees, *buf, msg)
+	}
+}
+
+//
+
+type TestRule string
+
+func (t *TestRule) ID() string                            { return string(*t) }
+func (t *TestRule) GetChilds() Treers                     { return nil }
+func (t *TestRule) GetParameters() map[string]interface{} { return nil }
+func NewTestRule(id string) *TestRule {
+	t := TestRule(id)
+	return &t
+}
+
+func TestWalkTreerIDChain(t *testing.T) {
+	type leveledTreer struct {
+		Treer
+		Chain []string
+	}
+
+	var (
+		appendWalker = func(buf *[][]string) func([]string, int, Treer) error {
+			return func(chain []string, level int, t Treer) error {
+				*buf = append(*buf, chain)
+				return nil
+			}
+		}
+		onceWalker = func(buf *[][]string) func([]string, int, Treer) error {
+			return func(chain []string, level int, t Treer) error {
+				*buf = append(*buf, chain)
+				return ErrStopIteration
+			}
+		}
+		skipChildsWhenData = func(data string) func(buf *[][]string) func([]string, int, Treer) error {
+			return func(buf *[][]string) func([]string, int, Treer) error {
+				return func(chain []string, level int, t Treer) error {
+					*buf = append(*buf, chain)
+					if strings.EqualFold(
+						data,
+						t.ID(),
+					) {
+						return ErrSkipBranch
+					}
+					return nil
+				}
+			}
+		}
+	)
+
+	samples := []struct {
+		tree   Treer
+		chains [][]string
+		walker func(*[][]string) func([]string, int, Treer) error
+		walkFn func(Treer, func([]string, int, Treer) error) error
+		err    error
+	}{
+		// BFS
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2"),
+						Childs: []*Tree{{Rule: NewTestRule("3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2"},
+				{"1", "2", "3"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: appendWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2"),
+						Childs: []*Tree{{Rule: NewTestRule("3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: onceWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule:   NewTestRule("2.2"),
+						Childs: []*Tree{{Rule: NewTestRule("3.2")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.2"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2", "3.2"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: appendWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2"),
+						Childs: []*Tree{{Rule: NewTestRule("3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: onceWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule:   NewTestRule("2.2"),
+						Childs: []*Tree{{Rule: NewTestRule("3.2")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.2"},
+				{"1", "2.2", "3.2"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: skipChildsWhenData("2.1"),
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule: NewTestRule("2.2"),
+						Childs: []*Tree{
+							{
+								Rule: NewTestRule("3.2"),
+								Childs: []*Tree{
+									{Rule: NewTestRule("3.2.1")},
+								},
+							},
+						},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.2"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2", "3.2"},
+				{"1", "2.2", "3.2", "3.2.1"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: skipChildsWhenData("3.1"),
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule: NewTestRule("2.2"),
+						Childs: []*Tree{
+							{
+								Rule: NewTestRule("3.2"),
+								Childs: []*Tree{
+									{Rule: NewTestRule("3.2.1")},
+								},
+							},
+						},
+					},
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.2"},
+				{"1", "2.1"},
+				{"1", "2.2", "3.2"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2", "3.2", "3.2.1"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: skipChildsWhenData("3.1"),
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule: NewTestRule("2.2"),
+						Childs: []*Tree{
+							{
+								Rule:   NewTestRule("3.2.1"),
+								Childs: []*Tree{{Rule: NewTestRule("4.2")}},
+							},
+							{Rule: NewTestRule("3.2.2")},
+						},
+					},
+					{
+						Rule:   NewTestRule("2.3"),
+						Childs: []*Tree{{Rule: NewTestRule("3.3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.2"},
+				{"1", "2.3"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2", "3.2.1"},
+				{"1", "2.2", "3.2.2"},
+				{"1", "2.3", "3.3"},
+				{"1", "2.2", "3.2.1", "4.2"},
+			},
+			walkFn: WalkTreerIDChainBFS,
+			walker: appendWalker,
+		},
+
+		// DFS
+
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2"),
+						Childs: []*Tree{{Rule: NewTestRule("3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2"},
+				{"1", "2", "3"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: appendWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2"),
+						Childs: []*Tree{{Rule: NewTestRule("3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: onceWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule:   NewTestRule("2.2"),
+						Childs: []*Tree{{Rule: NewTestRule("3.2")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2"},
+				{"1", "2.2", "3.2"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: appendWalker,
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule:   NewTestRule("2.2"),
+						Childs: []*Tree{{Rule: NewTestRule("3.2")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.2"},
+				{"1", "2.2", "3.2"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: skipChildsWhenData("2.1"),
+		},
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule:   NewTestRule("2.1"),
+						Childs: []*Tree{{Rule: NewTestRule("3.1")}},
+					},
+					{
+						Rule: NewTestRule("2.2"),
+						Childs: []*Tree{
+							{
+								Rule:   NewTestRule("3.2.1"),
+								Childs: []*Tree{{Rule: NewTestRule("4.2")}},
+							},
+							{Rule: NewTestRule("3.2.2")},
+						},
+					},
+					{
+						Rule:   NewTestRule("2.3"),
+						Childs: []*Tree{{Rule: NewTestRule("3.3")}},
+					},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.1", "3.1"},
+				{"1", "2.2"},
+				{"1", "2.2", "3.2.1"},
+				{"1", "2.2", "3.2.1", "4.2"},
+				{"1", "2.2", "3.2.2"},
+				{"1", "2.3"},
+				{"1", "2.3", "3.3"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: appendWalker,
+		},
+
+		{
+			tree: &Tree{
+				Rule: NewTestRule("1"),
+				Childs: []*Tree{
+					{
+						Rule: NewTestRule("2.1"),
+						Childs: []*Tree{
+							{
+								Rule:   NewTestRule("3.1.1"),
+								Childs: []*Tree{{Rule: NewTestRule("4.1.1")}},
+							},
+							{
+								Rule:   NewTestRule("3.1.2"),
+								Childs: []*Tree{{Rule: NewTestRule("4.1.2")}},
+							},
+							{
+								Rule:   NewTestRule("3.1.3"),
+								Childs: []*Tree{{Rule: NewTestRule("4.1.3")}},
+							},
+						},
+					},
+					{Rule: NewTestRule("2.2")},
+				},
+			},
+			chains: [][]string{
+				{"1"},
+				{"1", "2.1"},
+				{"1", "2.1", "3.1.1"},
+				{"1", "2.1", "3.1.1", "4.1.1"},
+				{"1", "2.1", "3.1.2"},
+				{"1", "2.1", "3.1.2", "4.1.2"},
+				{"1", "2.1", "3.1.3"},
+				{"1", "2.1", "3.1.3", "4.1.3"},
+				{"1", "2.2"},
+			},
+			walkFn: WalkTreerIDChainDFS,
+			walker: appendWalker,
+		},
+	}
+
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		buf := &[][]string{}
+		err := sample.walkFn(
+			sample.tree,
+			sample.walker(buf),
+		)
+		assert.Equal(t, sample.err, err, msg)
+		assert.EqualValues(t, sample.chains, *buf, msg)
 	}
 }
