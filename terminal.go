@@ -46,6 +46,12 @@ func (r *Terminal) GetParameters() map[string]interface{} {
 	}
 }
 
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Terminal) String() string {
+	return RuleString(r)
+}
+
 // NewTerminal constructs a new *Terminal.
 func NewTerminal(id string, v string) *Terminal {
 	return &Terminal{id, []byte(v)}

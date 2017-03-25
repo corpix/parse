@@ -742,6 +742,7 @@ type TestRule string
 func (t *TestRule) ID() string                            { return string(*t) }
 func (t *TestRule) GetChilds() Treers                     { return nil }
 func (t *TestRule) GetParameters() map[string]interface{} { return nil }
+func (t *TestRule) String() string                        { return RuleString(t) }
 func NewTestRule(id string) *TestRule {
 	t := TestRule(id)
 	return &t

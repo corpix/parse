@@ -30,6 +30,10 @@ type Rule interface {
 	Treer
 	// Parameters returns a KV rule parameters.
 	GetParameters() map[string]interface{}
+
+	// String returns rule as a string,
+	// resolving recursion with `<circular>` placeholder.
+	String() string
 }
 
 const (

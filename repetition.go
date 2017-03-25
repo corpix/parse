@@ -37,6 +37,12 @@ func (r *Repetition) ID() string {
 	return r.id
 }
 
+// GetChilds returns a slice of Rule which is
+// children for current Rule.
+func (r *Repetition) GetChilds() Treers {
+	return Treers{r.Rule}
+}
+
 // GetParameters returns a KV rule parameters.
 func (r *Repetition) GetParameters() map[string]interface{} {
 	return map[string]interface{}{
@@ -46,10 +52,10 @@ func (r *Repetition) GetParameters() map[string]interface{} {
 	}
 }
 
-// GetChilds returns a slice of Rule which is
-// children for current Rule.
-func (r *Repetition) GetChilds() Treers {
-	return Treers{r.Rule}
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Repetition) String() string {
+	return RuleString(r)
 }
 
 // NewRepetition constructs new *Repetition which repeats exactly `times`.

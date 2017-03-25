@@ -49,6 +49,12 @@ func (r *Chain) GetParameters() map[string]interface{} {
 	}
 }
 
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Chain) String() string {
+	return RuleString(r)
+}
+
 // Add appends a Rule to the Chain.
 func (r *Chain) Add(rule Rule) {
 	r.Rules = append(r.Rules, rule)
