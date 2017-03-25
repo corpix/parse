@@ -110,13 +110,6 @@ func WalkTreerIDChainBFS(tree Treer, fn func([]string, int, Treer) error) error 
 		parents = map[Treer]Treer{}
 		info    = map[Treer]*nodeInfo{}
 	)
-	defer func() {
-		// XXX: They could be a bit heavy
-		// It is a good idea to clean them
-		// after return to make GC life easy.
-		parents = nil
-		info = nil
-	}()
 
 	return WalkTreerBFS(
 		tree,
