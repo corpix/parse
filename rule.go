@@ -23,6 +23,13 @@ package parse
 import (
 	"fmt"
 	"sort"
+	"strings"
+)
+
+const (
+	newLine   = "\n"
+	space     = " "
+	delimiter = ", "
 )
 
 // Rule represents a general Rule interface.
@@ -40,7 +47,27 @@ const (
 	circularLabel = "<circular>"
 )
 
-func ruleShow(rule Rule, childs string) string {
+// RuleFormatter is a configurable rule pretty
+// printer.
+type RuleFormatter struct {
+	Pretty     bool
+	Spaces     int
+	MaxLineLen int
+}
+
+func (rs *RuleFormatter) indent(depth int, s string) string {
+	if rs.Pretty {
+		indent := strings.Repeat(space, rs.Spaces*depth)
+		lines := strings.Split(s, newLine)
+		for k, v := range lines {
+			lines[k] = indent + v
+		}
+		return strings.Join(lines, newLine)
+	}
+	return s
+}
+
+func (rs *RuleFormatter) single(rule Rule, depth int, childs string) string {
 	var (
 		parameters = rule.GetParameters()
 		paramKeys  = []string{}
@@ -55,7 +82,10 @@ func ruleShow(rule Rule, childs string) string {
 	sort.Strings(paramKeys)
 	for k, v := range paramKeys {
 		if k > 0 {
-			params += ", "
+			params += delimiter
+			if rs.Pretty {
+				params += newLine
+			}
 		}
 		params += fmt.Sprintf(
 			"%s: %v",
@@ -64,6 +94,15 @@ func ruleShow(rule Rule, childs string) string {
 		)
 	}
 
+	if rs.Pretty && len(params) > rs.MaxLineLen {
+		params = newLine + rs.indent(depth, params) + newLine
+	} else {
+		// XXX: roll back params if line too short.
+		params = strings.Join(strings.Split(params, newLine), "")
+	}
+	if rs.Pretty && len(childs) > 0 {
+		childs = newLine + rs.indent(depth, childs) + newLine
+	}
 	return fmt.Sprintf(
 		"%T(%s)(%s)",
 		rule,
@@ -72,7 +111,7 @@ func ruleShow(rule Rule, childs string) string {
 	)
 }
 
-func ruleString(visited map[Rule]bool, rule Rule) string {
+func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) string {
 	var (
 		child string
 	)
@@ -86,24 +125,43 @@ func ruleString(visited map[Rule]bool, rule Rule) string {
 		if len(childs) > 0 {
 			for k, v := range childs {
 				if k > 0 {
-					child += ", "
+					child += delimiter
+					if rs.Pretty {
+						child += newLine
+					}
 				}
-				child += ruleString(
+				child += rs.format(
 					visited,
+					depth+1,
 					v.(Rule),
 				)
 			}
 		}
 	}
 
-	return ruleShow(
-		rule,
-		child,
+	return rs.indent(
+		depth,
+		rs.single(
+			rule,
+			depth,
+			child,
+		),
 	)
+}
+
+// Format the Rule as string.
+func (rs *RuleFormatter) Format(rule Rule) string {
+	return rs.format(map[Rule]bool{}, 0, rule)
 }
 
 // RulesString folds a nested(maybe circular)
 // rule into a string representation.
 func RuleString(rule Rule) string {
-	return ruleString(map[Rule]bool{}, rule)
+	return (&RuleFormatter{}).
+		Format(rule)
+}
+
+func RulePrettyString(rule Rule) string {
+	return (&RuleFormatter{true, 2, 80}).
+		Format(rule)
 }

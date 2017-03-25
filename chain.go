@@ -52,7 +52,7 @@ func (r *Chain) GetParameters() map[string]interface{} {
 // String returns rule as a string,
 // resolving recursion with `<circular>` placeholder.
 func (r *Chain) String() string {
-	return RuleString(r)
+	return RulePrettyString(r)
 }
 
 // Add appends a Rule to the Chain.

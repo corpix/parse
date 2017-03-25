@@ -53,7 +53,7 @@ func (r *Either) GetParameters() map[string]interface{} {
 // String returns rule as a string,
 // resolving recursion with `<circular>` placeholder.
 func (r *Either) String() string {
-	return RuleString(r)
+	return RulePrettyString(r)
 }
 
 // Add appends a Rule into Either list.

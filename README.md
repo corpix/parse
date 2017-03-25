@@ -125,17 +125,36 @@ Run it:
 
 ``` shell
 go run main.go
-(*parse.Tree)(0xc4200163c0)({
- Rule: (*parse.Repetition)(0xc420010480)({
-  <max depth reached>
- }),
- Start: (int) 0,
- End: (int) 25,
- Childs: ([]*parse.Tree) (len=25 cap=32) {
-  <max depth reached>
- },
- Data: ([]uint8) (len=25 cap=32) {
-  <max depth reached>
- }
-})
+(*parse.Tree)(0xc4200163c0)(*parse.Repetition(ID: expressions, Times: 1, Variadic: true)(
+  *parse.Either(ID: expression)(
+        *parse.Repetition(ID: numbers, Times: 1, Variadic: true)(
+                  *parse.Either(ID: number)(
+                                *parse.Terminal(ID: 1, Value: [49])(),
+                                *parse.Terminal(ID: 2, Value: [50])(),
+                                *parse.Terminal(ID: 3, Value: [51])(),
+                                *parse.Terminal(ID: 4, Value: [52])(),
+                                *parse.Terminal(ID: 5, Value: [53])(),
+                                *parse.Terminal(ID: 6, Value: [54])(),
+                                *parse.Terminal(ID: 7, Value: [55])(),
+                                *parse.Terminal(ID: 8, Value: [56])(),
+                                *parse.Terminal(ID: 9, Value: [57])(),
+                                *parse.Terminal(ID: 0, Value: [48])()
+                  )
+        ),
+        *parse.Either(ID: whitespace)(
+                  *parse.Terminal(ID: space, Value: [32])(),
+                  *parse.Terminal(ID: tab, Value: [9])(),
+                  *parse.Terminal(ID: line-break, Value: [10])()
+        ),
+        *parse.Either(ID: operator)(
+                  *parse.Terminal(ID: +, Value: [43])(),
+                  *parse.Terminal(ID: -, Value: [45])(),
+                  *parse.Terminal(ID: *, Value: [42])(),
+                  *parse.Terminal(ID: /, Value: [47])(),
+                  *parse.Terminal(ID: mod, Value: [109 111 100])()
+        ),
+        *parse.Terminal(ID: (, Value: [40])(),
+        *parse.Terminal(ID: ), Value: [41])()
+  )
+))
 ```
