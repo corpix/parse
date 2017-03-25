@@ -401,7 +401,10 @@ func TestParse(t *testing.T) {
 				NewTerminal("terminal", "t"),
 			),
 			nil,
-			NewErrUnexpectedEOF(1),
+			NewErrUnexpectedEOF(
+				1,
+				NewTerminal("terminal", "t"),
+			),
 			DefaultParser,
 		},
 		{

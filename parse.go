@@ -85,6 +85,7 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 		if len(input) < length {
 			return nil, NewErrUnexpectedEOF(
 				p.humanizePosition(position),
+				v,
 			)
 		}
 		buf = input[:length]

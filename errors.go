@@ -81,18 +81,20 @@ func NewErrUnsupportedRule(rule Rule) error {
 // input.
 type ErrUnexpectedEOF struct {
 	Position int
+	Rule
 }
 
 func (e *ErrUnexpectedEOF) Error() string {
 	return fmt.Sprintf(
-		"Unexpected EOF at position '%d'",
+		"Unexpected EOF at position '%d' while applying '%s'",
 		e.Position,
+		e.Rule,
 	)
 }
 
 // NewErrUnexpectedEOF constructs new ErrUnexpectedEOF.
-func NewErrUnexpectedEOF(position int) error {
-	return &ErrUnexpectedEOF{position}
+func NewErrUnexpectedEOF(position int, rule Rule) error {
+	return &ErrUnexpectedEOF{position, rule}
 }
 
 //
@@ -108,7 +110,7 @@ type ErrUnexpectedToken struct {
 
 func (e *ErrUnexpectedToken) Error() string {
 	return fmt.Sprintf(
-		"Unexpected token '%s' at position '%d' while applying '%#v'",
+		"Unexpected token '%s' at position '%d' while applying '%s'",
 		e.Token,
 		e.Position,
 		e.Rule,
@@ -153,7 +155,7 @@ type ErrEmptyRule struct {
 
 func (e *ErrEmptyRule) Error() string {
 	return fmt.Sprintf(
-		"Empty rule of type '%T' = '%#v' inside '%#v' rule",
+		"Empty rule of type '%T' = '%s' inside '%s' rule",
 		e.Rule,
 		e.Rule,
 		e.Inside,
