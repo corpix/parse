@@ -6,3 +6,5 @@
   Then this is likely an UnexpectedToken error at the position of buffer.
   At this moment we have(from clickhouseql):
   =Unexpected EOF at position '7' while applying '*parse.Terminal(ID: Expression, Value: [69 120 112 114 101 115 115 105 111 110])()'=
+* TODO Iterative Parse
+  Recursion was a quick choice we should optimize it.
