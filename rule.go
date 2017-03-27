@@ -45,6 +45,7 @@ type Rule interface {
 
 const (
 	circularLabel = "<circular>"
+	nilLabel      = "<nil>"
 )
 
 // RuleFormatter is a configurable rule pretty
@@ -120,6 +121,10 @@ func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) str
 					if rs.Pretty {
 						child += newLine
 					}
+				}
+				if v == nil {
+					child += nilLabel
+					continue
 				}
 				child += rs.format(
 					visited,
