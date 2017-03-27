@@ -73,6 +73,13 @@ func TestRuleString(t *testing.T) {
 			}(),
 			"*parse.Chain(ID: foo-bar)(\n    *parse.Either(ID: foo)(\n        *parse.Repetition(ID: foo, Times: 1, Variadic: true)(  *parse.Terminal(ID: foo, Value: [102 111 111])()), \n        *parse.Either(ID: foo)(<circular>)\n    ), \n    *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
 		},
+		{
+			NewChain(
+				"nil",
+				nil,
+			),
+			"*parse.Chain(ID: nil)(<nil>)",
+		},
 	}
 
 	for k, sample := range samples {
