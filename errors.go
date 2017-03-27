@@ -28,6 +28,7 @@ import (
 var (
 	ErrStopIteration = e.New("Stop iteration")
 	ErrSkipBranch    = e.New("Skip branch")
+	ErrSkipRule      = e.New("Skip rule")
 )
 
 // ErrBoundIncomplete is an error which mean

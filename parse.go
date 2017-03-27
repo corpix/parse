@@ -39,6 +39,9 @@ type Parser struct {
 func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 	tree, err := p.parse(rule, input, nil, 0, 0)
 	if err != nil {
+		if err == ErrSkipRule {
+			return nil, NewErrUnexpectedEOF(1, rule)
+		}
 		return nil, err
 	}
 
@@ -116,6 +119,9 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 				depth+1,
 			)
 			if err != nil {
+				if err == ErrSkipRule {
+					continue
+				}
 				switch err.(type) {
 				case *ErrUnexpectedToken, *ErrUnexpectedEOF:
 					continue
@@ -151,6 +157,9 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 				depth+1,
 			)
 			if err != nil {
+				if err == ErrSkipRule {
+					continue
+				}
 				return nil, err
 			}
 			position = subTree.End
@@ -181,8 +190,19 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 				depth+1,
 			)
 			if err != nil {
+				if err == ErrSkipRule {
+					break
+				}
 				switch err.(type) {
 				case *ErrUnexpectedToken, *ErrUnexpectedEOF:
+					// XXX: We need to skip current rule
+					// if it has no matches and rule is variadic,
+					// should repeat 0 or more times.
+					// In this case we have seen nothing and it is
+					// ok to skip.
+					if seen == 0 && v.Times == 0 && v.Variadic {
+						return nil, ErrSkipRule
+					}
 					break repetitionLoop
 				default:
 					return nil, err

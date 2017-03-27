@@ -403,8 +403,40 @@ func TestParse(t *testing.T) {
 			nil,
 			NewErrUnexpectedEOF(
 				1,
+				NewRepetitionTimesVariadic(
+					"maybe",
+					0,
+					NewTerminal("terminal", "t"),
+				),
+			),
+			DefaultParser,
+		},
+		{
+			"t",
+			NewRepetitionTimesVariadic(
+				"maybe",
+				0,
 				NewTerminal("terminal", "t"),
 			),
+			&Tree{
+				Rule: NewRepetitionTimesVariadic(
+					"maybe",
+					0,
+					NewTerminal("terminal", "t"),
+				),
+				Start: 0,
+				End:   1,
+				Data:  []byte("t"),
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("terminal", "t"),
+						Start: 0,
+						End:   1,
+						Data:  []byte("t"),
+					},
+				},
+			},
+			nil,
 			DefaultParser,
 		},
 		{
@@ -466,29 +498,177 @@ func TestParse(t *testing.T) {
 			DefaultParser,
 		},
 		{
-			"t",
-			NewRepetitionTimesVariadic(
-				"maybe",
-				0,
-				NewTerminal("terminal", "t"),
+			"tf",
+			NewChain(
+				"chain",
+				NewTerminal("t", "t"),
+				NewRepetitionTimesVariadic(
+					"space",
+					0,
+					NewTerminal("space", " "),
+				),
+				NewTerminal("f", "f"),
 			),
 			&Tree{
-				Rule: NewRepetitionTimesVariadic(
-					"maybe",
-					0,
-					NewTerminal("terminal", "t"),
+				Rule: NewChain(
+					"chain",
+					NewTerminal("t", "t"),
+					NewRepetitionTimesVariadic(
+						"space",
+						0,
+						NewTerminal("space", " "),
+					),
+					NewTerminal("f", "f"),
 				),
 				Start: 0,
-				End:   1,
-				Data:  []byte("t"),
+				End:   2,
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("terminal", "t"),
+						Rule:  NewTerminal("t", "t"),
 						Start: 0,
 						End:   1,
 						Data:  []byte("t"),
 					},
+					{
+						Rule:  NewTerminal("f", "f"),
+						Start: 1,
+						End:   2,
+						Data:  []byte("f"),
+					},
 				},
+				Data: []byte("tf"),
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"t f",
+			NewChain(
+				"chain",
+				NewTerminal("t", "t"),
+				NewRepetitionTimesVariadic(
+					"space",
+					0,
+					NewTerminal("space", " "),
+				),
+				NewTerminal("f", "f"),
+			),
+			&Tree{
+				Rule: NewChain(
+					"chain",
+					NewTerminal("t", "t"),
+					NewRepetitionTimesVariadic(
+						"space",
+						0,
+						NewTerminal("space", " "),
+					),
+					NewTerminal("f", "f"),
+				),
+				Start: 0,
+				End:   3,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("t", "t"),
+						Start: 0,
+						End:   1,
+						Data:  []byte("t"),
+					},
+					{
+						Rule: NewRepetitionTimesVariadic(
+							"space",
+							0,
+							NewTerminal("space", " "),
+						),
+						Start: 1,
+						End:   2,
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("space", " "),
+								Start: 1,
+								End:   2,
+								Data:  []byte(" "),
+							},
+						},
+						Data: []byte(" "),
+					},
+
+					{
+						Rule:  NewTerminal("f", "f"),
+						Start: 2,
+						End:   3,
+						Data:  []byte("f"),
+					},
+				},
+				Data: []byte("t f"),
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"t  f",
+			NewChain(
+				"chain",
+				NewTerminal("t", "t"),
+				NewRepetitionTimesVariadic(
+					"space",
+					0,
+					NewTerminal("space", " "),
+				),
+				NewTerminal("f", "f"),
+			),
+			&Tree{
+				Rule: NewChain(
+					"chain",
+					NewTerminal("t", "t"),
+					NewRepetitionTimesVariadic(
+						"space",
+						0,
+						NewTerminal("space", " "),
+					),
+					NewTerminal("f", "f"),
+				),
+				Start: 0,
+				End:   4,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("t", "t"),
+						Start: 0,
+						End:   1,
+						Data:  []byte("t"),
+					},
+					{
+						Rule: NewRepetitionTimesVariadic(
+							"space",
+							0,
+							NewTerminal("space", " "),
+						),
+						Start: 1,
+						End:   3,
+						Childs: []*Tree{
+							{
+								Rule:  NewTerminal("space", " "),
+								Start: 1,
+								End:   2,
+								Data:  []byte(" "),
+							},
+							{
+								Rule:  NewTerminal("space", " "),
+								Start: 2,
+								End:   3,
+								Data:  []byte(" "),
+							},
+						},
+						Data: []byte("  "),
+					},
+
+					{
+						Rule:  NewTerminal("f", "f"),
+						Start: 3,
+						End:   4,
+						Data:  []byte("f"),
+					},
+				},
+				Data: []byte("t  f"),
 			},
 			nil,
 			DefaultParser,
