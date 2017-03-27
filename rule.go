@@ -135,20 +135,15 @@ func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) str
 		}
 	}
 
-	if depth == 0 {
-		return rs.single(
-			rule,
-			depth,
-			child,
-		)
-	}
-	return rs.indent(
-		rs.single(
-			rule,
-			depth,
-			child,
-		),
+	s := rs.single(
+		rule,
+		depth,
+		child,
 	)
+	if strings.Contains(s, newLine) && depth != 0 {
+		return rs.indent(s)
+	}
+	return s
 }
 
 // Format the Rule as string.
