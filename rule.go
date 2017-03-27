@@ -68,7 +68,7 @@ func (rs *RuleFormatter) indent(s string) string {
 	return s
 }
 
-func (rs *RuleFormatter) single(rule Rule, depth int, childs string) string {
+func (rs *RuleFormatter) single(rule Rule, childs string) string {
 	var (
 		parameters = rule.GetParameters()
 		paramKeys  = []string{}
@@ -135,15 +135,10 @@ func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) str
 		}
 	}
 
-	s := rs.single(
+	return rs.single(
 		rule,
-		depth,
 		child,
 	)
-	if strings.Contains(s, newLine) && depth != 0 {
-		return rs.indent(s)
-	}
-	return s
 }
 
 // Format the Rule as string.

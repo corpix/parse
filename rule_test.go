@@ -52,7 +52,7 @@ func TestRuleString(t *testing.T) {
 				),
 				NewTerminal("bar", "Bar"),
 			),
-			"*parse.Chain(ID: foo-bar)(\n    *parse.Either(ID: foo)(\n      *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])())\n    ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
+			"*parse.Chain(ID: foo-bar)(\n  *parse.Either(ID: foo)(\n    *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])())\n  ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
 		},
 		{
 			func() Rule {
@@ -71,7 +71,7 @@ func TestRuleString(t *testing.T) {
 					NewTerminal("bar", "Bar"),
 				)
 			}(),
-			"*parse.Chain(ID: foo-bar)(\n    *parse.Either(ID: foo)(\n      *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])()), \n      *parse.Either(ID: foo)(<circular>)\n    ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
+			"*parse.Chain(ID: foo-bar)(\n  *parse.Either(ID: foo)(\n    *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])()), \n    *parse.Either(ID: foo)(<circular>)\n  ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
 		},
 		{
 			NewChain(
