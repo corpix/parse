@@ -24,7 +24,7 @@ package parse
 // information about the input, position and matched Rule.
 // It will be recursive in case of nested Rule match.
 type Tree struct {
-	Rule
+	Rule   Rule
 	Start  int
 	End    int
 	Childs []*Tree
