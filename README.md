@@ -1,6 +1,8 @@
 parse
 ----------
 
+[![Build Status](https://travis-ci.org/corpix/parse.svg?branch=master)](https://travis-ci.org/corpix/parse)
+
 Simple parser constructor inspired by [EBNF](https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form) which
 describes grammars with composition of go types.
 
