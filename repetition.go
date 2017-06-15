@@ -52,6 +52,12 @@ func (r *Repetition) GetParameters() map[string]interface{} {
 	}
 }
 
+// IsFinite returns true if this rule is
+// not a wrapper for other rules.
+func (r *Repetition) IsFinite() bool {
+	return false
+}
+
 // String returns rule as a string,
 // resolving recursion with `<circular>` placeholder.
 func (r *Repetition) String() string {

@@ -50,6 +50,12 @@ func (r *Either) GetParameters() map[string]interface{} {
 	}
 }
 
+// IsFinite returns true if this rule is
+// not a wrapper for other rules.
+func (r *Either) IsFinite() bool {
+	return false
+}
+
 // String returns rule as a string,
 // resolving recursion with `<circular>` placeholder.
 func (r *Either) String() string {

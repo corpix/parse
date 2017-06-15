@@ -46,6 +46,12 @@ func (r *Terminal) GetParameters() map[string]interface{} {
 	}
 }
 
+// IsFinite returns true if this rule is
+// not a wrapper for other rules.
+func (r *Terminal) IsFinite() bool {
+	return true
+}
+
 // String returns rule as a string,
 // resolving recursion with `<circular>` placeholder.
 func (r *Terminal) String() string {

@@ -35,8 +35,13 @@ const (
 // Rule represents a general Rule interface.
 type Rule interface {
 	Treer
+
 	// Parameters returns a KV rule parameters.
 	GetParameters() map[string]interface{}
+
+	// IsFinite returns true if this rule is
+	// not a wrapper for other rules.
+	IsFinite() bool
 
 	// String returns rule as a string,
 	// resolving recursion with `<circular>` placeholder.
