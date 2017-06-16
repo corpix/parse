@@ -605,6 +605,7 @@ func TestParse(t *testing.T) {
 			DefaultParser,
 		},
 		{
+			// with 2 spaces
 			"t  f",
 			NewChain(
 				"chain",
@@ -660,7 +661,6 @@ func TestParse(t *testing.T) {
 						},
 						Data: []byte("  "),
 					},
-
 					{
 						Rule:  NewTerminal("f", "f"),
 						Start: 3,
