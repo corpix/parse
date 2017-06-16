@@ -29,7 +29,7 @@ type Treer interface {
 	GetChilds() Treers
 }
 
-// WalkRuleBFS walks the Treer level by level.
+// WalkTreerBFS walks the Treer level by level.
 // See: https://en.wikipedia.org/wiki/Breadth-first_search
 func WalkTreerBFS(tree Treer, fn func(int, Treer) error) error {
 	var (
