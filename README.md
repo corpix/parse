@@ -20,8 +20,6 @@ This project is in **alpha state**, API may change in future.
 
 ## Example
 
-> Example from `examples/` directory.
-
 ``` go
 package main
 
@@ -101,12 +99,8 @@ func main() {
 }
 ```
 
-Save this code into some file, `main.go` for example.
-
-Run it:
-
-``` shell
-go run main.go
+``` console
+$ go run ./examples/calculator-expression/calculator-expression.go
 (*parse.Tree)(0xc4200163c0)(*parse.Repetition(ID: expressions, Times: 1, Variadic: true)(
   *parse.Either(ID: expression)(
         *parse.Repetition(ID: numbers, Times: 1, Variadic: true)(
