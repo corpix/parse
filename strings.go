@@ -24,6 +24,17 @@ import (
 	"strings"
 )
 
+func indent(s string, character string, size int) string {
+	indent := strings.Repeat(character, size)
+	lines := strings.Split(s, newLine)
+	for k, v := range lines {
+		if len(v) > 0 {
+			lines[k] = indent + v
+		}
+	}
+	return strings.Join(lines, newLine)
+}
+
 // EqualSlicesFold checks that all elements from a
 // exists in b with strings.EqualFold.
 func EqualSlicesFold(a, b []string) bool {

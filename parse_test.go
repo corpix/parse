@@ -140,6 +140,47 @@ func TestParse(t *testing.T) {
 		err    error
 		parser *Parser
 	}{
+		// errors
+
+		{
+			"",
+			newTestRuleFinite("empty"),
+			nil,
+			NewErrEmptyRule(
+				newTestRuleFinite("empty"),
+				nil,
+			),
+			DefaultParser,
+		},
+		{
+			"",
+			newTestRuleNonFinite("empty", newTestRuleFinite("emptyInside")),
+			nil,
+			NewErrEmptyRule(
+				newTestRuleFinite("emptyInside"),
+				newTestRuleNonFinite("empty", newTestRuleFinite("emptyInside")),
+			),
+			DefaultParser,
+		},
+		{
+			"foo",
+			newTestRuleNonFinite(
+				"deep",
+				newTestRuleNonFinite(
+					"deep",
+					newTestRuleNonFinite(
+						"deep",
+						newTestRuleNonFinite(
+							"deep",
+							newTestRuleFinite("foo"),
+						),
+					),
+				),
+			),
+			nil,
+			NewErrNestingTooDeep(4, 1),
+			NewParser(3),
+		},
 
 		// Terminal
 
@@ -191,26 +232,6 @@ func TestParse(t *testing.T) {
 		// Chain
 
 		{
-			"",
-			NewChain("empty"),
-			nil,
-			NewErrEmptyRule(
-				NewChain("empty"),
-				nil,
-			),
-			DefaultParser,
-		},
-		{
-			"",
-			NewChain("empty", NewChain("emptyInside")),
-			nil,
-			NewErrEmptyRule(
-				NewChain("emptyInside"),
-				NewChain("empty", NewChain("emptyInside")),
-			),
-			DefaultParser,
-		},
-		{
 			"foo bar",
 			NewChain(
 				"chain of foo bar",
@@ -251,25 +272,6 @@ func TestParse(t *testing.T) {
 			},
 			nil,
 			DefaultParser,
-		},
-		{
-			"foo",
-			NewChain(
-				"deep",
-				NewChain(
-					"deep",
-					NewChain(
-						"deep",
-						NewChain(
-							"deep",
-							NewTerminal("foo", "foo"),
-						),
-					),
-				),
-			),
-			nil,
-			NewErrNestingTooDeep(4, 1),
-			NewParser(3),
 		},
 
 		// Either

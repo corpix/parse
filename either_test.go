@@ -23,30 +23,182 @@ package parse
 import (
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
+func TestEitherName(t *testing.T) {
+	samples := []struct {
+		rule Rule
+		name string
+	}{
+		{
+			NewEither("sample either"),
+			"sample either",
+		},
+		{
+			NewEither("another sample either", newTestRuleFinite("inner")),
+			"another sample either",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+	}
+}
+
+func TestEitherShow(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		childs string
+		show   string
+	}{
+		{
+			NewEither("sample either"),
+			"none",
+			"*parse.Either(name: sample either)(none)",
+		},
+		{
+			NewEither("another sample either", newTestRuleFinite("inner")),
+			"different",
+			"*parse.Either(name: another sample either)(different)",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.show,
+			sample.rule.Show(sample.childs),
+			msg,
+		)
+	}
+}
+
+func TestEitherString(t *testing.T) {
+	samples := []struct {
+		rule        Rule
+		stringified string
+	}{
+		{
+			NewEither("sample either"),
+			"*parse.Either(name: sample either)()",
+		},
+		{
+			NewEither("another sample either", newTestRuleFinite("inner")),
+			"*parse.Either(name: another sample either)(*parse.testRuleFinite(name: inner)())",
+		},
+		{
+			NewEither(
+				"sample either of two",
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+			),
+			"*parse.Either(name: sample either of two)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)())",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.stringified,
+			sample.rule.String(),
+			msg,
+		)
+	}
+}
+
+func TestEitherGetChilds(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		childs Treers
+	}{
+		{
+			NewEither("sample either"),
+			Treers{},
+		},
+		{
+			NewEither("another sample either", newTestRuleFinite("inner")),
+			Treers{newTestRuleFinite("inner")},
+		},
+		{
+			NewEither(
+				"sample either of two",
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+			),
+			Treers{
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+			},
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.childs,
+			sample.rule.GetChilds(),
+			msg,
+		)
+	}
+}
+
+func TestEitherGetParameters(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		params RuleParameters
+	}{
+		{
+			NewEither("sample either"),
+			RuleParameters{"name": "sample either"},
+		},
+		{
+			NewEither("another sample either", newTestRuleFinite("inner")),
+			RuleParameters{"name": "another sample either"},
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.params,
+			sample.rule.GetParameters(),
+			msg,
+		)
+	}
+}
+
+func TestEitherIsFinite(t *testing.T) {
+	assert.EqualValues(
+		t,
+		false,
+		NewEither("foo").IsFinite(),
+		"Either is not a finite entity",
+	)
+}
+
 func TestEitherAdd(t *testing.T) {
-	chain := NewEither("either")
-	chain.Add(NewTerminal("terminal", "hello"))
+	either := NewEither("either")
+	either.Add(newTestRuleFinite("terminal"))
 
 	assert.EqualValues(
 		t,
 		NewEither(
 			"either",
-			NewTerminal("terminal", "hello"),
+			newTestRuleFinite("terminal"),
 		),
-		chain,
+		either,
 	)
 
-	chain.Add(NewTerminal("otherTerminal", "hello"))
+	either.Add(newTestRuleFinite("otherTerminal"))
 	assert.EqualValues(
 		t,
 		NewEither(
 			"either",
-			NewTerminal("terminal", "hello"),
-			NewTerminal("otherTerminal", "hello"),
+			newTestRuleFinite("terminal"),
+			newTestRuleFinite("otherTerminal"),
 		),
-		chain,
+		either,
 	)
 }

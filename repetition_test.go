@@ -19,3 +19,133 @@ package parse
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import (
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestRepetitionName(t *testing.T) {
+	samples := []struct {
+		rule Rule
+		name string
+	}{
+		{
+			NewRepetition("sample repetition", newTestRuleFinite("foo")),
+			"sample repetition",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+	}
+}
+
+func TestRepetitionShow(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		childs string
+		show   string
+	}{
+		{
+			NewRepetition("sample repetition", newTestRuleFinite("foo")),
+			"none",
+			"*parse.Repetition(name: sample repetition)(none)",
+		},
+		{
+			NewRepetition("another sample repetition", newTestRuleFinite("inner")),
+			"different",
+			"*parse.Repetition(name: another sample repetition)(different)",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.show,
+			sample.rule.Show(sample.childs),
+			msg,
+		)
+	}
+}
+
+func TestRepetitionString(t *testing.T) {
+	samples := []struct {
+		rule        Rule
+		stringified string
+	}{
+		{
+			NewRepetition("sample repetition", newTestRuleFinite("inner")),
+			"*parse.Repetition(name: sample repetition)(*parse.testRuleFinite(name: inner)())",
+		},
+		{
+			NewRepetition("another sample repetition", newTestRuleNonFinite("inner")),
+			"*parse.Repetition(name: another sample repetition)(*parse.testRuleNonFinite(name: inner)())",
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.stringified,
+			sample.rule.String(),
+			msg,
+		)
+	}
+}
+
+func TestRepetitionGetChilds(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		childs Treers
+	}{
+		{
+			NewRepetition("sample repetition", newTestRuleFinite("inner")),
+			Treers{newTestRuleFinite("inner")},
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.childs,
+			sample.rule.GetChilds(),
+			msg,
+		)
+	}
+}
+
+func TestRepetitionGetParameters(t *testing.T) {
+	samples := []struct {
+		rule   Rule
+		params RuleParameters
+	}{
+		{
+			NewRepetition("sample repetition", newTestRuleFinite("inner")),
+			RuleParameters{"name": "sample repetition"},
+		},
+	}
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+		assert.EqualValues(
+			t,
+			sample.params,
+			sample.rule.GetParameters(),
+			msg,
+		)
+	}
+}
+
+func TestRepetitionIsFinite(t *testing.T) {
+	assert.EqualValues(
+		t,
+		false,
+		NewRepetition(
+			"foo",
+			newTestRuleFinite("inner"),
+		).IsFinite(),
+		"Repetition is not a finite entity",
+	)
+}

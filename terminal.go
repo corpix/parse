@@ -22,14 +22,28 @@ package parse
 
 // Terminal is a Rule which is literal in input.
 type Terminal struct {
-	id    string
+	name  string
 	Value []byte
 }
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Terminal) ID() string {
-	return r.id
+// Name indicates the name which was given to the rule
+// on creation. Name could be not unique.
+func (r *Terminal) Name() string {
+	return r.name
+}
+
+func (r *Terminal) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Terminal) String() string {
+	return TreerString(r)
 }
 
 // GetChilds returns a slice of Rule which is
@@ -38,11 +52,13 @@ func (r *Terminal) GetChilds() Treers {
 	return nil
 }
 
+//
+
 // GetParameters returns a KV rule parameters.
-func (r *Terminal) GetParameters() map[string]interface{} {
-	return map[string]interface{}{
-		"ID":    r.id,
-		"Value": r.Value,
+func (r *Terminal) GetParameters() RuleParameters {
+	return RuleParameters{
+		"name":  r.name,
+		"value": string(r.Value),
 	}
 }
 
@@ -52,13 +68,9 @@ func (r *Terminal) IsFinite() bool {
 	return true
 }
 
-// String returns rule as a string,
-// resolving recursion with `<circular>` placeholder.
-func (r *Terminal) String() string {
-	return RulePrettyString(r)
-}
+//
 
 // NewTerminal constructs a new *Terminal.
-func NewTerminal(id string, v string) *Terminal {
-	return &Terminal{id, []byte(v)}
+func NewTerminal(name string, v string) *Terminal {
+	return &Terminal{name, []byte(v)}
 }

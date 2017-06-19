@@ -20,21 +20,38 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import ()
-
 // Repetition is a Rule which is repeating in the input
 // one or more times.
 type Repetition struct {
-	id       string
+	name     string
 	Rule     Rule
 	Times    int
 	Variadic bool
 }
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Repetition) ID() string {
-	return r.id
+// Name indicates the Name which was given to the rule
+// on creation. Name could be not unique.
+func (r *Repetition) Name() string {
+	return r.name
+}
+
+// Show this node as a string.
+// You should provide childs as string
+// to this function, it does not care
+// about nesting in a tree, it only shows
+// string representation of itself.
+func (r *Repetition) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Repetition) String() string {
+	return TreerString(r)
 }
 
 // GetChilds returns a slice of Rule which is
@@ -43,12 +60,14 @@ func (r *Repetition) GetChilds() Treers {
 	return Treers{r.Rule}
 }
 
+//
+
 // GetParameters returns a KV rule parameters.
-func (r *Repetition) GetParameters() map[string]interface{} {
-	return map[string]interface{}{
-		"ID":       r.id,
-		"Times":    r.Times,
-		"Variadic": r.Variadic,
+func (r *Repetition) GetParameters() RuleParameters {
+	return RuleParameters{
+		"name":     r.name,
+		"times":    r.Times,
+		"variadic": r.Variadic,
 	}
 }
 
@@ -58,16 +77,12 @@ func (r *Repetition) IsFinite() bool {
 	return false
 }
 
-// String returns rule as a string,
-// resolving recursion with `<circular>` placeholder.
-func (r *Repetition) String() string {
-	return RulePrettyString(r)
-}
+//
 
-// NewRepetition constructs new *Repetition which repeats exactly `times`.
-func NewRepetitionTimes(id string, times int, rule Rule) *Repetition {
+// NewRepetitionTimes constructs new *Repetition which repeats exactly `times`.
+func NewRepetitionTimes(name string, times int, rule Rule) *Repetition {
 	return &Repetition{
-		id:       id,
+		name:     name,
 		Rule:     rule,
 		Times:    times,
 		Variadic: false,
@@ -76,9 +91,9 @@ func NewRepetitionTimes(id string, times int, rule Rule) *Repetition {
 
 // NewRepetitionTimesVariadic constructs new variadic *Repetition
 // which repeats exactly `times` or more.
-func NewRepetitionTimesVariadic(id string, times int, rule Rule) *Repetition {
+func NewRepetitionTimesVariadic(name string, times int, rule Rule) *Repetition {
 	return &Repetition{
-		id:       id,
+		name:     name,
 		Rule:     rule,
 		Times:    times,
 		Variadic: true,
@@ -86,6 +101,6 @@ func NewRepetitionTimesVariadic(id string, times int, rule Rule) *Repetition {
 }
 
 // NewRepetition constructs new *Repetition which releat one or more times.
-func NewRepetition(id string, rule Rule) *Repetition {
-	return NewRepetitionTimesVariadic(id, 1, rule)
+func NewRepetition(name string, rule Rule) *Repetition {
+	return NewRepetitionTimesVariadic(name, 1, rule)
 }

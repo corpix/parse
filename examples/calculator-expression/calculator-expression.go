@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"fmt"
 
 	"github.com/corpix/parse"
 )
@@ -44,8 +44,8 @@ func init() {
 		parse.NewTerminal("line-break", "\n"),
 	)
 
-	leftBracket := parse.NewTerminal("(", "(")
-	rightBracket := parse.NewTerminal(")", ")")
+	leftBracket := parse.NewTerminal("leftBracket", "(")
+	rightBracket := parse.NewTerminal("rightBracket", ")")
 
 	expression = parse.NewRepetition(
 		"expressions",
@@ -64,13 +64,11 @@ func init() {
 func main() {
 	tree, err := parse.Parse(
 		expression,
-		[]byte("5 + 3 * (4 - 3) / (7 + 3)"),
+		[]byte("5+(3*2)"),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	s := spew.NewDefaultConfig()
-	s.MaxDepth = 1
-	s.Dump(tree)
+	fmt.Println(tree)
 }

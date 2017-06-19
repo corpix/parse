@@ -27,7 +27,54 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRuleString(t *testing.T) {
+type testRuleFinite string
+
+func (r *testRuleFinite) Name() string { return string(*r) }
+func (r *testRuleFinite) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+func (r *testRuleFinite) String() string                { return TreerString(r) }
+func (r *testRuleFinite) GetChilds() Treers             { return nil }
+func (r *testRuleFinite) GetParameters() RuleParameters { return RuleParameters{"name": string(*r)} }
+func (r *testRuleFinite) IsFinite() bool                { return true }
+
+func newTestRuleFinite(name string) *testRuleFinite {
+	r := testRuleFinite(name)
+	return &r
+}
+
+//
+
+type testRuleNonFinite struct {
+	Rule
+	rules Treers
+}
+
+func (r *testRuleNonFinite) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+func (r *testRuleNonFinite) String() string    { return TreerString(r) }
+func (r *testRuleNonFinite) GetChilds() Treers { return r.rules }
+func (r *testRuleNonFinite) IsFinite() bool    { return false }
+
+func newTestRuleNonFinite(name string, rules ...Treer) *testRuleNonFinite {
+	return &testRuleNonFinite{
+		newTestRuleFinite(name),
+		rules,
+	}
+}
+
+//
+
+func TestRuleShow(t *testing.T) {
 	samples := []struct {
 		grammar Rule
 		result  string
@@ -38,7 +85,7 @@ func TestRuleString(t *testing.T) {
 				NewTerminal("foo", "Foo"),
 				NewTerminal("bar", "Bar"),
 			),
-			"*parse.Chain(ID: foo-bar)(\n  *parse.Terminal(ID: foo, Value: [70 111 111])(), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
+			"*parse.Chain(name: foo-bar)(\n  *parse.Terminal(name: foo, value: Foo)(), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
 		},
 		{
 			NewChain(
@@ -52,7 +99,7 @@ func TestRuleString(t *testing.T) {
 				),
 				NewTerminal("bar", "Bar"),
 			),
-			"*parse.Chain(ID: foo-bar)(\n  *parse.Either(ID: foo)(\n    *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])())\n  ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
+			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(*parse.Terminal(name: foo, value: foo)())\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
 		},
 		{
 			func() Rule {
@@ -71,14 +118,15 @@ func TestRuleString(t *testing.T) {
 					NewTerminal("bar", "Bar"),
 				)
 			}(),
-			"*parse.Chain(ID: foo-bar)(\n  *parse.Either(ID: foo)(\n    *parse.Repetition(ID: foo, Times: 1, Variadic: true)(*parse.Terminal(ID: foo, Value: [102 111 111])()), \n    *parse.Either(ID: foo)(<circular>)\n  ), \n  *parse.Terminal(ID: bar, Value: [66 97 114])()\n)",
+			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(*parse.Terminal(name: foo, value: foo)()), \n    *parse.Either(name: foo)(<circular>)\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
 		},
 		{
 			NewChain(
 				"nil",
 				nil,
+				nil,
 			),
-			"*parse.Chain(ID: nil)(<nil>)",
+			"*parse.Chain(name: nil)(<nil>)",
 		},
 	}
 
@@ -94,7 +142,7 @@ func TestRuleString(t *testing.T) {
 		assert.Equal(
 			t,
 			sample.result,
-			RulePrettyString(sample.grammar),
+			TreerString(sample.grammar),
 			msg,
 		)
 	}

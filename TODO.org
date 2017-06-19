@@ -1,3 +1,7 @@
+* TODO Human readable Tree and Rule
+  - [X] implementation
+  - [ ] docs
+  - [ ] tests
 * TODO Return UnexpectedTokenErr intead of UnexpectedEOF in some cases
   If we have some Either(foo, bar, baz) but^
   - nothing matched
@@ -8,3 +12,12 @@
   =Unexpected EOF at position '7' while applying '*parse.Terminal(ID: Expression, Value: [69 120 112 114 101 115 115 105 111 110])()'=
 * TODO Iterative Parse
   Recursion was a quick choice we should optimize it.
+* TODO Fix stringifier bugs
+  From test:
+  #+BEGIN_SRC text
+  expected: "*parse.Chain(name: another sample chain)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)(), \n*parse.testRuleFinite(name: inner3)())"
+  received: "*parse.Chain(name: another sample chain)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)(), \n  *parse.testRuleFinite(name: inner3)()\n)"
+  #+END_SRC
+
+  All was obtained from the stringifier. The difference in the =\s= count which depends on the length of the line.
+  Type name was changed to longer string, this is the case.

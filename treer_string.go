@@ -20,26 +20,66 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Treer is a tree node interface.
-type Treer interface {
-	// Name returns current node name.
-	Name() string
+import ()
 
-	// Show this node as a string.
-	// You should provide childs as string
-	// to this function, it does not care
-	// about nesting in a tree, it only shows
-	// string representation of itself.
-	Show(childs string) string
+const (
+	newLine              = "\n"
+	treerIndentCharacter = " "
+	treerDelimiter       = ", "
+)
 
-	// FIXME: Is it actually be named like TreerString?
-	// String returns a tree string representation
-	// from current node to the leafs.
-	// You should use `TreerString(Treer) string` func
-	// inside your implementation because it will resolve
-	// the loops counting visited nodes.
-	String() string
+const (
+	treerIndentSize  = 2
+	treerMaxLineSize = 80
+)
 
-	// GetChilds returns a slice of the Treer with children nodes.
-	GetChilds() Treers
+const (
+	circularLabel = "<circular>"
+	nilLabel      = "<nil>"
+)
+
+// treerString folds a tree into string representation(with `Show`) while
+// resolving the pointer loops.
+func treerString(t Treer, visited map[interface{}]bool) string {
+	var (
+		childs         string
+		alreadyVisited bool
+	)
+
+	_, alreadyVisited = visited[t]
+	if alreadyVisited {
+		return t.Show(circularLabel)
+	}
+
+	visited[t] = true
+
+	for k, v := range t.GetChilds() {
+		if k > 0 {
+			childs += treerDelimiter
+			childs += newLine
+		}
+		if v == nil {
+			childs += nilLabel
+			continue
+		}
+		childs += treerString(
+			v,
+			visited,
+		)
+	}
+
+	if len(childs) > 0 && len(childs) > treerMaxLineSize {
+		childs = newLine + indent(
+			childs,
+			treerIndentCharacter,
+			treerIndentSize,
+		) + newLine
+	}
+
+	return t.Show(childs)
+}
+
+// TreerString prints a Treer as human-readable string.
+func TreerString(t Treer) string {
+	return treerString(t, map[interface{}]bool{})
 }

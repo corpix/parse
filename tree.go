@@ -20,6 +20,10 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import (
+	"fmt"
+)
+
 // Tree represents a single Rule match with corresponding
 // information about the input, position and matched Rule.
 // It will be recursive in case of nested Rule match.
@@ -31,10 +35,10 @@ type Tree struct {
 	Data   []byte
 }
 
-// ID returns current node identifier.
-func (t *Tree) ID() string {
+// Name returns current node name.
+func (t *Tree) Name() string {
 	if t.Rule != nil {
-		return t.Rule.ID()
+		return t.Rule.Name()
 	}
 	return ""
 }
@@ -46,4 +50,46 @@ func (t *Tree) GetChilds() Treers {
 		treer[k] = v
 	}
 	return treer
+}
+
+// FIXME: Derive a separate function
+func (t *Tree) Show(childs string) string {
+	var (
+		c string
+		r string
+	)
+	if len(childs) > 0 {
+		c = indent(
+			childs,
+			treerIndentCharacter,
+			treerIndentSize,
+		)
+	}
+
+	if len(t.Rule.GetChilds()) == 0 {
+		r = t.Rule.Show("")
+	} else {
+		r = t.Rule.Show("...")
+	}
+
+	return fmt.Sprintf(
+		"%s{\n%s\n}(%s)",
+		t.Name(),
+		fmt.Sprintf(
+			indent(
+				"rule: %s\nstart: %d\nend: %d\ndata: %s",
+				treerIndentCharacter,
+				treerIndentSize,
+			),
+			r,
+			t.Start,
+			t.End,
+			string(t.Data),
+		),
+		c,
+	)
+}
+
+func (t *Tree) String() string {
+	return TreerString(t)
 }

@@ -1,7 +1,5 @@
 package parse
 
-import ()
-
 // Copyright © 2017 Dmitry Moskowski
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +19,10 @@ import ()
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import (
+	"reflect"
+)
 
 // ShowInput return a byte slice of input and formats it with ellipsis,
 // preparing it to be printed to human.
@@ -61,4 +63,11 @@ func ShowInput(buf []byte) []byte {
 	}
 
 	return bufCopy
+}
+
+func indirectValue(reflectValue reflect.Value) reflect.Value {
+	for reflectValue.Kind() == reflect.Ptr {
+		reflectValue = reflectValue.Elem()
+	}
+	return reflectValue
 }

@@ -20,4 +20,5 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// Rules is just a alias for the list of Rule.
 type Rules []Rule

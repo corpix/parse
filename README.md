@@ -24,7 +24,7 @@ This project is in **alpha state**, API may change in future.
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"fmt"
 
 	"github.com/corpix/parse"
 )
@@ -67,8 +67,8 @@ func init() {
 		parse.NewTerminal("line-break", "\n"),
 	)
 
-	leftBracket := parse.NewTerminal("(", "(")
-	rightBracket := parse.NewTerminal(")", ")")
+	leftBracket := parse.NewTerminal("leftBracket", "(")
+	rightBracket := parse.NewTerminal("rightBracket", ")")
 
 	expression = parse.NewRepetition(
 		"expressions",
@@ -87,50 +87,68 @@ func init() {
 func main() {
 	tree, err := parse.Parse(
 		expression,
-		[]byte("5 + 3 * (4 - 3) / (7 + 3)"),
+		[]byte("5+(3*2)"),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	s := spew.NewDefaultConfig()
-	s.MaxDepth = 1
-	s.Dump(tree)
+	fmt.Println(tree)
 }
 ```
 
+> Console output shortened
+
 ``` console
 $ go run ./examples/calculator-expression/calculator-expression.go
-(*parse.Tree)(0xc4200163c0)(*parse.Repetition(ID: expressions, Times: 1, Variadic: true)(
-  *parse.Either(ID: expression)(
-        *parse.Repetition(ID: numbers, Times: 1, Variadic: true)(
-                  *parse.Either(ID: number)(
-                                *parse.Terminal(ID: 1, Value: [49])(),
-                                *parse.Terminal(ID: 2, Value: [50])(),
-                                *parse.Terminal(ID: 3, Value: [51])(),
-                                *parse.Terminal(ID: 4, Value: [52])(),
-                                *parse.Terminal(ID: 5, Value: [53])(),
-                                *parse.Terminal(ID: 6, Value: [54])(),
-                                *parse.Terminal(ID: 7, Value: [55])(),
-                                *parse.Terminal(ID: 8, Value: [56])(),
-                                *parse.Terminal(ID: 9, Value: [57])(),
-                                *parse.Terminal(ID: 0, Value: [48])()
-                  )
-        ),
-        *parse.Either(ID: whitespace)(
-                  *parse.Terminal(ID: space, Value: [32])(),
-                  *parse.Terminal(ID: tab, Value: [9])(),
-                  *parse.Terminal(ID: line-break, Value: [10])()
-        ),
-        *parse.Either(ID: operator)(
-                  *parse.Terminal(ID: +, Value: [43])(),
-                  *parse.Terminal(ID: -, Value: [45])(),
-                  *parse.Terminal(ID: *, Value: [42])(),
-                  *parse.Terminal(ID: /, Value: [47])(),
-                  *parse.Terminal(ID: mod, Value: [109 111 100])()
-        ),
-        *parse.Terminal(ID: (, Value: [40])(),
-        *parse.Terminal(ID: ), Value: [41])()
-  )
-))
+expressions{
+  rule: *parse.Repetition(name: expressions, times: 1, variadic: true)(...)
+  start: 0
+  end: 7
+  data: 5+(3*2)
+}(
+    expression{
+      rule: *parse.Either(name: expression)(...)
+      start: 0
+      end: 1
+      data: 5
+    }(
+        numbers{
+          rule: *parse.Repetition(name: numbers, times: 1, variadic: true)(...)
+          start: 0
+          end: 1
+          data: 5
+        }(
+            number{
+              rule: *parse.Either(name: number)(...)
+              start: 0
+              end: 1
+              data: 5
+            }(
+                5{
+                  rule: *parse.Terminal(name: 5, value: 5)()
+                  start: 0
+                  end: 1
+                  data: 5
+                }()
+            )
+        )
+    ),
+
+    ...
+
+    expression{
+      rule: *parse.Either(name: expression)(...)
+      start: 6
+      end: 7
+      data: )
+    }(
+        rightBracket{
+          rule: *parse.Terminal(name: rightBracket, value: ))()
+          start: 6
+          end: 7
+          data: )
+        }()
+    )
+)
 ```

@@ -23,14 +23,33 @@ package parse
 // Either represents a list of Rule's to match in the data.
 // One of the rules in a list must match.
 type Either struct {
-	id    string
+	name  string
 	Rules Rules
 }
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Either) ID() string {
-	return r.id
+// Name indicates the name which was given to the rule
+// on creation. Name could be not unique.
+func (r *Either) Name() string {
+	return r.name
+}
+
+// Show this node as a string.
+// You should provide childs as string
+// to this function, it does not care
+// about nesting in a tree, it only shows
+// string representation of itself.
+func (r *Either) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Either) String() string {
+	return TreerString(r)
 }
 
 // GetChilds returns a slice of Rule which is
@@ -43,10 +62,12 @@ func (r *Either) GetChilds() Treers {
 	return treers
 }
 
+//
+
 // GetParameters returns a KV rule parameters.
-func (r *Either) GetParameters() map[string]interface{} {
-	return map[string]interface{}{
-		"ID": r.id,
+func (r *Either) GetParameters() RuleParameters {
+	return RuleParameters{
+		"name": r.name,
 	}
 }
 
@@ -56,21 +77,23 @@ func (r *Either) IsFinite() bool {
 	return false
 }
 
-// String returns rule as a string,
-// resolving recursion with `<circular>` placeholder.
-func (r *Either) String() string {
-	return RulePrettyString(r)
-}
+//
 
 // Add appends a Rule into Either list.
 func (r *Either) Add(rule Rule) {
 	r.Rules = append(r.Rules, rule)
 }
 
+//
+
+// FIXME: Either should always contain >1 childs
+// otherwise it is not either :)
+// Probably we could change func signature to return error
+// in this case.
 // NewEither constructs *Either Rule.
-func NewEither(id string, rules ...Rule) *Either {
+func NewEither(name string, rules ...Rule) *Either {
 	return &Either{
-		id,
+		name,
 		Rules(rules),
 	}
 }

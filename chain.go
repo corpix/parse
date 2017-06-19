@@ -22,14 +22,33 @@ package parse
 
 // Chain represents a chain of Rule's to match in the data.
 type Chain struct {
-	id    string
+	name  string
 	Rules Rules
 }
 
-// ID indicates the ID which was given to the rule
-// on creation. ID could be not unique.
-func (r *Chain) ID() string {
-	return r.id
+// Name indicates the name which was given to the rule
+// on creation. Name could be not unique.
+func (r *Chain) Name() string {
+	return r.name
+}
+
+// Show this node as a string.
+// You should provide childs as string
+// to this function, it does not care
+// about nesting in a tree, it only shows
+// string representation of itself.
+func (r *Chain) Show(childs string) string {
+	return RuleShow(
+		r,
+		RuleParametersShow(r.GetParameters()),
+		childs,
+	)
+}
+
+// String returns rule as a string,
+// resolving recursion with `<circular>` placeholder.
+func (r *Chain) String() string {
+	return TreerString(r)
 }
 
 // GetChilds returns a slice of Rule which is
@@ -42,10 +61,12 @@ func (r *Chain) GetChilds() Treers {
 	return treers
 }
 
+//
+
 // GetParameters returns a KV rule parameters.
-func (r *Chain) GetParameters() map[string]interface{} {
-	return map[string]interface{}{
-		"ID": r.id,
+func (r *Chain) GetParameters() RuleParameters {
+	return RuleParameters{
+		"name": r.name,
 	}
 }
 
@@ -55,21 +76,23 @@ func (r *Chain) IsFinite() bool {
 	return false
 }
 
-// String returns rule as a string,
-// resolving recursion with `<circular>` placeholder.
-func (r *Chain) String() string {
-	return RulePrettyString(r)
-}
+//
 
 // Add appends a Rule to the Chain.
 func (r *Chain) Add(rule Rule) {
 	r.Rules = append(r.Rules, rule)
 }
 
+//
+
 // NewChain constructs new Chain.
-func NewChain(id string, rules ...Rule) *Chain {
+// Valid chain could be constructed with >=2 rules.
+func NewChain(name string, r1, r2 Rule, rN ...Rule) *Chain {
 	return &Chain{
-		id,
-		Rules(rules),
+		name,
+		append(
+			Rules{r1, r2},
+			Rules(rN)...,
+		),
 	}
 }

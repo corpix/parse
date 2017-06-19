@@ -22,143 +22,64 @@ package parse
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
-	"strings"
 )
 
-const (
-	newLine   = "\n"
-	space     = " "
-	delimiter = ", "
-)
+// RuleParameters is a key-value mapping of
+// the Rule custom settings.
+type RuleParameters map[string]interface{}
 
 // Rule represents a general Rule interface.
 type Rule interface {
 	Treer
 
 	// Parameters returns a KV rule parameters.
-	GetParameters() map[string]interface{}
+	GetParameters() RuleParameters
 
 	// IsFinite returns true if this rule is
 	// not a wrapper for other rules.
 	IsFinite() bool
-
-	// String returns rule as a string,
-	// resolving recursion with `<circular>` placeholder.
-	String() string
 }
 
-const (
-	circularLabel = "<circular>"
-	nilLabel      = "<nil>"
-)
-
-// RuleFormatter is a configurable rule pretty
-// printer.
-type RuleFormatter struct {
-	Pretty     bool
-	Spaces     int
-	MaxLineLen int
-}
-
-func (rs *RuleFormatter) indent(s string) string {
-	if rs.Pretty {
-		indent := strings.Repeat(space, rs.Spaces)
-		lines := strings.Split(s, newLine)
-		for k, v := range lines {
-			lines[k] = indent + v
-		}
-		return strings.Join(lines, newLine)
-	}
-	return s
-}
-
-func (rs *RuleFormatter) single(rule Rule, childs string) string {
+// FIXME: Probably this function should be a RuleParameters.Show()?
+// In this case we could make RuleShow signature more simple, but should we?
+// RuleParametersShow returns a Rule.GetParameters() encoded as string.
+func RuleParametersShow(parameters RuleParameters) string {
 	var (
-		parameters = rule.GetParameters()
-		paramKeys  = []string{}
-		params     = ""
+		keys   = []string{}
+		params = ""
 	)
 	for k, _ := range parameters {
-		paramKeys = append(
-			paramKeys,
+		keys = append(
+			keys,
 			k,
 		)
 	}
-	sort.Strings(paramKeys)
-	for k, v := range paramKeys {
+	sort.Strings(keys)
+	for k, v := range keys {
 		if k > 0 {
-			params += delimiter
+			params += treerDelimiter
 		}
 		params += fmt.Sprintf(
 			"%s: %v",
 			v,
-			parameters[v],
+			indirectValue(
+				reflect.ValueOf(parameters[v]),
+			).Interface(),
 		)
 	}
 
-	if rs.Pretty && len(childs) > 0 && len(childs) > rs.MaxLineLen {
-		childs = newLine + rs.indent(childs) + newLine
-	}
+	return params
+}
+
+// RuleShow returns a Rule encoded as a string.
+// It requires some parts to be prepared(encoded into a string).
+func RuleShow(rule Rule, parameters string, childs string) string {
 	return fmt.Sprintf(
 		"%T(%s)(%s)",
 		rule,
-		params,
+		parameters,
 		childs,
 	)
-}
-
-func (rs *RuleFormatter) format(visited map[Rule]bool, depth int, rule Rule) string {
-	var (
-		child string
-	)
-
-	if _, ok := visited[rule]; ok {
-		child = circularLabel
-	} else {
-		visited[rule] = true
-
-		childs := rule.GetChilds()
-		if len(childs) > 0 {
-			for k, v := range childs {
-				if k > 0 {
-					child += delimiter
-					if rs.Pretty {
-						child += newLine
-					}
-				}
-				if v == nil {
-					child += nilLabel
-					continue
-				}
-				child += rs.format(
-					visited,
-					depth+1,
-					v.(Rule),
-				)
-			}
-		}
-	}
-
-	return rs.single(
-		rule,
-		child,
-	)
-}
-
-// Format the Rule as string.
-func (rs *RuleFormatter) Format(rule Rule) string {
-	return rs.format(map[Rule]bool{}, 0, rule)
-}
-
-// RulesString folds a nested(maybe circular)
-// rule into a string representation.
-func RuleString(rule Rule) string {
-	return (&RuleFormatter{}).
-		Format(rule)
-}
-
-func RulePrettyString(rule Rule) string {
-	return (&RuleFormatter{true, 2, 80}).
-		Format(rule)
 }
