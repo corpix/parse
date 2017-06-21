@@ -52,12 +52,12 @@ func TestRepetitionShow(t *testing.T) {
 		{
 			NewRepetition("sample repetition", newTestRuleFinite("foo")),
 			"none",
-			"*parse.Repetition(name: sample repetition)(none)",
+			"*parse.Repetition(name: sample repetition, times: 1, variadic: true)(none)",
 		},
 		{
 			NewRepetition("another sample repetition", newTestRuleFinite("inner")),
 			"different",
-			"*parse.Repetition(name: another sample repetition)(different)",
+			"*parse.Repetition(name: another sample repetition, times: 1, variadic: true)(different)",
 		},
 	}
 	for k, sample := range samples {
@@ -78,11 +78,11 @@ func TestRepetitionString(t *testing.T) {
 	}{
 		{
 			NewRepetition("sample repetition", newTestRuleFinite("inner")),
-			"*parse.Repetition(name: sample repetition)(*parse.testRuleFinite(name: inner)())",
+			"*parse.Repetition(name: sample repetition, times: 1, variadic: true)(\n  *parse.testRuleFinite(name: inner)()\n)",
 		},
 		{
 			NewRepetition("another sample repetition", newTestRuleNonFinite("inner")),
-			"*parse.Repetition(name: another sample repetition)(*parse.testRuleNonFinite(name: inner)())",
+			"*parse.Repetition(name: another sample repetition, times: 1, variadic: true)(\n  *parse.testRuleNonFinite(name: inner)()\n)",
 		},
 	}
 	for k, sample := range samples {
@@ -124,7 +124,11 @@ func TestRepetitionGetParameters(t *testing.T) {
 	}{
 		{
 			NewRepetition("sample repetition", newTestRuleFinite("inner")),
-			RuleParameters{"name": "sample repetition"},
+			RuleParameters{
+				"name":     "sample repetition",
+				"times":    1,
+				"variadic": true,
+			},
 		},
 	}
 	for k, sample := range samples {
