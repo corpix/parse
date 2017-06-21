@@ -20,4 +20,84 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// FIXME: Move terminal tests here.
+import (
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestTerminal(t *testing.T) {
+	samples := []struct {
+		text   string
+		rule   Rule
+		tree   *Tree
+		err    error
+		parser *Parser
+	}{
+
+		// errors
+
+		{
+			"",
+			NewTerminal("empty", ""),
+			nil,
+			NewErrEmptyRule(
+				NewTerminal("empty", ""),
+				nil,
+			),
+			DefaultParser,
+		},
+		{
+			"bar",
+			NewTerminal("foo", "foo"),
+			nil,
+			NewErrUnexpectedToken(
+				ShowInput([]byte("bar")),
+				1,
+				NewTerminal("foo", "foo"),
+			),
+			DefaultParser,
+		},
+		{
+			"foobar",
+			NewTerminal("foo", "foo"),
+			nil,
+			NewErrUnexpectedToken(
+				ShowInput([]byte("bar")),
+				4,
+				NewTerminal("foo", "foo"),
+			),
+			DefaultParser,
+		},
+
+		// success
+
+		{
+			"foo",
+			NewTerminal("foo", "foo"),
+			&Tree{
+				Rule:  NewTerminal("foo", "foo"),
+				Data:  []byte("foo"),
+				Start: 0,
+				End:   3,
+			},
+			nil,
+			DefaultParser,
+		},
+	}
+
+	for k, sample := range samples {
+		tree, err := sample.parser.Parse(
+			sample.rule,
+			[]byte(sample.text),
+		)
+		msg := spew.Sdump(
+			k,
+			sample.rule,
+			sample.text,
+		)
+		assert.EqualValues(t, sample.err, err, msg)
+		assert.EqualValues(t, sample.tree, tree, msg)
+	}
+}

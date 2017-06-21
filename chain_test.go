@@ -296,3 +296,77 @@ func TestChainAdd(t *testing.T) {
 		)
 	}
 }
+
+func TestChain(t *testing.T) {
+	samples := []struct {
+		text   string
+		rule   Rule
+		tree   *Tree
+		err    error
+		parser *Parser
+	}{
+
+		// errors
+
+		// FIXME: Implement error checking just like in Terminal tests
+
+		// success
+
+		{
+			"foo bar",
+			NewChain(
+				"chain of foo bar",
+				NewTerminal("foo", "foo"),
+				NewTerminal("space", " "),
+				NewTerminal("bar", "bar"),
+			),
+			&Tree{
+				Rule: NewChain(
+					"chain of foo bar",
+					NewTerminal("foo", "foo"),
+					NewTerminal("space", " "),
+					NewTerminal("bar", "bar"),
+				),
+				Data:  []byte("foo bar"),
+				Start: 0,
+				End:   7,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("foo", "foo"),
+						Data:  []byte("foo"),
+						Start: 0,
+						End:   3,
+					},
+					{
+						Rule:  NewTerminal("space", " "),
+						Data:  []byte(" "),
+						Start: 3,
+						End:   4,
+					},
+					{
+						Rule:  NewTerminal("bar", "bar"),
+						Data:  []byte("bar"),
+						Start: 4,
+						End:   7,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+	}
+
+	for k, sample := range samples {
+		tree, err := sample.parser.Parse(
+			sample.rule,
+			[]byte(sample.text),
+		)
+		msg := spew.Sdump(
+			k,
+			sample.rule,
+			sample.text,
+		)
+		assert.EqualValues(t, sample.err, err, msg)
+		assert.EqualValues(t, sample.tree, tree, msg)
+	}
+}

@@ -202,3 +202,150 @@ func TestEitherAdd(t *testing.T) {
 		either,
 	)
 }
+
+func TestEither(t *testing.T) {
+	samples := []struct {
+		text   string
+		rule   Rule
+		tree   *Tree
+		err    error
+		parser *Parser
+	}{
+
+		// errors
+
+		{
+			"",
+			NewEither("empty"),
+			nil,
+			NewErrEmptyRule(
+				NewEither("empty"),
+				nil,
+			),
+			DefaultParser,
+		},
+		{
+			"4",
+			NewEither(
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("4"),
+				1,
+				NewTerminal("three", "3"),
+			),
+			DefaultParser,
+		},
+
+		// success
+
+		{
+			"1",
+			NewEither(
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
+			),
+			&Tree{
+				Rule: NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+				Data:  []byte("1"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("one", "1"),
+						Data:  []byte("1"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"1",
+			NewEither(
+				"number",
+				NewTerminal("three", "3"),
+				NewTerminal("two", "2"),
+				NewTerminal("one", "1"),
+			),
+			&Tree{
+				Rule: NewEither(
+					"number",
+					NewTerminal("three", "3"),
+					NewTerminal("two", "2"),
+					NewTerminal("one", "1"),
+				),
+				Data:  []byte("1"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("one", "1"),
+						Data:  []byte("1"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"2",
+			NewEither(
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+				NewTerminal("three", "3"),
+			),
+			&Tree{
+				Rule: NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
+				Data:  []byte("2"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("two", "2"),
+						Data:  []byte("2"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+	}
+
+	for k, sample := range samples {
+		tree, err := sample.parser.Parse(
+			sample.rule,
+			[]byte(sample.text),
+		)
+		msg := spew.Sdump(
+			k,
+			sample.rule,
+			sample.text,
+		)
+		assert.EqualValues(t, sample.err, err, msg)
+		assert.EqualValues(t, sample.tree, tree, msg)
+	}
+}
