@@ -20,8 +20,6 @@ package parse
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import ()
-
 const (
 	newLine              = "\n"
 	treerIndentCharacter = " "
@@ -29,8 +27,7 @@ const (
 )
 
 const (
-	treerIndentSize  = 2
-	treerMaxLineSize = 80
+	treerIndentSize = 2
 )
 
 const (
@@ -68,7 +65,7 @@ func treerString(t Treer, visited map[interface{}]bool) string {
 		)
 	}
 
-	if len(childs) > 0 && len(childs) > treerMaxLineSize {
+	if len(childs) > 0 {
 		childs = newLine + indent(
 			childs,
 			treerIndentCharacter,

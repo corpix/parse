@@ -102,7 +102,7 @@ func TestChainString(t *testing.T) {
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
 			),
-			"*parse.Chain(name: sample chain)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)())",
+			"*parse.Chain(name: sample chain)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)()\n)",
 		},
 		{
 			NewChain(
@@ -111,7 +111,7 @@ func TestChainString(t *testing.T) {
 				newTestRuleFinite("inner2"),
 				newTestRuleFinite("inner3"),
 			),
-			"*parse.Chain(name: another sample chain)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)(), \n*parse.testRuleFinite(name: inner3)())",
+			"*parse.Chain(name: another sample chain)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)(), \n  *parse.testRuleFinite(name: inner3)()\n)",
 		},
 		{
 			NewChain(
@@ -119,7 +119,7 @@ func TestChainString(t *testing.T) {
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
 			),
-			"*parse.Chain(name: sample chain of two)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)())",
+			"*parse.Chain(name: sample chain of two)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)()\n)",
 		},
 	}
 	for k, sample := range samples {

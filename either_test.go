@@ -86,7 +86,7 @@ func TestEitherString(t *testing.T) {
 		},
 		{
 			NewEither("another sample either", newTestRuleFinite("inner")),
-			"*parse.Either(name: another sample either)(*parse.testRuleFinite(name: inner)())",
+			"*parse.Either(name: another sample either)(\n  *parse.testRuleFinite(name: inner)()\n)",
 		},
 		{
 			NewEither(
@@ -94,7 +94,7 @@ func TestEitherString(t *testing.T) {
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
 			),
-			"*parse.Either(name: sample either of two)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)())",
+			"*parse.Either(name: sample either of two)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)()\n)",
 		},
 	}
 	for k, sample := range samples {

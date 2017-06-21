@@ -164,15 +164,15 @@ func TestParse(t *testing.T) {
 		},
 		{
 			"foo",
-			newTestRuleNonFinite(
+			NewRepetition(
 				"deep",
-				newTestRuleNonFinite(
+				NewRepetition(
 					"deep",
-					newTestRuleNonFinite(
+					NewRepetition(
 						"deep",
-						newTestRuleNonFinite(
+						NewRepetition(
 							"deep",
-							newTestRuleFinite("foo"),
+							NewTerminal("foo", "foo"),
 						),
 					),
 				),
