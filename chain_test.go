@@ -308,7 +308,54 @@ func TestChain(t *testing.T) {
 
 		// errors
 
-		// FIXME: Implement error checking just like in Terminal tests
+		{
+			"",
+			NewChain(
+				"some",
+				NewTerminal("foo", "foo"),
+				NewTerminal("bar", "bar"),
+			),
+			nil,
+			NewErrUnexpectedEOF(
+				1,
+				NewTerminal("foo", "foo"),
+			),
+			DefaultParser,
+		},
+		{
+			"bar",
+			NewChain(
+				"foo",
+				NewTerminal("foo", "foo"),
+				NewTerminal("bar", "bar"),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("bar"),
+				1,
+				NewTerminal("foo", "foo"),
+			),
+			DefaultParser,
+		},
+		{
+			"foobarbaz",
+			NewChain(
+				"foo",
+				NewTerminal("foo", "foo"),
+				NewTerminal("bar", "bar"),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("baz"),
+				7,
+				NewChain(
+					"foo",
+					NewTerminal("foo", "foo"),
+					NewTerminal("bar", "bar"),
+				),
+			),
+			DefaultParser,
+		},
 
 		// success
 
