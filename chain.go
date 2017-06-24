@@ -86,7 +86,7 @@ func (r *Chain) Add(rule Rule) {
 //
 
 // NewChain constructs new Chain.
-// Valid chain could be constructed with >=2 rules.
+// Valid Chain could be constructed with >=2 rules.
 func NewChain(name string, r1, r2 Rule, rN ...Rule) *Chain {
 	return &Chain{
 		name,
