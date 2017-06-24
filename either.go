@@ -86,14 +86,14 @@ func (r *Either) Add(rule Rule) {
 
 //
 
-// FIXME: Either should always contain >1 childs
-// otherwise it is not either :)
-// Probably we could change func signature to return error
-// in this case.
 // NewEither constructs *Either Rule.
-func NewEither(name string, rules ...Rule) *Either {
+// Valid Either could be constructed with >=2 rules.
+func NewEither(name string, r1 Rule, r2 Rule, rN ...Rule) *Either {
 	return &Either{
 		name,
-		Rules(rules),
+		append(
+			Rules{r1, r2},
+			Rules(rN)...,
+		),
 	}
 }

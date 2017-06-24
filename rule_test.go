@@ -96,10 +96,14 @@ func TestRuleShow(t *testing.T) {
 						"foo",
 						NewTerminal("foo", "foo"),
 					),
+					NewRepetition(
+						"bar",
+						NewTerminal("bar", "bar"),
+					),
 				),
 				NewTerminal("bar", "Bar"),
 			),
-			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(\n      *parse.Terminal(name: foo, value: foo)()\n    )\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
+			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(\n      *parse.Terminal(name: foo, value: foo)(), \n      *parse.Terminal(name: bar, value: bar)()\n    )\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
 		},
 		{
 			func() Rule {
@@ -108,6 +112,10 @@ func TestRuleShow(t *testing.T) {
 					NewRepetition(
 						"foo",
 						NewTerminal("foo", "foo"),
+					),
+					NewRepetition(
+						"bar",
+						NewTerminal("bar", "bar"),
 					),
 				)
 				foo.Add(foo)
@@ -118,7 +126,7 @@ func TestRuleShow(t *testing.T) {
 					NewTerminal("bar", "Bar"),
 				)
 			}(),
-			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(\n      *parse.Terminal(name: foo, value: foo)()\n    ), \n    *parse.Either(name: foo)(<circular>)\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
+			"*parse.Chain(name: foo-bar)(\n  *parse.Either(name: foo)(\n    *parse.Repetition(name: foo, times: 1, variadic: true)(\n      *parse.Terminal(name: foo, value: foo)(), \n      *parse.Terminal(name: bar, value: bar)()\n    ), \n    *parse.Either(name: foo)(<circular>)\n  ), \n  *parse.Terminal(name: bar, value: Bar)()\n)",
 		},
 		{
 			NewChain(

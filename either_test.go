@@ -33,11 +33,19 @@ func TestEitherName(t *testing.T) {
 		name string
 	}{
 		{
-			NewEither("sample either"),
+			NewEither(
+				"sample either",
+				newTestRuleFinite("foo"),
+				newTestRuleFinite("bar"),
+			),
 			"sample either",
 		},
 		{
-			NewEither("another sample either", newTestRuleFinite("inner")),
+			NewEither(
+				"another sample either",
+				newTestRuleFinite("foo"),
+				newTestRuleFinite("bar"),
+			),
 			"another sample either",
 		},
 	}
@@ -54,12 +62,20 @@ func TestEitherShow(t *testing.T) {
 		show   string
 	}{
 		{
-			NewEither("sample either"),
+			NewEither(
+				"sample either",
+				newTestRuleFinite("foo"),
+				newTestRuleFinite("bar"),
+			),
 			"none",
 			"*parse.Either(name: sample either)(none)",
 		},
 		{
-			NewEither("another sample either", newTestRuleFinite("inner")),
+			NewEither(
+				"another sample either",
+				newTestRuleFinite("foo"),
+				newTestRuleFinite("bar"),
+			),
 			"different",
 			"*parse.Either(name: another sample either)(different)",
 		},
@@ -81,20 +97,21 @@ func TestEitherString(t *testing.T) {
 		stringified string
 	}{
 		{
-			NewEither("sample either"),
-			"*parse.Either(name: sample either)()",
-		},
-		{
-			NewEither("another sample either", newTestRuleFinite("inner")),
-			"*parse.Either(name: another sample either)(\n  *parse.testRuleFinite(name: inner)()\n)",
-		},
-		{
 			NewEither(
 				"sample either of two",
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
 			),
 			"*parse.Either(name: sample either of two)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)()\n)",
+		},
+		{
+			NewEither(
+				"sample either of three",
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+				newTestRuleFinite("inner3"),
+			),
+			"*parse.Either(name: sample either of three)(\n  *parse.testRuleFinite(name: inner1)(), \n  *parse.testRuleFinite(name: inner2)(), \n  *parse.testRuleFinite(name: inner3)()\n)",
 		},
 	}
 	for k, sample := range samples {
@@ -114,22 +131,27 @@ func TestEitherGetChilds(t *testing.T) {
 		childs Treers
 	}{
 		{
-			NewEither("sample either"),
-			Treers{},
-		},
-		{
-			NewEither("another sample either", newTestRuleFinite("inner")),
-			Treers{newTestRuleFinite("inner")},
-		},
-		{
 			NewEither(
-				"sample either of two",
+				"another sample either",
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
 			),
 			Treers{
 				newTestRuleFinite("inner1"),
 				newTestRuleFinite("inner2"),
+			},
+		},
+		{
+			NewEither(
+				"sample either of two",
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+				newTestRuleFinite("inner3"),
+			),
+			Treers{
+				newTestRuleFinite("inner1"),
+				newTestRuleFinite("inner2"),
+				newTestRuleFinite("inner3"),
 			},
 		},
 	}
@@ -150,12 +172,14 @@ func TestEitherGetParameters(t *testing.T) {
 		params RuleParameters
 	}{
 		{
-			NewEither("sample either"),
-			RuleParameters{"name": "sample either"},
-		},
-		{
-			NewEither("another sample either", newTestRuleFinite("inner")),
-			RuleParameters{"name": "another sample either"},
+			NewEither(
+				"sample either",
+				newTestRuleFinite("foo"),
+				newTestRuleFinite("bar"),
+			),
+			RuleParameters{
+				"name": "sample either",
+			},
 		},
 	}
 	for k, sample := range samples {
@@ -173,31 +197,43 @@ func TestEitherIsFinite(t *testing.T) {
 	assert.EqualValues(
 		t,
 		false,
-		NewEither("foo").IsFinite(),
+		NewEither(
+			"foo",
+			newTestRuleFinite("foo"),
+			newTestRuleFinite("bar"),
+		).IsFinite(),
 		"Either is not a finite entity",
 	)
 }
 
 func TestEitherAdd(t *testing.T) {
-	either := NewEither("either")
-	either.Add(newTestRuleFinite("terminal"))
+	either := NewEither(
+		"either",
+		newTestRuleFinite("foo"),
+		newTestRuleFinite("bar"),
+	)
+	either.Add(newTestRuleFinite("baz"))
 
 	assert.EqualValues(
 		t,
 		NewEither(
 			"either",
-			newTestRuleFinite("terminal"),
+			newTestRuleFinite("foo"),
+			newTestRuleFinite("bar"),
+			newTestRuleFinite("baz"),
 		),
 		either,
 	)
 
-	either.Add(newTestRuleFinite("otherTerminal"))
+	either.Add(newTestRuleFinite("daz"))
 	assert.EqualValues(
 		t,
 		NewEither(
 			"either",
-			newTestRuleFinite("terminal"),
-			newTestRuleFinite("otherTerminal"),
+			newTestRuleFinite("foo"),
+			newTestRuleFinite("bar"),
+			newTestRuleFinite("baz"),
+			newTestRuleFinite("daz"),
 		),
 		either,
 	)
@@ -215,16 +251,6 @@ func TestEither(t *testing.T) {
 		// errors
 
 		{
-			"",
-			NewEither("empty"),
-			nil,
-			NewErrEmptyRule(
-				NewEither("empty"),
-				nil,
-			),
-			DefaultParser,
-		},
-		{
 			"4",
 			NewEither(
 				"number",
@@ -237,6 +263,25 @@ func TestEither(t *testing.T) {
 				[]byte("4"),
 				1,
 				NewTerminal("three", "3"),
+			),
+			DefaultParser,
+		},
+		{
+			"12",
+			NewEither(
+				"number",
+				NewTerminal("one", "1"),
+				NewTerminal("two", "2"),
+			),
+			nil,
+			NewErrUnexpectedToken(
+				[]byte("2"),
+				2,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+				),
 			),
 			DefaultParser,
 		},
