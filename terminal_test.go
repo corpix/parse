@@ -166,6 +166,16 @@ func TestTerminal(t *testing.T) {
 			DefaultParser,
 		},
 		{
+			"",
+			NewTerminal("foo", "foo"),
+			nil,
+			NewErrUnexpectedEOF(
+				1,
+				NewTerminal("foo", "foo"),
+			),
+			DefaultParser,
+		},
+		{
 			"bar",
 			NewTerminal("foo", "foo"),
 			nil,
