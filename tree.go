@@ -52,7 +52,11 @@ func (t *Tree) GetChilds() Treers {
 	return treer
 }
 
-// FIXME: Derive a separate function
+// Show this node as a string.
+// You should provide childs as string
+// to this function, it does not care
+// about nesting in a tree, it only shows
+// string representation of itself.
 func (t *Tree) Show(childs string) string {
 	var (
 		c string
@@ -72,24 +76,32 @@ func (t *Tree) Show(childs string) string {
 		r = t.Rule.Show("...")
 	}
 
+	return TreeShow(t, r, c)
+}
+
+func (t *Tree) String() string {
+	return TreerString(t)
+}
+
+//
+
+// TreeShow returns a Tree encoded as a string.
+// It requires some parts to be prepared(encoded into a string).
+func TreeShow(tree *Tree, rule string, childs string) string {
 	return fmt.Sprintf(
 		"%s{\n%s\n}(%s)",
-		t.Name(),
+		tree.Name(),
 		fmt.Sprintf(
 			indent(
 				"rule: %s\nstart: %d\nend: %d\ndata: %s",
 				treerIndentCharacter,
 				treerIndentSize,
 			),
-			r,
-			t.Start,
-			t.End,
-			string(t.Data),
+			rule,
+			tree.Start,
+			tree.End,
+			string(tree.Data),
 		),
-		c,
+		childs,
 	)
-}
-
-func (t *Tree) String() string {
-	return TreerString(t)
 }
