@@ -1,8 +1,9 @@
-* TODO Human readable Tree and Rule
+* DONE Human readable Tree and Rule
+  CLOSED: [2017-06-26 Mon 12:32]
   - [X] implementation
-  - [ ] docs
-  - [ ] tests
-* TODO Return UnexpectedTokenErr intead of UnexpectedEOF in some cases
+  - [X] docs
+  - [X] tests
+* TODO Return UnexpectedTokenErr instead of UnexpectedEOF in some cases
   If we have some Either(foo, bar, baz) but^
   - nothing matched
   - buffer have some tokens
@@ -12,7 +13,8 @@
   =Unexpected EOF at position '7' while applying '*parse.Terminal(ID: Expression, Value: [69 120 112 114 101 115 115 105 111 110])()'=
 * TODO Iterative Parse
   Recursion was a quick choice we should optimize it.
-* TODO Fix stringifier bugs
+* DONE Fix stringifier bugs
+  CLOSED: [2017-06-26 Mon 12:33]
   From test:
   #+BEGIN_SRC text
   expected: "*parse.Chain(name: another sample chain)(*parse.testRuleFinite(name: inner1)(), \n*parse.testRuleFinite(name: inner2)(), \n*parse.testRuleFinite(name: inner3)())"
@@ -21,3 +23,19 @@
 
   All was obtained from the stringifier. The difference in the =\s= count which depends on the length of the line.
   Type name was changed to longer string, this is the case.
+* TODO Visited strigifier nodes should respect the nesting
+  #+BEGIN_SRC
+        *parse.Repetition(name: Whitespaces, times: 0, variadic: true)(
+          *parse.Repetition(name: Whitespaces, times: 1, variadic: true)(
+            *parse.Either(name: Whitespace)(
+              *parse.Terminal(name: Space, value:  )(),
+              *parse.Terminal(name: Tab, value: \t)(),
+              *parse.Terminal(name: NewLine, value: \n)()
+            )
+          )
+        ),
+        *parse.Terminal(name: Equal, value: =)(),
+        *parse.Repetition(name: Whitespaces, times: 0, variadic: true)(<circular>),
+  #+END_SRC
+  Here =Whitespaces= are the same rules, first showed, second showed as =<circular>=
+  because you count visited nodes without respecting the branches.
