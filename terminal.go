@@ -35,7 +35,7 @@ func (r *Terminal) Name() string {
 func (r *Terminal) Show(childs string) string {
 	return RuleShow(
 		r,
-		r.GetParameters().Show(),
+		r.GetParameters().String(),
 		childs,
 	)
 }

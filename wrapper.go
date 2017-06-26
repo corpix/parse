@@ -41,7 +41,7 @@ func (r *Wrapper) Name() string {
 func (r *Wrapper) Show(childs string) string {
 	return RuleShow(
 		r,
-		r.GetParameters().Show(),
+		r.GetParameters().String(),
 		childs,
 	)
 }

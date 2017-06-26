@@ -40,7 +40,7 @@ func (r *Chain) Name() string {
 func (r *Chain) Show(childs string) string {
 	return RuleShow(
 		r,
-		r.GetParameters().Show(),
+		r.GetParameters().String(),
 		childs,
 	)
 }

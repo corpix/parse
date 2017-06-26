@@ -30,8 +30,8 @@ import (
 // the Rule custom settings.
 type RuleParameters map[string]interface{}
 
-// Show encodes a RuleParameters as string.
-func (p RuleParameters) Show() string {
+// String encodes a RuleParameters as string.
+func (p RuleParameters) String() string {
 	var (
 		keys   = []string{}
 		params = ""

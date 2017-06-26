@@ -41,7 +41,7 @@ func (r *Either) Name() string {
 func (r *Either) Show(childs string) string {
 	return RuleShow(
 		r,
-		r.GetParameters().Show(),
+		r.GetParameters().String(),
 		childs,
 	)
 }
