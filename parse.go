@@ -253,11 +253,9 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 	return tree, nil
 }
 
-// FIXME: We need position starting from 0
-// to simplify code, but human readable errors and
-// dumps should contain position starting from 1
-// I am not sure this is ok to implement it in this manner
-// but at this time let it be so.
+// humanizePosition is just a little helper which wraps
+// common position operations before it will be showed to
+// human.
 func (p *Parser) humanizePosition(position int) int {
 	return position + 1
 }
