@@ -310,6 +310,13 @@ func TestChain(t *testing.T) {
 
 		{
 			"",
+			NewChain("some"),
+			nil,
+			NewErrEmptyRule(NewChain("some"), nil),
+			DefaultParser,
+		},
+		{
+			"",
 			NewChain(
 				"some",
 				NewTerminal("foo", "foo"),

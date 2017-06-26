@@ -251,6 +251,13 @@ func TestEither(t *testing.T) {
 		// errors
 
 		{
+			"",
+			NewEither("number"),
+			nil,
+			NewErrEmptyRule(NewEither("number"), nil),
+			DefaultParser,
+		},
+		{
 			"4",
 			NewEither(
 				"number",

@@ -88,12 +88,9 @@ func (r *Either) Add(rule Rule) {
 
 // NewEither constructs *Either Rule.
 // Valid Either could be constructed with >=2 rules.
-func NewEither(name string, r1 Rule, r2 Rule, rN ...Rule) *Either {
+func NewEither(name string, r ...Rule) *Either {
 	return &Either{
 		name,
-		append(
-			Rules{r1, r2},
-			Rules(rN)...,
-		),
+		r,
 	}
 }
