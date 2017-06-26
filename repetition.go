@@ -43,7 +43,7 @@ func (r *Repetition) Name() string {
 func (r *Repetition) Show(childs string) string {
 	return RuleShow(
 		r,
-		RuleParametersShow(r.GetParameters()),
+		r.GetParameters().Show(),
 		childs,
 	)
 }

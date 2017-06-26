@@ -30,27 +30,13 @@ import (
 // the Rule custom settings.
 type RuleParameters map[string]interface{}
 
-// Rule represents a general Rule interface.
-type Rule interface {
-	Treer
-
-	// Parameters returns a KV rule parameters.
-	GetParameters() RuleParameters
-
-	// IsFinite returns true if this rule is
-	// not a wrapper for other rules.
-	IsFinite() bool
-}
-
-// FIXME: Probably this function should be a RuleParameters.Show()?
-// In this case we could make RuleShow signature more simple, but should we?
-// RuleParametersShow returns a Rule.GetParameters() encoded as string.
-func RuleParametersShow(parameters RuleParameters) string {
+// Show encodes a RuleParameters as string.
+func (p RuleParameters) Show() string {
 	var (
 		keys   = []string{}
 		params = ""
 	)
-	for k, _ := range parameters {
+	for k, _ := range p {
 		keys = append(
 			keys,
 			k,
@@ -65,12 +51,24 @@ func RuleParametersShow(parameters RuleParameters) string {
 			"%s: %v",
 			v,
 			indirectValue(
-				reflect.ValueOf(parameters[v]),
+				reflect.ValueOf(p[v]),
 			).Interface(),
 		)
 	}
 
 	return params
+}
+
+// Rule represents a general Rule interface.
+type Rule interface {
+	Treer
+
+	// Parameters returns a KV rule parameters.
+	GetParameters() RuleParameters
+
+	// IsFinite returns true if this rule is
+	// not a wrapper for other rules.
+	IsFinite() bool
 }
 
 // RuleShow returns a Rule encoded as a string.

@@ -33,7 +33,7 @@ func (r *testRuleFinite) Name() string { return string(*r) }
 func (r *testRuleFinite) Show(childs string) string {
 	return RuleShow(
 		r,
-		RuleParametersShow(r.GetParameters()),
+		r.GetParameters().Show(),
 		childs,
 	)
 }
@@ -57,7 +57,7 @@ type testRuleNonFinite struct {
 func (r *testRuleNonFinite) Show(childs string) string {
 	return RuleShow(
 		r,
-		RuleParametersShow(r.GetParameters()),
+		r.GetParameters().Show(),
 		childs,
 	)
 }
