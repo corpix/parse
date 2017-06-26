@@ -246,6 +246,28 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 		tree.End = bounds.Closing
 		tree.Rule = v
 		tree.Data = input[:bounds.Closing-bounds.Starting]
+	case *Wrapper:
+		if v.Rule == nil {
+			return nil, NewErrEmptyRule(v, parent)
+		}
+
+		subTree, err = p.parse(
+			v.Rule,
+			input,
+			v,
+			position,
+			depth+1,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		tree.Childs = make([]*Tree, 1)
+		tree.Childs[0] = subTree
+		tree.Start = subTree.Start
+		tree.End = subTree.End
+		tree.Rule = v
+		tree.Data = input[:subTree.End-subTree.Start]
 	default:
 		return nil, NewErrUnsupportedRule(rule)
 	}
