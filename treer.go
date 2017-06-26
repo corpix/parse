@@ -32,7 +32,6 @@ type Treer interface {
 	// string representation of itself.
 	Show(childs string) string
 
-	// FIXME: Is it actually be named like TreerString?
 	// String returns a tree string representation
 	// from current node to the leafs.
 	// You should use `TreerString(Treer) string` func
