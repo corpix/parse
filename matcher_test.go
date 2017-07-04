@@ -95,6 +95,60 @@ func TestAllMatcher(t *testing.T) {
 	}
 }
 
+func TestSomeMatcher(t *testing.T) {
+	samples := []struct {
+		a     []Matcher
+		b     []string
+		match bool
+	}{
+		{
+			[]Matcher{},
+			[]string{"foo", "bar"},
+			false,
+		},
+		{
+			[]Matcher{},
+			[]string{},
+			false,
+		},
+		{
+			[]Matcher{
+				testMatcher([]string{"foo", "bar"}),
+				testMatcher([]string{"bar", "foo"}),
+			},
+			[]string{},
+			false,
+		},
+		{
+			[]Matcher{
+				testMatcher([]string{"bar", "foo"}),
+				testMatcher([]string{"foo", "bar"}),
+			},
+			[]string{"foo", "bar"},
+			true,
+		},
+		{
+			[]Matcher{
+				testMatcher([]string{"foo", "bar"}),
+				testMatcher([]string{"bar", "foo"}),
+			},
+			[]string{"foo", "bar"},
+			true,
+		},
+	}
+
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		assert.EqualValues(
+			t,
+			sample.match,
+			NewSomeMatcher(sample.a).Match(sample.b),
+			msg,
+		)
+	}
+}
+
 func TestPrefixMatcher(t *testing.T) {
 	samples := []struct {
 		a     []string

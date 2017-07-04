@@ -55,6 +55,30 @@ func NewAllMatcher(matchers []Matcher) AllMatcher {
 
 //
 
+// SomeMatcher represents a Matcher which wraps a slice of Matcher
+// where some(one of) Matcher should match for the wrapper to be true.
+type SomeMatcher []Matcher
+
+// Match checks that some(one of) Matcher.Match(...) returns true
+// and returns true too, otherwise it returns false.
+// If no Matcher presented in a slice then it will
+// return false.
+func (m SomeMatcher) Match(chain []string) bool {
+	for _, v := range m {
+		if v.Match(chain) {
+			return true
+		}
+	}
+	return false
+}
+
+// NewSomeMatcher creates new SomeMatcher.
+func NewSomeMatcher(matchers []Matcher) SomeMatcher {
+	return SomeMatcher(matchers)
+}
+
+//
+
 // PrefixMatcher represents a Matcher which is true
 // when chain(which should be matched) has the specified
 // prefix.
