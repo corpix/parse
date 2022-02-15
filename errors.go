@@ -1,6 +1,5 @@
 package parse
 
-
 import (
 	e "errors"
 	"fmt"

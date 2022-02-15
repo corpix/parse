@@ -1,6 +1,5 @@
 package parse
 
-
 const (
 	newLine              = "\n"
 	treerIndentCharacter = " "

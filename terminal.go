@@ -1,6 +1,5 @@
 package parse
 
-
 // Terminal is a Rule which is literal in input.
 type Terminal struct {
 	name  string

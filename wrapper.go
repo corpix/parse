@@ -1,6 +1,5 @@
 package parse
 
-
 // Wrapper represents a wrapper type for some inner Rule.
 // It could be used to wrap a Rule with custom name.
 type Wrapper struct {

@@ -1,6 +1,5 @@
 package parse
 
-
 // Treer is a tree node interface.
 type Treer interface {
 	// Name returns current node name.

@@ -1,6 +1,5 @@
 package parse
 
-
 // Either represents a list of Rule's to match in the data.
 // One of the rules in a list must match.
 type Either struct {

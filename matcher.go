@@ -1,6 +1,5 @@
 package parse
 
-
 // Matcher represents an interface of the object
 // which could be checked to match to some slice of strings.
 type Matcher interface {

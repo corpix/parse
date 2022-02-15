@@ -1,6 +1,5 @@
 package parse
 
-
 // Repetition is a Rule which is repeating in the input
 // one or more times.
 type Repetition struct {

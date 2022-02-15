@@ -1,6 +1,5 @@
 package parse
 
-
 import (
 	"fmt"
 	"reflect"

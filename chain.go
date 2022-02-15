@@ -1,6 +1,5 @@
 package parse
 
-
 // Chain represents a chain of Rule's to match in the data.
 type Chain struct {
 	name  string
