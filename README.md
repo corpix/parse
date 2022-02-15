@@ -8,7 +8,10 @@ describes grammars with composition of go types.
 
 It generates syntax tree which could be used to fold the data inside into something useful.
 
-This project is in **alpha state**, API may change in future.
+This project is **experimental**. If you need industrial-grade parsers look at:
+
+- [tree-sitter](https://tree-sitter.github.io/tree-sitter/)
+- [ANTLR](https://www.antlr.org/)
 
 ## Limitations
 
