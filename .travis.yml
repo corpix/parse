@@ -1,8 +1,0 @@
-language: go
-
-go:
-  - 1.16
-  - 1.17
-  - master
-
-script: make test
