@@ -35,7 +35,6 @@ func WalkTreerBFS(tree Treer, fn func(int, Treer) error) error {
 			case ErrStopIteration:
 				return nil
 			case ErrSkipBranch:
-				err = nil
 				goto nextLevel
 			default:
 				return err
@@ -143,7 +142,6 @@ func WalkTreerDFS(tree Treer, fn func(int, Treer) error) error {
 			case ErrStopIteration:
 				return nil
 			case ErrSkipBranch:
-				err = nil
 				goto nextLevel
 			default:
 				return err

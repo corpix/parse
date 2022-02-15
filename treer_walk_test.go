@@ -1,6 +1,5 @@
 package parse
 
-
 import (
 	"bytes"
 	"strings"
@@ -10,12 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWalkTreer(t *testing.T) {
-	type leveledTreer struct {
-		Treer
-		Level int
-	}
+type leveledTreer struct {
+	Treer
+	Level int
+}
 
+func TestWalkTreer(t *testing.T) {
 	var (
 		appendWalker = func(buf *Treers) func(int, Treer) error {
 			return func(level int, t Treer) error {
@@ -720,11 +719,6 @@ func TestWalkTreer(t *testing.T) {
 //
 
 func TestWalkTreerNameChain(t *testing.T) {
-	type leveledTreer struct {
-		Treer
-		Chain []string
-	}
-
 	var (
 		appendWalker = func(buf *[][]string) func([]string, int, Treer) error {
 			return func(chain []string, level int, t Treer) error {

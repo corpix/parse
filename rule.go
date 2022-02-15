@@ -17,7 +17,7 @@ func (p RuleParameters) String() string {
 		keys   = []string{}
 		params = ""
 	)
-	for k, _ := range p {
+	for k := range p {
 		keys = append(
 			keys,
 			k,
