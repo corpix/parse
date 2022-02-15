@@ -1,3 +1,9 @@
-/build
-/vendor
-*~
+.personal.*
+/main
+/.env
+/.cache/*
+/.config/*
+/.local/*
+*.prof
+*.pid
+/.tmux
