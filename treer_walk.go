@@ -1,6 +1,5 @@
 package parse
 
-
 // WalkTreerBFS walks the Treer level by level.
 // See: https://en.wikipedia.org/wiki/Breadth-first_search
 func WalkTreerBFS(tree Treer, fn func(int, Treer) error) error {
@@ -204,4 +203,75 @@ func WalkTreerNameChainDFS(tree Treer, fn func([]string, int, Treer) error) erro
 			return fn(chainCopy, level, tree)
 		},
 	)
+}
+
+func FindFirstDFSPrefix(tree Treer, prefix []string) (Treer, bool) {
+	var (
+		node Treer
+		ok   bool
+	)
+
+	if len(prefix) == 0 {
+		return node, ok
+	}
+
+	_ = WalkTreerNameChainDFS(
+		tree,
+		func(chain []string, level int, tree Treer) error {
+			if len(prefix) > len(chain) {
+				return nil
+			}
+
+			for n := 0; n < len(prefix); n++ {
+				if prefix[n] != chain[n] {
+					return nil
+				}
+			}
+			node = tree
+			ok = true
+			return ErrStopIteration
+		},
+	)
+
+	return node, ok
+}
+
+func FindFirstDFSSuffix(tree Treer, suffix []string) (Treer, bool) {
+	var (
+		node Treer
+		ok   bool
+	)
+
+	if len(suffix) == 0 {
+		return node, ok
+	}
+
+	_ = WalkTreerNameChainDFS(
+		tree,
+		func(chain []string, level int, tree Treer) error {
+			if len(suffix) > len(chain) {
+				return nil
+			}
+
+			n := len(suffix) - 1
+			cn := len(chain) - 1
+
+			for ; n >= 0; n-- {
+				if suffix[n] != chain[cn] {
+					return nil
+				}
+				cn--
+			}
+
+			if n < 0 { // walked whole suffix without return
+				node = tree
+				ok = true
+				return ErrStopIteration
+			}
+
+			return nil
+		},
+	)
+
+	return node, ok
 }

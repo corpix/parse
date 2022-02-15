@@ -1130,3 +1130,203 @@ func TestWalkTreerNameChain(t *testing.T) {
 		assert.EqualValues(t, sample.chains, *buf, msg)
 	}
 }
+
+//
+
+func TestFindFirstDFS(t *testing.T) {
+	samples := []struct {
+		tree    Treer
+		match   []string
+		found   bool
+		variant func(Treer, []string) (Treer, bool)
+		result  Treer
+	}{
+		// DFS Prefix
+
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{},
+			found:   false,
+			variant: FindFirstDFSPrefix,
+			result:  nil,
+		},
+		{
+			tree:    nil,
+			match:   []string{"1"},
+			found:   false,
+			variant: FindFirstDFSPrefix,
+			result:  nil,
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"1"},
+			found:   true,
+			variant: FindFirstDFSPrefix,
+			result: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"1", "2"},
+			found:   true,
+			variant: FindFirstDFSPrefix,
+			result: &Tree{
+				Rule:   newTestRuleFinite("2"),
+				Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+			},
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"1", "2", "666"},
+			found:   false,
+			variant: FindFirstDFSPrefix,
+			result:  nil,
+		},
+
+		// DFS Suffix
+
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{},
+			found:   false,
+			variant: FindFirstDFSSuffix,
+			result:  nil,
+		},
+		{
+			tree:    nil,
+			match:   []string{"1"},
+			found:   false,
+			variant: FindFirstDFSSuffix,
+			result:  nil,
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"1"},
+			found:   true,
+			variant: FindFirstDFSSuffix,
+			result: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"2"},
+			found:   true,
+			variant: FindFirstDFSSuffix,
+			result: &Tree{
+				Rule:   newTestRuleFinite("2"),
+				Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+			},
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"2", "3"},
+			found:   true,
+			variant: FindFirstDFSSuffix,
+			result:  &Tree{Rule: newTestRuleFinite("3")},
+		},
+		{
+			tree: &Tree{
+				Rule: newTestRuleFinite("1"),
+				Childs: []*Tree{
+					{
+						Rule:   newTestRuleFinite("2"),
+						Childs: []*Tree{{Rule: newTestRuleFinite("3")}},
+					},
+				},
+			},
+			match:   []string{"3", "666"},
+			found:   false,
+			variant: FindFirstDFSSuffix,
+			result:  nil,
+		},
+	}
+
+	for k, sample := range samples {
+		msg := spew.Sdump(k, sample)
+
+		tree, ok := sample.variant(
+			sample.tree,
+			sample.match,
+		)
+		assert.Equal(t, sample.found, ok, msg)
+		assert.EqualValues(t, sample.result, tree, msg)
+	}
+}
