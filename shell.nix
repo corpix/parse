@@ -5,17 +5,7 @@ in with import nixpkgs { inherit config; }; let
     #! ${stdenv.shell}
     set -e
 
-    exec -a shell ${fish}/bin/fish --login --interactive --init-command='
-      set -x root '"$root"'
-      set config $root/.fish.conf
-      set personal_config $root/.personal.fish.conf
-      if test -e $personal_config
-        source $personal_config
-      end
-      if test -e $config
-        source $config
-      end
-    ' "$@"
+    exec -a shell ${fish}/bin/fish --login --interactive "$@"
   '';
 in stdenv.mkDerivation rec {
   name = "nix-shell";
@@ -27,11 +17,6 @@ in stdenv.mkDerivation rec {
   ];
   shellHook = ''
     export root=$(pwd)
-
-    if [ -f "$root/.env" ]
-    then
-      source "$root/.env"
-    fi
 
     export LANG="en_US.UTF-8"
     export NIX_PATH="nixpkgs=${nixpkgs}"
