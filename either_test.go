@@ -377,7 +377,123 @@ func TestEither(t *testing.T) {
 			sample.rule,
 			sample.text,
 		)
-		assert.EqualValues(t, sample.err, err, msg)
+		if sample.err == nil && err != nil {
+			t.Error(err)
+		}
+		assert.EqualValues(t, sample.tree, tree, msg)
+	}
+}
+
+func TestASCIIRange(t *testing.T) {
+	samples := []struct {
+		text   string
+		rule   Rule
+		tree   *Tree
+		err    error
+		parser *Parser
+	}{
+		{
+			"0",
+			NewASCIIRange(
+				"numbers",
+				'0', '3',
+			),
+			&Tree{
+				Rule: NewEither(
+					"numbers",
+					NewTerminal("0", "0"),
+					NewTerminal("1", "1"),
+					NewTerminal("2", "2"),
+					NewTerminal("3", "3"),
+				),
+				Data:  []byte("0"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("0", "0"),
+						Data:  []byte("0"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"1",
+			NewASCIIRange(
+				"numbers",
+				'0', '3',
+			),
+			&Tree{
+				Rule: NewEither(
+					"numbers",
+					NewTerminal("0", "0"),
+					NewTerminal("1", "1"),
+					NewTerminal("2", "2"),
+					NewTerminal("3", "3"),
+				),
+				Data:  []byte("1"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("1", "1"),
+						Data:  []byte("1"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
+			"3",
+			NewASCIIRange(
+				"numbers",
+				'0', '3',
+			),
+			&Tree{
+				Rule: NewEither(
+					"numbers",
+					NewTerminal("0", "0"),
+					NewTerminal("1", "1"),
+					NewTerminal("2", "2"),
+					NewTerminal("3", "3"),
+				),
+				Data:  []byte("3"),
+				Start: 0,
+				End:   1,
+				Childs: []*Tree{
+					{
+						Rule:  NewTerminal("3", "3"),
+						Data:  []byte("3"),
+						Start: 0,
+						End:   1,
+					},
+				},
+			},
+			nil,
+			DefaultParser,
+		},
+	}
+
+	for k, sample := range samples {
+		tree, err := sample.parser.Parse(
+			sample.rule,
+			[]byte(sample.text),
+		)
+		msg := spew.Sdump(
+			k,
+			sample.rule,
+			sample.text,
+		)
+		if sample.err == nil && err != nil {
+			t.Error(err)
+		}
 		assert.EqualValues(t, sample.tree, tree, msg)
 	}
 }

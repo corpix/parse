@@ -1,5 +1,7 @@
 package parse
 
+import "fmt"
+
 // Either represents a list of Rule's to match in the data.
 // One of the rules in a list must match.
 type Either struct {
@@ -73,4 +75,23 @@ func NewEither(name string, r ...Rule) *Either {
 		name,
 		r,
 	}
+}
+
+// NewASCIIRange constructs *Either(Terminal, ...) Rule using specified ASCII range.
+func NewASCIIRange(name string, from byte, to byte) *Either {
+	if from > to {
+		panic(fmt.Errorf(
+			"invalid range, `from` (%d) should be less than `to` (%d)",
+			from, to,
+		))
+	}
+
+	amount := to-from
+	terms := make([]Rule, amount+1)
+	for chr := to; chr >= from; chr-- {
+		terms[amount] = NewTerminal(string(chr), string(chr))
+		amount--
+	}
+
+	return NewEither(name, terms...)
 }
