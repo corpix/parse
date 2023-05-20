@@ -38,17 +38,7 @@ func (t *Tree) GetChilds() Treers {
 // about nesting in a tree, it only shows
 // string representation of itself.
 func (t *Tree) Show(childs string) string {
-	var (
-		c string
-		r string
-	)
-	if len(childs) > 0 {
-		c = indent(
-			childs,
-			treerIndentCharacter,
-			treerIndentSize,
-		)
-	}
+	var r string
 
 	if len(t.Rule.GetChilds()) == 0 {
 		r = t.Rule.Show("")
@@ -56,7 +46,7 @@ func (t *Tree) Show(childs string) string {
 		r = t.Rule.Show("...")
 	}
 
-	return TreeShow(t, r, c)
+	return TreeShow(t, r, childs)
 }
 
 func (t *Tree) String() string {
