@@ -2,6 +2,7 @@ package parse
 
 import (
 	"bytes"
+	"unicode/utf8"
 )
 
 var (
@@ -25,7 +26,7 @@ func (p *Parser) Parse(rule Rule, input []byte) (*Tree, error) {
 		return nil, err
 	}
 
-	if tree.End < len(input) {
+	if tree.End < utf8.RuneCount(input) {
 		return nil, NewErrUnexpectedToken(
 			ShowInput(input[tree.End:]),
 			p.humanizePosition(tree.End),
@@ -60,12 +61,12 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 
 	switch v := rule.(type) {
 	case *Terminal:
-		length := len(v.Value)
+		length := utf8.RuneCount(v.Value)
 		if length == 0 {
 			return nil, NewErrEmptyRule(v, parent)
 		}
 
-		if len(input) < length {
+		if utf8.RuneCount(input) < length {
 			return nil, NewErrUnexpectedEOF(
 				p.humanizePosition(position),
 				v,
