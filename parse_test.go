@@ -48,6 +48,14 @@ func TestParseInputIntegrity(t *testing.T) {
 			nil,
 		},
 		{
+			"faaaaaaaabfaaaabfaaaaaaaaaaaaaabfab",
+			NewRepetition(
+				"fabs",
+				NewRegexp("fab", "fa+b"),
+			),
+			nil,
+		},
+		{
 			"123",
 			NewRepetitionTimesVariadic(
 				"numbers",
