@@ -379,6 +379,8 @@ func TestEither(t *testing.T) {
 		)
 		if sample.err == nil && err != nil {
 			t.Error(err)
+		} else {
+			assert.EqualValues(t, sample.err, err, msg)
 		}
 		assert.EqualValues(t, sample.tree, tree, msg)
 	}
@@ -493,6 +495,8 @@ func TestASCIIRange(t *testing.T) {
 		)
 		if sample.err == nil && err != nil {
 			t.Error(err)
+		} else {
+			assert.EqualValues(t, sample.err, err, msg)
 		}
 		assert.EqualValues(t, sample.tree, tree, msg)
 	}

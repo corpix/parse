@@ -204,7 +204,11 @@ func TestTerminal(t *testing.T) {
 			sample.rule,
 			sample.text,
 		)
-		assert.EqualValues(t, sample.err, err, msg)
+		if sample.err == nil && err != nil {
+			t.Error(err)
+		} else {
+			assert.EqualValues(t, sample.err, err, msg)
+		}
 		assert.EqualValues(t, sample.tree, tree, msg)
 	}
 }
