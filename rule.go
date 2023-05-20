@@ -29,10 +29,7 @@ func (p RuleParameters) String() string {
 		}
 		params += fmt.Sprintf(
 			"%s: %v",
-			v,
-			indirectValue(
-				reflect.ValueOf(p[v]),
-			).Interface(),
+			v, indirectValue(reflect.ValueOf(p[v])).Interface(),
 		)
 	}
 
