@@ -86,6 +86,20 @@ func (p *Parser) parse(rule Rule, input []byte, parent Rule, position int, depth
 		tree.End = position + length
 		tree.Rule = v
 		tree.Data = buf
+	case *Regexp:
+		buf = v.Regexp.Find(input)
+		if buf == nil {
+			return nil, NewErrUnexpectedToken(
+				ShowInput(input),
+				p.humanizePosition(position),
+				v,
+			)
+		}
+
+		tree.Start = position
+		tree.End = position + utf8.RuneCount(buf)
+		tree.Rule = v
+		tree.Data = buf
 	case *Either:
 		if len(v.Rules) == 0 {
 			return nil, NewErrEmptyRule(v, parent)

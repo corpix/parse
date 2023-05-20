@@ -86,7 +86,7 @@ func NewASCIIRange(name string, from byte, to byte) *Either {
 		))
 	}
 
-	amount := to-from
+	amount := to - from
 	terms := make([]Rule, amount+1)
 	for chr := to; chr >= from; chr-- {
 		terms[amount] = NewTerminal(string(chr), string(chr))
