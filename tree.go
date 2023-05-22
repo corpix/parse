@@ -4,15 +4,22 @@ import (
 	"fmt"
 )
 
+type Location struct {
+	Position int
+	Line     int
+	Column   int
+	Depth    int
+}
+
 // Tree represents a single Rule match with corresponding
 // information about the input, position and matched Rule.
 // It will be recursive in case of nested Rule match.
 type Tree struct {
-	Rule   Rule
-	Start  int
-	End    int
-	Childs []*Tree
-	Data   []byte
+	Rule     Rule
+	Location *Location
+	Region   *Region
+	Childs   []*Tree
+	Data     []byte
 }
 
 // Name returns current node name.
@@ -68,8 +75,8 @@ func TreeShow(tree *Tree, rule string, childs string) string {
 				treerIndentSize,
 			),
 			rule,
-			tree.Start,
-			tree.End,
+			tree.Region.Start,
+			tree.Region.End,
 			string(tree.Data),
 		),
 		childs,

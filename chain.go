@@ -1,5 +1,7 @@
 package parse
 
+var _ Rule = new(Chain)
+
 // Chain represents a chain of Rule's to match in the data.
 type Chain struct {
 	name  string
@@ -54,6 +56,72 @@ func (r *Chain) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Chain) IsFinite() bool {
 	return false
+}
+
+func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
+	if len(r.Rules) == 0 {
+		return nil, NewErrEmptyRule(r, ctx.Rule)
+	}
+
+	nextDepth := ctx.Location.Depth + 1
+	if nextDepth > ctx.Parser.MaxDepth {
+		return nil, NewErrNestingTooDeep(
+			nextDepth,
+			ctx.Location.Position,
+		)
+	}
+
+	var (
+		subInput = input
+		subTrees = make([]*Tree, len(r.Rules))
+		n        int
+		pos      = ctx.Location.Position
+		movPos   = 0
+		err      error
+	)
+	for _, sr := range r.Rules {
+		subTrees[n], err = sr.Parse(
+			&Context{
+				Rule:   r,
+				Parser: ctx.Parser,
+				Location: &Location{
+					Position: pos,
+					Line:     ctx.Location.Line,   // FIXME
+					Column:   ctx.Location.Column, // FIXME
+					Depth:    nextDepth,
+				},
+			},
+			subInput,
+		)
+		if err != nil {
+			if err == ErrSkipRule {
+				continue
+			}
+			return nil, err
+		}
+		movPos = subTrees[n].Region.End - subTrees[n].Region.Start
+		pos += movPos
+		subInput = subInput[movPos:]
+		n++
+	}
+	if err != nil {
+		return nil, err
+	}
+	subTrees = subTrees[:n] // NOTE: because some Rule's could be skipped
+
+	region := TreeRegion(subTrees...)
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: ctx.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: region,
+		Childs: subTrees,
+		Data:   input[:region.End-region.Start],
+	}, nil
 }
 
 //

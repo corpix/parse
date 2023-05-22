@@ -1,5 +1,7 @@
 package parse
 
+var _ Rule = new(Wrapper)
+
 // Wrapper represents a wrapper type for some inner Rule.
 // It could be used to wrap a Rule with custom name.
 type Wrapper struct {
@@ -51,6 +53,57 @@ func (r *Wrapper) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Wrapper) IsFinite() bool {
 	return false
+}
+
+func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
+	if r.Rule == nil {
+		return nil, NewErrEmptyRule(r, r.Rule)
+	}
+
+	nextDepth := ctx.Location.Depth + 1
+	if nextDepth > ctx.Parser.MaxDepth {
+		return nil, NewErrNestingTooDeep(
+			nextDepth,
+			ctx.Location.Position,
+		)
+	}
+
+	var (
+		subTree *Tree
+		err     error
+	)
+
+	subTree, err = r.Rule.Parse(
+		&Context{
+			Rule:   r,
+			Parser: ctx.Parser,
+			Location: &Location{
+				Position: ctx.Location.Position,
+				Line:     ctx.Location.Line,   // FIXME
+				Column:   ctx.Location.Column, // FIXME
+				Depth:    nextDepth,
+			},
+		},
+		input,
+	)
+	if err != nil {
+
+		return nil, err
+	}
+
+	region := TreeRegion(subTree)
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: ctx.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: region,
+		Childs: []*Tree{subTree},
+		Data:   input[:region.End-region.Start],
+	}, nil
 }
 
 //

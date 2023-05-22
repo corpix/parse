@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -18,8 +19,10 @@ func TestRepetitionName(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		})
 	}
 }
 
@@ -41,13 +44,15 @@ func TestRepetitionShow(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.show,
-			sample.rule.Show(sample.childs),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.show,
+				sample.rule.Show(sample.childs),
+				msg,
+			)
+		})
 	}
 }
 
@@ -66,13 +71,15 @@ func TestRepetitionString(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.stringified,
-			sample.rule.String(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.stringified,
+				sample.rule.String(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -87,13 +94,15 @@ func TestRepetitionGetChilds(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.childs,
-			sample.rule.GetChilds(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.childs,
+				sample.rule.GetChilds(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -112,13 +121,15 @@ func TestRepetitionGetParameters(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.params,
-			sample.rule.GetParameters(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.params,
+				sample.rule.GetParameters(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -146,24 +157,6 @@ func TestRepetition(t *testing.T) {
 		// errors
 
 		{
-			"",
-			NewRepetitionTimesVariadic(
-				"maybe",
-				0,
-				NewTerminal("terminal", "t"),
-			),
-			nil,
-			NewErrUnexpectedEOF(
-				1,
-				NewRepetitionTimesVariadic(
-					"maybe",
-					0,
-					NewTerminal("terminal", "t"),
-				),
-			),
-			DefaultParser,
-		},
-		{
 			"1234",
 			NewRepetitionTimes(
 				"numbers",
@@ -178,7 +171,7 @@ func TestRepetition(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("4"),
-				4,
+				3,
 				NewRepetitionTimes(
 					"numbers",
 					3,
@@ -225,6 +218,30 @@ func TestRepetition(t *testing.T) {
 		// success
 
 		{
+			"",
+			NewRepetitionTimesVariadic(
+				"maybe",
+				0,
+				NewTerminal("terminal", "t"),
+			),
+			&Tree{
+				Rule: NewRepetitionTimesVariadic(
+					"maybe",
+					0,
+					NewTerminal("terminal", "t"),
+				),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   0,
+				},
+				Data:   []byte{},
+				Childs: []*Tree{},
+			},
+			nil,
+			DefaultParser,
+		},
+		{
 			"t",
 			NewRepetitionTimesVariadic(
 				"maybe",
@@ -237,15 +254,21 @@ func TestRepetition(t *testing.T) {
 					0,
 					NewTerminal("terminal", "t"),
 				),
-				Start: 0,
-				End:   1,
-				Data:  []byte("t"),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("t"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("terminal", "t"),
-						Start: 0,
-						End:   1,
-						Data:  []byte("t"),
+						Rule:     NewTerminal("terminal", "t"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("t"),
 					},
 				},
 			},
@@ -279,9 +302,12 @@ func TestRepetition(t *testing.T) {
 						),
 					),
 				),
-				Start: 0,
-				End:   1,
-				Data:  []byte("f"),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("f"),
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
@@ -293,15 +319,21 @@ func TestRepetition(t *testing.T) {
 								NewTerminal("terminal", "t"),
 							),
 						),
-						Start: 0,
-						End:   1,
-						Data:  []byte("f"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("f"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("terminal", "f"),
-								Start: 0,
-								End:   1,
-								Data:  []byte("f"),
+								Rule:     NewTerminal("terminal", "f"),
+								Location: &Location{Depth: 2},
+								Region: &Region{
+									Start: 0,
+									End:   1,
+								},
+								Data: []byte("f"),
 							},
 						},
 					},
@@ -333,20 +365,32 @@ func TestRepetition(t *testing.T) {
 					),
 					NewTerminal("f", "f"),
 				),
-				Start: 0,
-				End:   2,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   2,
+				},
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("t", "t"),
-						Start: 0,
-						End:   1,
-						Data:  []byte("t"),
+						Rule:     NewTerminal("t", "t"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("t"),
 					},
 					{
-						Rule:  NewTerminal("f", "f"),
-						Start: 1,
-						End:   2,
-						Data:  []byte("f"),
+						Rule: NewTerminal("f", "f"),
+						Location: &Location{
+							Position: 1,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 1,
+							End:   2,
+						},
+						Data: []byte("f"),
 					},
 				},
 				Data: []byte("tf"),
@@ -377,14 +421,20 @@ func TestRepetition(t *testing.T) {
 					),
 					NewTerminal("f", "f"),
 				),
-				Start: 0,
-				End:   3,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   3,
+				},
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("t", "t"),
-						Start: 0,
-						End:   1,
-						Data:  []byte("t"),
+						Rule:     NewTerminal("t", "t"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("t"),
 					},
 					{
 						Rule: NewRepetitionTimesVariadic(
@@ -392,23 +442,41 @@ func TestRepetition(t *testing.T) {
 							0,
 							NewTerminal("space", " "),
 						),
-						Start: 1,
-						End:   2,
+						Location: &Location{
+							Position: 1,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 1,
+							End:   2,
+						},
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("space", " "),
-								Start: 1,
-								End:   2,
-								Data:  []byte(" "),
+								Rule: NewTerminal("space", " "),
+								Location: &Location{
+									Position: 1,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 1,
+									End:   2,
+								},
+								Data: []byte(" "),
 							},
 						},
 						Data: []byte(" "),
 					},
 					{
-						Rule:  NewTerminal("f", "f"),
-						Start: 2,
-						End:   3,
-						Data:  []byte("f"),
+						Rule: NewTerminal("f", "f"),
+						Location: &Location{
+							Position: 2,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 2,
+							End:   3,
+						},
+						Data: []byte("f"),
 					},
 				},
 				Data: []byte("t f"),
@@ -440,14 +508,20 @@ func TestRepetition(t *testing.T) {
 					),
 					NewTerminal("f", "f"),
 				),
-				Start: 0,
-				End:   4,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   4,
+				},
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("t", "t"),
-						Start: 0,
-						End:   1,
-						Data:  []byte("t"),
+						Rule:     NewTerminal("t", "t"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("t"),
 					},
 					{
 						Rule: NewRepetitionTimesVariadic(
@@ -455,29 +529,53 @@ func TestRepetition(t *testing.T) {
 							0,
 							NewTerminal("space", " "),
 						),
-						Start: 1,
-						End:   3,
+						Location: &Location{
+							Position: 1,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 1,
+							End:   3,
+						},
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("space", " "),
-								Start: 1,
-								End:   2,
-								Data:  []byte(" "),
+								Rule: NewTerminal("space", " "),
+								Location: &Location{
+									Position: 1,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 1,
+									End:   2,
+								},
+								Data: []byte(" "),
 							},
 							{
-								Rule:  NewTerminal("space", " "),
-								Start: 2,
-								End:   3,
-								Data:  []byte(" "),
+								Rule: NewTerminal("space", " "),
+								Location: &Location{
+									Position: 2,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 2,
+									End:   3,
+								},
+								Data: []byte(" "),
 							},
 						},
 						Data: []byte("  "),
 					},
 					{
-						Rule:  NewTerminal("f", "f"),
-						Start: 3,
-						End:   4,
-						Data:  []byte("f"),
+						Rule: NewTerminal("f", "f"),
+						Location: &Location{
+							Position: 3,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 3,
+							End:   4,
+						},
+						Data: []byte("f"),
 					},
 				},
 				Data: []byte("t  f"),
@@ -506,9 +604,12 @@ func TestRepetition(t *testing.T) {
 						NewTerminal("three", "3"),
 					),
 				),
-				Data:  []byte("123"),
-				Start: 0,
-				End:   3,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   3,
+				},
+				Data: []byte("123"),
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
@@ -517,15 +618,21 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("1"),
-						Start: 0,
-						End:   1,
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("1"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("one", "1"),
-								Data:  []byte("1"),
-								Start: 0,
-								End:   1,
+								Rule:     NewTerminal("one", "1"),
+								Location: &Location{Depth: 2},
+								Region: &Region{
+									Start: 0,
+									End:   1,
+								},
+								Data: []byte("1"),
 							},
 						},
 					},
@@ -536,15 +643,27 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("2"),
-						Start: 1,
-						End:   2,
+						Location: &Location{
+							Position: 1,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 1,
+							End:   2,
+						},
+						Data: []byte("2"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("two", "2"),
-								Data:  []byte("2"),
-								Start: 1,
-								End:   2,
+								Rule: NewTerminal("two", "2"),
+								Location: &Location{
+									Position: 1,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 1,
+									End:   2,
+								},
+								Data: []byte("2"),
 							},
 						},
 					},
@@ -555,15 +674,27 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("3"),
-						Start: 2,
-						End:   3,
+						Location: &Location{
+							Position: 2,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 2,
+							End:   3,
+						},
+						Data: []byte("3"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("three", "3"),
-								Data:  []byte("3"),
-								Start: 2,
-								End:   3,
+								Rule: NewTerminal("three", "3"),
+								Location: &Location{
+									Position: 2,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 2,
+									End:   3,
+								},
+								Data: []byte("3"),
 							},
 						},
 					},
@@ -595,9 +726,12 @@ func TestRepetition(t *testing.T) {
 						NewTerminal("three", "3"),
 					),
 				),
-				Data:  []byte("123"),
-				Start: 0,
-				End:   3,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   3,
+				},
+				Data: []byte("123"),
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
@@ -606,15 +740,21 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("1"),
-						Start: 0,
-						End:   1,
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("1"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("one", "1"),
-								Data:  []byte("1"),
-								Start: 0,
-								End:   1,
+								Rule:     NewTerminal("one", "1"),
+								Location: &Location{Depth: 2},
+								Region: &Region{
+									Start: 0,
+									End:   1,
+								},
+								Data: []byte("1"),
 							},
 						},
 					},
@@ -625,15 +765,27 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("2"),
-						Start: 1,
-						End:   2,
+						Location: &Location{
+							Position: 1,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 1,
+							End:   2,
+						},
+						Data: []byte("2"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("two", "2"),
-								Data:  []byte("2"),
-								Start: 1,
-								End:   2,
+								Rule: NewTerminal("two", "2"),
+								Location: &Location{
+									Position: 1,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 1,
+									End:   2,
+								},
+								Data: []byte("2"),
 							},
 						},
 					},
@@ -644,15 +796,27 @@ func TestRepetition(t *testing.T) {
 							NewTerminal("two", "2"),
 							NewTerminal("three", "3"),
 						),
-						Data:  []byte("3"),
-						Start: 2,
-						End:   3,
+						Location: &Location{
+							Position: 2,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 2,
+							End:   3,
+						},
+						Data: []byte("3"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("three", "3"),
-								Data:  []byte("3"),
-								Start: 2,
-								End:   3,
+								Rule: NewTerminal("three", "3"),
+								Location: &Location{
+									Position: 2,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 2,
+									End:   3,
+								},
+								Data: []byte("3"),
 							},
 						},
 					},
@@ -664,16 +828,18 @@ func TestRepetition(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		assert.EqualValues(t, sample.err, err, msg)
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			assert.EqualValues(t, sample.err, err, msg)
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

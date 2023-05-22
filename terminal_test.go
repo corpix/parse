@@ -150,7 +150,7 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedEOF(
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -160,7 +160,7 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("o", "oó"),
 			nil,
 			NewErrUnexpectedEOF(
-				1,
+				0,
 				NewTerminal("o", "oó"),
 			),
 			DefaultParser,
@@ -171,7 +171,7 @@ func TestTerminal(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("oo")),
-				1,
+				0,
 				NewTerminal("o", "oó"),
 			),
 			DefaultParser,
@@ -182,7 +182,7 @@ func TestTerminal(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("bar")),
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -193,7 +193,7 @@ func TestTerminal(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("bar")),
-				4,
+				3,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -206,9 +206,12 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			&Tree{
 				Rule:  NewTerminal("foo", "foo"),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   3,
+				},
 				Data:  []byte("foo"),
-				Start: 0,
-				End:   3,
 			},
 			nil,
 			DefaultParser,

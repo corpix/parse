@@ -27,53 +27,53 @@ package main
 import (
 	"fmt"
 
-	"github.com/corpix/parse"
+	. "github.com/corpix/parse"
 )
 
 var (
-	expression parse.Rule
+	expression Rule
 )
 
 func init() {
-	numbers := parse.NewRepetition(
+	numbers := NewRepetition(
 		"numbers",
-		parse.NewEither(
+		NewEither(
 			"number",
-			parse.NewTerminal("1", "1"),
-			parse.NewTerminal("2", "2"),
-			parse.NewTerminal("3", "3"),
-			parse.NewTerminal("4", "4"),
-			parse.NewTerminal("5", "5"),
-			parse.NewTerminal("6", "6"),
-			parse.NewTerminal("7", "7"),
-			parse.NewTerminal("8", "8"),
-			parse.NewTerminal("9", "9"),
-			parse.NewTerminal("0", "0"),
+			NewTerminal("1", "1"),
+			NewTerminal("2", "2"),
+			NewTerminal("3", "3"),
+			NewTerminal("4", "4"),
+			NewTerminal("5", "5"),
+			NewTerminal("6", "6"),
+			NewTerminal("7", "7"),
+			NewTerminal("8", "8"),
+			NewTerminal("9", "9"),
+			NewTerminal("0", "0"),
 		),
 	)
 
-	operator := parse.NewEither(
+	operator := NewEither(
 		"operator",
-		parse.NewTerminal("+", "+"),
-		parse.NewTerminal("-", "-"),
-		parse.NewTerminal("*", "*"),
-		parse.NewTerminal("/", "/"),
-		parse.NewTerminal("mod", "mod"),
+		NewTerminal("+", "+"),
+		NewTerminal("-", "-"),
+		NewTerminal("*", "*"),
+		NewTerminal("/", "/"),
+		NewTerminal("mod", "mod"),
 	)
 
-	whitespace := parse.NewEither(
+	whitespace := NewEither(
 		"whitespace",
-		parse.NewTerminal("space", " "),
-		parse.NewTerminal("tab", "\t"),
-		parse.NewTerminal("line-break", "\n"),
+		NewTerminal("space", " "),
+		NewTerminal("tab", "\t"),
+		NewTerminal("line-break", "\n"),
 	)
 
-	leftBracket := parse.NewTerminal("leftBracket", "(")
-	rightBracket := parse.NewTerminal("rightBracket", ")")
+	leftBracket := NewTerminal("leftBracket", "(")
+	rightBracket := NewTerminal("rightBracket", ")")
 
-	expression = parse.NewRepetition(
+	expression = NewRepetition(
 		"expressions",
-		parse.NewEither(
+		NewEither(
 			"expression",
 			numbers,
 			whitespace,
@@ -86,7 +86,7 @@ func init() {
 }
 
 func main() {
-	tree, err := parse.Parse(
+	tree, err := Parse(
 		expression,
 		[]byte("5+(3*2)"),
 	)
@@ -108,48 +108,152 @@ expressions{
   end: 7
   data: 5+(3*2)
 }(
-    expression{
-      rule: *parse.Either(name: expression)(...)
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 0
+    end: 1
+    data: 5
+  }(
+    numbers{
+      rule: *parse.Repetition(name: numbers, times: 1, variadic: true)(...)
       start: 0
       end: 1
       data: 5
     }(
-        numbers{
-          rule: *parse.Repetition(name: numbers, times: 1, variadic: true)(...)
+      number{
+        rule: *parse.Either(name: number)(...)
+        start: 0
+        end: 1
+        data: 5
+      }(
+        5{
+          rule: *parse.Terminal(name: 5, value: 5)()
           start: 0
           end: 1
           data: 5
-        }(
-            number{
-              rule: *parse.Either(name: number)(...)
-              start: 0
-              end: 1
-              data: 5
-            }(
-                5{
-                  rule: *parse.Terminal(name: 5, value: 5)()
-                  start: 0
-                  end: 1
-                  data: 5
-                }()
-            )
-        )
-    ),
-
-    ...
-
-    expression{
-      rule: *parse.Either(name: expression)(...)
+        }()
+      )
+    )
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 1
+    end: 2
+    data: +
+  }(
+    operator{
+      rule: *parse.Either(name: operator)(...)
+      start: 1
+      end: 2
+      data: +
+    }(
+      +{
+        rule: *parse.Terminal(name: +, value: +)()
+        start: 1
+        end: 2
+        data: +
+      }()
+    )
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 2
+    end: 3
+    data: (
+  }(
+    leftBracket{
+      rule: *parse.Terminal(name: leftBracket, value: ()()
+      start: 2
+      end: 3
+      data: (
+    }()
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 3
+    end: 4
+    data: 3
+  }(
+    numbers{
+      rule: *parse.Repetition(name: numbers, times: 1, variadic: true)(...)
+      start: 3
+      end: 4
+      data: 3
+    }(
+      number{
+        rule: *parse.Either(name: number)(...)
+        start: 3
+        end: 4
+        data: 3
+      }(
+        3{
+          rule: *parse.Terminal(name: 3, value: 3)()
+          start: 3
+          end: 4
+          data: 3
+        }()
+      )
+    )
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 4
+    end: 5
+    data: *
+  }(
+    operator{
+      rule: *parse.Either(name: operator)(...)
+      start: 4
+      end: 5
+      data: *
+    }(
+      *{
+        rule: *parse.Terminal(name: *, value: *)()
+        start: 4
+        end: 5
+        data: *
+      }()
+    )
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 5
+    end: 6
+    data: 2
+  }(
+    numbers{
+      rule: *parse.Repetition(name: numbers, times: 1, variadic: true)(...)
+      start: 5
+      end: 6
+      data: 2
+    }(
+      number{
+        rule: *parse.Either(name: number)(...)
+        start: 5
+        end: 6
+        data: 2
+      }(
+        2{
+          rule: *parse.Terminal(name: 2, value: 2)()
+          start: 5
+          end: 6
+          data: 2
+        }()
+      )
+    )
+  ),
+  expression{
+    rule: *parse.Either(name: expression)(...)
+    start: 6
+    end: 7
+    data: )
+  }(
+    rightBracket{
+      rule: *parse.Terminal(name: rightBracket, value: ))()
       start: 6
       end: 7
       data: )
-    }(
-        rightBracket{
-          rule: *parse.Terminal(name: rightBracket, value: ))()
-          start: 6
-          end: 7
-          data: )
-        }()
-    )
+    }()
+  )
 )
 ```

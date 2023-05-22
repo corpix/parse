@@ -11,6 +11,13 @@ var (
 	ErrSkipRule      = e.New("Skip rule")
 )
 
+// humanizePosition is just a little helper which wraps
+// common position operations before it will be showed to
+// human.
+func humanizePosition(position int) int {
+	return position + 1
+}
+
 // ErrBoundIncomplete is an error which mean
 // that a closing token was not
 // found in the input which is making a requested
@@ -67,9 +74,9 @@ type ErrUnexpectedEOF struct {
 
 func (e *ErrUnexpectedEOF) Error() string {
 	return fmt.Sprintf(
-		"Unexpected EOF at position '%d' while applying '%s'",
-		e.Position,
-		e.Rule,
+		"Unexpected EOF at position '%d' while applying '%s' rule",
+		humanizePosition(e.Position),
+		e.Rule.Name(),
 	)
 }
 
@@ -91,10 +98,10 @@ type ErrUnexpectedToken struct {
 
 func (e *ErrUnexpectedToken) Error() string {
 	return fmt.Sprintf(
-		"Unexpected token '%s' at position '%d' while applying '%s'",
+		"Unexpected token '%s' at position '%d' while applying '%s' rule",
 		e.Token,
-		e.Position,
-		e.Rule,
+		humanizePosition(e.Position),
+		e.Rule.Name(),
 	)
 }
 
@@ -114,9 +121,9 @@ type ErrNestingTooDeep struct {
 
 func (e *ErrNestingTooDeep) Error() string {
 	return fmt.Sprintf(
-		"Nesting too deep, counted to '%d' levels at position %d",
+		"Nesting too deep, counted '%d' levels at position %d",
 		e.Nesting,
-		e.Position,
+		humanizePosition(e.Position),
 	)
 }
 
@@ -135,11 +142,17 @@ type ErrEmptyRule struct {
 }
 
 func (e *ErrEmptyRule) Error() string {
+	var inside string
+	if e.Inside == nil {
+		inside = "<root>"
+	} else {
+		inside = e.Inside.Name()
+	}
 	return fmt.Sprintf(
 		"Empty rule of type '%T' = '%s' inside '%s' rule",
 		e.Rule,
 		e.Rule,
-		e.Inside,
+		inside,
 	)
 }
 

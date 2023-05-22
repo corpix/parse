@@ -2,6 +2,7 @@ package parse
 
 import (
 	"testing"
+	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
@@ -30,8 +31,10 @@ func TestChainName(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		})
 	}
 }
 
@@ -157,13 +160,15 @@ func TestChainGetChilds(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.childs,
-			sample.rule.GetChilds(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.childs,
+				sample.rule.GetChilds(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -191,13 +196,15 @@ func TestChainGetParameters(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.params,
-			sample.rule.GetParameters(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.params,
+				sample.rule.GetParameters(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -261,19 +268,22 @@ func TestChainAdd(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
 
-		rule := sample.chainFactory()
-		for _, inner := range sample.add {
-			rule.Add(inner)
-		}
+			rule := sample.chainFactory()
+			for _, inner := range sample.add {
+				rule.Add(inner)
+			}
 
-		assert.EqualValues(
-			t,
-			rule,
-			sample.result,
-			msg,
-		)
+			assert.EqualValues(
+				t,
+				rule,
+				sample.result,
+				msg,
+			)
+
+		})
 	}
 }
 
@@ -304,7 +314,7 @@ func TestChain(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedEOF(
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -319,7 +329,7 @@ func TestChain(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("bar"),
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -334,7 +344,7 @@ func TestChain(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("baz"),
-				7,
+				6,
 				NewChain(
 					"foo",
 					NewTerminal("foo", "foo"),
@@ -361,27 +371,45 @@ func TestChain(t *testing.T) {
 					NewTerminal("space", " "),
 					NewTerminal("bar", "bar"),
 				),
-				Data:  []byte("foo bar"),
-				Start: 0,
-				End:   7,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   7,
+				},
+				Data: []byte("foo bar"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("foo", "foo"),
-						Data:  []byte("foo"),
-						Start: 0,
-						End:   3,
+						Rule:     NewTerminal("foo", "foo"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   3,
+						},
+						Data: []byte("foo"),
 					},
 					{
-						Rule:  NewTerminal("space", " "),
-						Data:  []byte(" "),
-						Start: 3,
-						End:   4,
+						Rule: NewTerminal("space", " "),
+						Location: &Location{
+							Position: 3,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 3,
+							End:   4,
+						},
+						Data: []byte(" "),
 					},
 					{
-						Rule:  NewTerminal("bar", "bar"),
-						Data:  []byte("bar"),
-						Start: 4,
-						End:   7,
+						Rule: NewTerminal("bar", "bar"),
+						Location: &Location{
+							Position: 4,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 4,
+							End:   7,
+						},
+						Data: []byte("bar"),
 					},
 				},
 			},
@@ -391,20 +419,22 @@ func TestChain(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

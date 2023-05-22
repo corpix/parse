@@ -24,3 +24,7 @@ bench:
 .PHONY: lint
 lint:
 	golangci-lint --color=always --timeout=120s run ./...
+
+.PHONY: doc
+doc:
+	gomarkdoc --include-unexported -o doc/doc.md .

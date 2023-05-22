@@ -1,5 +1,7 @@
 package parse
 
+var _ Rule = new(Repetition)
+
 // Repetition is a Rule which is repeating in the input
 // one or more times.
 type Repetition struct {
@@ -55,6 +57,109 @@ func (r *Repetition) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Repetition) IsFinite() bool {
 	return false
+}
+
+func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
+	nextDepth := ctx.Location.Depth + 1
+	if nextDepth > ctx.Parser.MaxDepth {
+		return nil, NewErrNestingTooDeep(
+			nextDepth,
+			ctx.Location.Position,
+		)
+	}
+
+	var (
+		occurrences = 0
+		subInput    = input
+		subTree     *Tree
+		subChilds   = []*Tree{}
+		pos         = ctx.Location.Position
+		err         error
+	)
+repeat:
+	for {
+		if len(subInput) == 0 {
+			break
+		}
+
+		subTree, err = r.Rule.Parse(
+			&Context{
+				Rule:   r,
+				Parser: ctx.Parser,
+				Location: &Location{
+					Position: pos,
+					Line:     ctx.Location.Line,   // FIXME
+					Column:   ctx.Location.Column, // FIXME
+					Depth:    nextDepth,
+				},
+			},
+			subInput,
+		)
+		if err != nil {
+			if err == ErrSkipRule {
+				break
+			}
+			switch err.(type) {
+			case *ErrUnexpectedToken, *ErrUnexpectedEOF:
+				// XXX: We need to skip current rule
+				// if it has no matches and rule is variadic,
+				// should repeat 0 or more times.
+				// In this case we have seen nothing and it is
+				// ok to skip.
+				if occurrences == 0 && r.Times == 0 && r.Variadic {
+					return nil, ErrSkipRule
+				}
+				break repeat
+			default:
+				return nil, err
+			}
+		}
+		occurrences++
+
+		movePos := subTree.Region.End - subTree.Region.Start
+		if !r.Variadic && occurrences > r.Times {
+			return nil, NewErrUnexpectedToken(
+				ShowInput(input[pos:]),
+				pos+movePos,
+				r, // FIXME: may we point to the problem here? (we have enough occurrences)
+			)
+		}
+
+		subInput = subInput[movePos:]
+		subChilds = append(subChilds, subTree)
+		pos += movePos
+	}
+	if err != nil && len(subChilds) == 0 { // nothing matched
+		return nil, NewErrUnexpectedToken(
+			input,
+			pos,
+			r, // FIXME: pass sub-error to reason more precisely?
+		)
+	}
+	if occurrences < r.Times {
+		if err != nil {
+			return nil, err
+		}
+		return nil, NewErrUnexpectedToken(
+			input,
+			pos,
+			r, // FIXME: point to the real reason (not sufficient amount of occurrences)
+		)
+	}
+
+	region := TreeRegion(subChilds...)
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: ctx.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: region,
+		Childs: subChilds,
+		Data:   input[:region.End-region.Start],
+	}, nil
 }
 
 //

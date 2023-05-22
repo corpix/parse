@@ -1,6 +1,10 @@
 package parse
 
-import "fmt"
+import (
+	"fmt"
+)
+
+var _ Rule = new(Either)
 
 // Either represents a list of Rule's to match in the data.
 // One of the rules in a list must match.
@@ -57,6 +61,79 @@ func (r *Either) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Either) IsFinite() bool {
 	return false
+}
+
+func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
+	if len(r.Rules) == 0 {
+		return nil, NewErrEmptyRule(r, ctx.Rule)
+	}
+	if len(input) == 0 {
+		return nil, NewErrUnexpectedEOF(ctx.Location.Position, r)
+	}
+
+	nextDepth := ctx.Location.Depth + 1
+	if nextDepth > ctx.Parser.MaxDepth {
+		return nil, NewErrNestingTooDeep(
+			nextDepth,
+			ctx.Location.Position,
+		)
+	}
+
+	var (
+		subTree *Tree
+		err     error
+	)
+	for _, sr := range r.Rules {
+		subTree, err = sr.Parse(
+			&Context{
+				Rule:   sr,
+				Parser: ctx.Parser,
+				Location: &Location{
+					Position: ctx.Location.Position,
+					Line:     ctx.Location.Line,   // FIXME
+					Column:   ctx.Location.Column, // FIXME
+					Depth:    nextDepth,
+				},
+			},
+			input,
+		)
+		if err != nil {
+			if err == ErrSkipRule {
+				continue
+			}
+			switch err.(type) {
+			case *ErrUnexpectedToken, *ErrUnexpectedEOF:
+				continue
+			default:
+				return nil, err
+			}
+		}
+		break
+	}
+	if subTree == nil {
+		return nil, NewErrUnexpectedToken(
+			input,
+			ctx.Location.Position,
+			r, // FIXME: pass sub-error to reason more precisely?
+		)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	region := *subTree.Region
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: subTree.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: &region,
+		Childs: []*Tree{subTree},
+		Data:   input[:subTree.Region.End-subTree.Region.Start],
+	}, nil
 }
 
 //

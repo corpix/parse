@@ -3,53 +3,53 @@ package main
 import (
 	"fmt"
 
-	"github.com/corpix/parse"
+	. "github.com/corpix/parse"
 )
 
 var (
-	expression parse.Rule
+	expression Rule
 )
 
 func init() {
-	numbers := parse.NewRepetition(
+	numbers := NewRepetition(
 		"numbers",
-		parse.NewEither(
+		NewEither(
 			"number",
-			parse.NewTerminal("1", "1"),
-			parse.NewTerminal("2", "2"),
-			parse.NewTerminal("3", "3"),
-			parse.NewTerminal("4", "4"),
-			parse.NewTerminal("5", "5"),
-			parse.NewTerminal("6", "6"),
-			parse.NewTerminal("7", "7"),
-			parse.NewTerminal("8", "8"),
-			parse.NewTerminal("9", "9"),
-			parse.NewTerminal("0", "0"),
+			NewTerminal("1", "1"),
+			NewTerminal("2", "2"),
+			NewTerminal("3", "3"),
+			NewTerminal("4", "4"),
+			NewTerminal("5", "5"),
+			NewTerminal("6", "6"),
+			NewTerminal("7", "7"),
+			NewTerminal("8", "8"),
+			NewTerminal("9", "9"),
+			NewTerminal("0", "0"),
 		),
 	)
 
-	operator := parse.NewEither(
+	operator := NewEither(
 		"operator",
-		parse.NewTerminal("+", "+"),
-		parse.NewTerminal("-", "-"),
-		parse.NewTerminal("*", "*"),
-		parse.NewTerminal("/", "/"),
-		parse.NewTerminal("mod", "mod"),
+		NewTerminal("+", "+"),
+		NewTerminal("-", "-"),
+		NewTerminal("*", "*"),
+		NewTerminal("/", "/"),
+		NewTerminal("mod", "mod"),
 	)
 
-	whitespace := parse.NewEither(
+	whitespace := NewEither(
 		"whitespace",
-		parse.NewTerminal("space", " "),
-		parse.NewTerminal("tab", "\t"),
-		parse.NewTerminal("line-break", "\n"),
+		NewTerminal("space", " "),
+		NewTerminal("tab", "\t"),
+		NewTerminal("line-break", "\n"),
 	)
 
-	leftBracket := parse.NewTerminal("leftBracket", "(")
-	rightBracket := parse.NewTerminal("rightBracket", ")")
+	leftBracket := NewTerminal("leftBracket", "(")
+	rightBracket := NewTerminal("rightBracket", ")")
 
-	expression = parse.NewRepetition(
+	expression = NewRepetition(
 		"expressions",
-		parse.NewEither(
+		NewEither(
 			"expression",
 			numbers,
 			whitespace,
@@ -62,7 +62,7 @@ func init() {
 }
 
 func main() {
-	tree, err := parse.Parse(
+	tree, err := Parse(
 		expression,
 		[]byte("5+(3*2)"),
 	)

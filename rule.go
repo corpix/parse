@@ -46,6 +46,14 @@ type Rule interface {
 	// IsFinite returns true if this rule is
 	// not a wrapper for other rules.
 	IsFinite() bool
+
+	Parse(ctx *Context, input []byte) (*Tree, error)
+}
+
+type Context struct {
+	Rule     Rule
+	Parser   *Parser
+	Location *Location
 }
 
 // RuleShow returns a Rule encoded as a string.

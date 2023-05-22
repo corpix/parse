@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -109,14 +110,16 @@ func TestParseInputIntegrity(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
 
-		input := make([]byte, len(sample.input))
-		copy(input, []byte(sample.input))
-		_, err := Parse(sample.grammar, input)
+			input := make([]byte, len(sample.input))
+			copy(input, []byte(sample.input))
+			_, err := Parse(sample.grammar, input)
 
-		assert.Equal(t, []byte(sample.input), input, msg)
-		assert.Equal(t, sample.err, err, msg)
+			assert.Equal(t, []byte(sample.input), input, msg)
+			assert.Equal(t, sample.err, err, msg)
+		})
 	}
 }
 
@@ -134,19 +137,7 @@ func TestParse(t *testing.T) {
 			"",
 			nil,
 			nil,
-			NewErrEmptyRule(
-				Rule(nil),
-				nil,
-			),
-			DefaultParser,
-		},
-		{
-			"",
-			newTestRuleFinite("unsupported"),
-			nil,
-			NewErrUnsupportedRule(
-				newTestRuleFinite("unsupported"),
-			),
+			NewErrEmptyRule(Rule(nil), nil),
 			DefaultParser,
 		},
 		{
@@ -165,12 +156,28 @@ func TestParse(t *testing.T) {
 				),
 			),
 			nil,
-			NewErrNestingTooDeep(4, 1),
-			NewParser(3),
+			NewErrNestingTooDeep(4, 0),
+			NewParser(ParserOptionMaxDepth(3)),
 		},
 
 		// success
 
+		{
+			"",
+			newTestRuleFinite("unsupported"),
+			&Tree{
+				Rule: newTestRuleFinite("unsupported"),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   0,
+				},
+				Data: []byte{},
+				Childs: []*Tree{},
+			},
+			nil,
+			DefaultParser,
+		},
 		{
 			"foobar",
 			NewChain(
@@ -200,9 +207,12 @@ func TestParse(t *testing.T) {
 						NewTerminal("bar", "bar"),
 					),
 				),
-				Data:  []byte("foobar"),
-				Start: 0,
-				End:   6,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   6,
+				},
+				Data: []byte("foobar"),
 				Childs: []*Tree{
 					{
 						Rule: NewEither(
@@ -210,15 +220,21 @@ func TestParse(t *testing.T) {
 							NewTerminal("foo", "foo"),
 							NewTerminal("bar", "bar"),
 						),
-						Data:  []byte("foo"),
-						Start: 0,
-						End:   3,
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   3,
+						},
+						Data: []byte("foo"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("foo", "foo"),
-								Data:  []byte("foo"),
-								Start: 0,
-								End:   3,
+								Rule:     NewTerminal("foo", "foo"),
+								Location: &Location{Depth: 2},
+								Region: &Region{
+									Start: 0,
+									End:   3,
+								},
+								Data: []byte("foo"),
 							},
 						},
 					},
@@ -228,15 +244,27 @@ func TestParse(t *testing.T) {
 							NewTerminal("foo", "foo"),
 							NewTerminal("bar", "bar"),
 						),
-						Data:  []byte("bar"),
-						Start: 3,
-						End:   6,
+						Location: &Location{
+							Position: 3,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 3,
+							End:   6,
+						},
+						Data: []byte("bar"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("bar", "bar"),
-								Data:  []byte("bar"),
-								Start: 3,
-								End:   6,
+								Rule: NewTerminal("bar", "bar"),
+								Location: &Location{
+									Position: 3,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 3,
+									End:   6,
+								},
+								Data: []byte("bar"),
 							},
 						},
 					},
@@ -280,21 +308,33 @@ func TestParse(t *testing.T) {
 					),
 					NewTerminal("right bracket", ")"),
 				),
-				Data:  []byte("foo(1234)"),
-				Start: 0,
-				End:   9,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   9,
+				},
+				Data: []byte("foo(1234)"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("foo", "foo"),
-						Data:  []byte("foo"),
-						Start: 0,
-						End:   3,
+						Rule:     NewTerminal("foo", "foo"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   3,
+						},
+						Data: []byte("foo"),
 					},
 					{
-						Rule:  NewTerminal("left bracket", "("),
-						Data:  []byte("("),
-						Start: 3,
-						End:   4,
+						Rule: NewTerminal("left bracket", "("),
+						Location: &Location{
+							Position: 3,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 3,
+							End:   4,
+						},
+						Data: []byte("("),
 					},
 					{
 						Rule: NewRepetition(
@@ -307,9 +347,15 @@ func TestParse(t *testing.T) {
 								NewTerminal("one", "1"),
 							),
 						),
-						Data:  []byte("1234"),
-						Start: 4,
-						End:   8,
+						Location: &Location{
+							Position: 4,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 4,
+							End:   8,
+						},
+						Data: []byte("1234"),
 						Childs: []*Tree{
 							{
 								Rule: NewEither(
@@ -319,15 +365,27 @@ func TestParse(t *testing.T) {
 									NewTerminal("two", "2"),
 									NewTerminal("one", "1"),
 								),
-								Data:  []byte("1"),
-								Start: 4,
-								End:   5,
+								Location: &Location{
+									Position: 4,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 4,
+									End:   5,
+								},
+								Data: []byte("1"),
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("one", "1"),
-										Data:  []byte("1"),
-										Start: 4,
-										End:   5,
+										Rule: NewTerminal("one", "1"),
+										Location: &Location{
+											Position: 4,
+											Depth:    3,
+										},
+										Region: &Region{
+											Start: 4,
+											End:   5,
+										},
+										Data: []byte("1"),
 									},
 								},
 							},
@@ -339,15 +397,27 @@ func TestParse(t *testing.T) {
 									NewTerminal("two", "2"),
 									NewTerminal("one", "1"),
 								),
-								Data:  []byte("2"),
-								Start: 5,
-								End:   6,
+								Location: &Location{
+									Position: 5,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 5,
+									End:   6,
+								},
+								Data: []byte("2"),
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("two", "2"),
-										Data:  []byte("2"),
-										Start: 5,
-										End:   6,
+										Rule: NewTerminal("two", "2"),
+										Location: &Location{
+											Position: 5,
+											Depth:    3,
+										},
+										Region: &Region{
+											Start: 5,
+											End:   6,
+										},
+										Data: []byte("2"),
 									},
 								},
 							},
@@ -359,15 +429,27 @@ func TestParse(t *testing.T) {
 									NewTerminal("two", "2"),
 									NewTerminal("one", "1"),
 								),
-								Data:  []byte("3"),
-								Start: 6,
-								End:   7,
+								Location: &Location{
+									Position: 6,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 6,
+									End:   7,
+								},
+								Data: []byte("3"),
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("three", "3"),
-										Data:  []byte("3"),
-										Start: 6,
-										End:   7,
+										Rule: NewTerminal("three", "3"),
+										Location: &Location{
+											Position: 6,
+											Depth:    3,
+										},
+										Region: &Region{
+											Start: 6,
+											End:   7,
+										},
+										Data: []byte("3"),
 									},
 								},
 							},
@@ -379,25 +461,43 @@ func TestParse(t *testing.T) {
 									NewTerminal("two", "2"),
 									NewTerminal("one", "1"),
 								),
-								Data:  []byte("4"),
-								Start: 7,
-								End:   8,
+								Location: &Location{
+									Position: 7,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 7,
+									End:   8,
+								},
+								Data: []byte("4"),
 								Childs: []*Tree{
 									{
-										Rule:  NewTerminal("four", "4"),
-										Data:  []byte("4"),
-										Start: 7,
-										End:   8,
+										Rule: NewTerminal("four", "4"),
+										Location: &Location{
+											Position: 7,
+											Depth:    3,
+										},
+										Region: &Region{
+											Start: 7,
+											End:   8,
+										},
+										Data: []byte("4"),
 									},
 								},
 							},
 						},
 					},
 					{
-						Rule:  NewTerminal("right bracket", ")"),
-						Data:  []byte(")"),
-						Start: 8,
-						End:   9,
+						Rule: NewTerminal("right bracket", ")"),
+						Location: &Location{
+							Position: 8,
+							Depth:    1,
+						},
+						Region: &Region{
+							Start: 8,
+							End:   9,
+						},
+						Data: []byte(")"),
 					},
 				},
 			},
@@ -407,16 +507,18 @@ func TestParse(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		assert.EqualValues(t, sample.err, err, msg)
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			assert.EqualValues(t, sample.err, err, msg)
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

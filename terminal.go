@@ -1,5 +1,12 @@
 package parse
 
+import (
+	"bytes"
+	"unicode/utf8"
+)
+
+var _ Rule = new(Terminal)
+
 // Terminal is a Rule which is literal in input.
 type Terminal struct {
 	name  string
@@ -46,6 +53,44 @@ func (r *Terminal) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Terminal) IsFinite() bool {
 	return true
+}
+
+func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
+	length := utf8.RuneCount(r.Value)
+	if length == 0 {
+		return nil, NewErrEmptyRule(r, ctx.Rule)
+	}
+
+	if utf8.RuneCount(input) < length {
+		return nil, NewErrUnexpectedEOF(
+			ctx.Location.Position,
+			r,
+		)
+	}
+
+	buf := input[:length]
+	if !bytes.Equal(buf, r.Value) {
+		return nil, NewErrUnexpectedToken(
+			ShowInput(input),
+			ctx.Location.Position,
+			r,
+		)
+	}
+
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: ctx.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: &Region{
+			Start: ctx.Location.Position,
+			End:   ctx.Location.Position + length,
+		},
+		Data: buf,
+	}, nil
 }
 
 //

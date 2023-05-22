@@ -4,6 +4,8 @@ import (
 	"regexp"
 )
 
+var _ Rule = new(Regexp)
+
 // Regexp is a Rule which should match Go regexp on input.
 type Regexp struct {
 	name   string
@@ -51,6 +53,33 @@ func (r *Regexp) GetParameters() RuleParameters {
 // not a wrapper for other rules.
 func (r *Regexp) IsFinite() bool {
 	return true
+}
+
+func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error) {
+	buf := r.Regexp.Find(input)
+	if buf == nil {
+		return nil, NewErrUnexpectedToken(
+			ShowInput(input),
+			ctx.Location.Position,
+			r,
+		)
+	}
+	regexpRegion := r.Regexp.FindIndex(input)
+
+	return &Tree{
+		Rule: r,
+		Location: &Location{
+			Position: ctx.Location.Position,
+			Line:     ctx.Location.Line,   // FIXME
+			Column:   ctx.Location.Column, // FIXME
+			Depth:    ctx.Location.Depth,
+		},
+		Region: &Region{
+			Start: ctx.Location.Position + regexpRegion[0],
+			End:   ctx.Location.Position + regexpRegion[1],
+		},
+		Data: buf,
+	}, nil
 }
 
 //

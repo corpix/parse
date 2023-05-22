@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -30,8 +31,10 @@ func TestEitherName(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		})
 	}
 }
 
@@ -61,13 +64,15 @@ func TestEitherShow(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.show,
-			sample.rule.Show(sample.childs),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.show,
+				sample.rule.Show(sample.childs),
+				msg,
+			)
+		})
 	}
 }
 
@@ -95,13 +100,15 @@ func TestEitherString(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.stringified,
-			sample.rule.String(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.stringified,
+				sample.rule.String(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -136,13 +143,15 @@ func TestEitherGetChilds(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.childs,
-			sample.rule.GetChilds(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.childs,
+				sample.rule.GetChilds(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -163,13 +172,15 @@ func TestEitherGetParameters(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.params,
-			sample.rule.GetParameters(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.params,
+				sample.rule.GetParameters(),
+				msg,
+			)
+		})
 	}
 }
 
@@ -248,8 +259,13 @@ func TestEither(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("4"),
-				1,
-				NewTerminal("three", "3"),
+				0,
+				NewEither(
+					"number",
+					NewTerminal("one", "1"),
+					NewTerminal("two", "2"),
+					NewTerminal("three", "3"),
+				),
 			),
 			DefaultParser,
 		},
@@ -263,7 +279,7 @@ func TestEither(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("2"),
-				2,
+				1,
 				NewEither(
 					"number",
 					NewTerminal("one", "1"),
@@ -290,15 +306,21 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
-				Data:  []byte("1"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("1"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("one", "1"),
-						Data:  []byte("1"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("one", "1"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("1"),
 					},
 				},
 			},
@@ -320,15 +342,21 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("one", "1"),
 				),
-				Data:  []byte("1"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("1"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("one", "1"),
-						Data:  []byte("1"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("one", "1"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("1"),
 					},
 				},
 			},
@@ -350,15 +378,21 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
-				Data:  []byte("2"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("2"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("two", "2"),
-						Data:  []byte("2"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("two", "2"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("2"),
 					},
 				},
 			},
@@ -368,21 +402,24 @@ func TestEither(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+
+		})
 	}
 }
 
@@ -408,15 +445,21 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Data:  []byte("0"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("0"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("0", "0"),
-						Data:  []byte("0"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("0", "0"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("0"),
 					},
 				},
 			},
@@ -437,15 +480,21 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Data:  []byte("1"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("1"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("1", "1"),
-						Data:  []byte("1"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("1", "1"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("1"),
 					},
 				},
 			},
@@ -466,15 +515,21 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Data:  []byte("3"),
-				Start: 0,
-				End:   1,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   1,
+				},
+				Data: []byte("3"),
 				Childs: []*Tree{
 					{
-						Rule:  NewTerminal("3", "3"),
-						Data:  []byte("3"),
-						Start: 0,
-						End:   1,
+						Rule:     NewTerminal("3", "3"),
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   1,
+						},
+						Data: []byte("3"),
 					},
 				},
 			},
@@ -484,20 +539,22 @@ func TestASCIIRange(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

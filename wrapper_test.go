@@ -199,7 +199,7 @@ func TestWrapper(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedEOF(
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -217,7 +217,7 @@ func TestWrapper(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("bar"),
-				1,
+				0,
 				NewTerminal("foo", "foo"),
 			),
 			DefaultParser,
@@ -235,7 +235,7 @@ func TestWrapper(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				[]byte("baz"),
-				7,
+				6,
 				NewWrapper(
 					"foo",
 					NewChain(
@@ -271,9 +271,12 @@ func TestWrapper(t *testing.T) {
 						NewTerminal("bar", "bar"),
 					),
 				),
-				Data:  []byte("foo bar"),
-				Start: 0,
-				End:   7,
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   7,
+				},
+				Data: []byte("foo bar"),
 				Childs: []*Tree{
 					{
 						Rule: NewChain(
@@ -282,27 +285,45 @@ func TestWrapper(t *testing.T) {
 							NewTerminal("space", " "),
 							NewTerminal("bar", "bar"),
 						),
-						Data:  []byte("foo bar"),
-						Start: 0,
-						End:   7,
+						Location: &Location{Depth: 1},
+						Region: &Region{
+							Start: 0,
+							End:   7,
+						},
+						Data: []byte("foo bar"),
 						Childs: []*Tree{
 							{
-								Rule:  NewTerminal("foo", "foo"),
-								Data:  []byte("foo"),
-								Start: 0,
-								End:   3,
+								Rule:     NewTerminal("foo", "foo"),
+								Location: &Location{Depth: 2},
+								Region: &Region{
+									Start: 0,
+									End:   3,
+								},
+								Data: []byte("foo"),
 							},
 							{
-								Rule:  NewTerminal("space", " "),
-								Data:  []byte(" "),
-								Start: 3,
-								End:   4,
+								Rule: NewTerminal("space", " "),
+								Location: &Location{
+									Position: 3,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 3,
+									End:   4,
+								},
+								Data: []byte(" "),
 							},
 							{
-								Rule:  NewTerminal("bar", "bar"),
-								Data:  []byte("bar"),
-								Start: 4,
-								End:   7,
+								Rule: NewTerminal("bar", "bar"),
+								Location: &Location{
+									Position: 4,
+									Depth:    2,
+								},
+								Region: &Region{
+									Start: 4,
+									End:   7,
+								},
+								Data: []byte("bar"),
 							},
 						},
 					},

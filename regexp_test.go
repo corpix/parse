@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -18,8 +19,10 @@ func TestRegexpName(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(t, sample.name, sample.rule.Name(), msg)
+		})
 	}
 }
 
@@ -36,13 +39,15 @@ func TestRegexpShow(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.show,
-			sample.rule.Show(sample.childs),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.show,
+				sample.rule.Show(sample.childs),
+				msg,
+			)
+		})
 	}
 }
 
@@ -57,13 +62,17 @@ func TestRegexpString(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.stringified,
-			sample.rule.String(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.stringified,
+				sample.rule.String(),
+				msg,
+			)
+
+		})
+
 	}
 }
 
@@ -102,13 +111,16 @@ func TestRegexpGetParameters(t *testing.T) {
 		},
 	}
 	for k, sample := range samples {
-		msg := spew.Sdump(k, sample)
-		assert.EqualValues(
-			t,
-			sample.params,
-			sample.rule.GetParameters(),
-			msg,
-		)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			msg := spew.Sdump(k, sample)
+			assert.EqualValues(
+				t,
+				sample.params,
+				sample.rule.GetParameters(),
+				msg,
+			)
+
+		})
 	}
 }
 
@@ -141,7 +153,7 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("")),
-				1,
+				0,
 				NewRegexp("foo", "foo"),
 			),
 			DefaultParser,
@@ -152,7 +164,7 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("bar")),
-				1,
+				0,
 				NewRegexp("foo", "foo"),
 			),
 			DefaultParser,
@@ -163,7 +175,7 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				ShowInput([]byte("bar")),
-				4,
+				3,
 				NewRegexp("foo", "foo"),
 			),
 			DefaultParser,
@@ -175,10 +187,13 @@ func TestRegexp(t *testing.T) {
 			"",
 			NewRegexp("empty", ""),
 			&Tree{
-				Rule:  NewRegexp("empty", ""),
-				Data:  []byte(""),
-				Start: 0,
-				End:   0,
+				Rule:     NewRegexp("empty", ""),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   0,
+				},
+				Data: []byte(""),
 			},
 			nil,
 			DefaultParser,
@@ -187,10 +202,13 @@ func TestRegexp(t *testing.T) {
 			"foo",
 			NewRegexp("foo", "foo"),
 			&Tree{
-				Rule:  NewRegexp("foo", "foo"),
-				Data:  []byte("foo"),
-				Start: 0,
-				End:   3,
+				Rule:     NewRegexp("foo", "foo"),
+				Location: &Location{},
+				Region: &Region{
+					Start: 0,
+					End:   3,
+				},
+				Data: []byte("foo"),
 			},
 			nil,
 			DefaultParser,
@@ -198,20 +216,23 @@ func TestRegexp(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
+
 	}
 }
