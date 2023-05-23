@@ -314,8 +314,8 @@ func TestChain(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedEOF(
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{Depth: 1},
 			),
 			DefaultParser,
 		},
@@ -328,9 +328,9 @@ func TestChain(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("bar"),
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{Depth: 1},
+				[]byte("bar"),
 			),
 			DefaultParser,
 		},
@@ -343,13 +343,13 @@ func TestChain(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("baz"),
-				6,
 				NewChain(
 					"foo",
 					NewTerminal("foo", "foo"),
 					NewTerminal("bar", "bar"),
 				),
+				&Location{Position: 6, Line: 0, Column: 6},
+				[]byte("baz"),
 			),
 			DefaultParser,
 		},

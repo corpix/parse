@@ -11,13 +11,6 @@ var (
 	ErrSkipRule      = e.New("Skip rule")
 )
 
-// humanizePosition is just a little helper which wraps
-// common position operations before it will be showed to
-// human.
-func humanizePosition(position int) int {
-	return position + 1
-}
-
 // ErrBoundIncomplete is an error which mean
 // that a closing token was not
 // found in the input which is making a requested
@@ -25,21 +18,21 @@ func humanizePosition(position int) int {
 type ErrBoundIncomplete struct {
 	Starting []byte
 	Closing  []byte
-	Position int
+	Location *Location
 }
 
 func (e *ErrBoundIncomplete) Error() string {
 	return fmt.Sprintf(
-		"Bound start token '%s' found but close token '%s' is not, bound incomplete at position %d",
+		"Bound start token '%s' found but close token '%s' is not, bound incomplete at %q",
 		string(e.Starting),
 		string(e.Closing),
-		e.Position,
+		e.Location,
 	)
 }
 
 // NewErrBoundIncomplete constructs new ErrBoundIncomplete.
-func NewErrBoundIncomplete(position int, starting, closing []byte) error {
-	return &ErrBoundIncomplete{starting, closing, position}
+func NewErrBoundIncomplete(starting, closing []byte, l *Location) error {
+	return &ErrBoundIncomplete{starting, closing, l}
 }
 
 //
@@ -47,7 +40,7 @@ func NewErrBoundIncomplete(position int, starting, closing []byte) error {
 // ErrUnsupportedRule is an error which mean
 // that parser support for specifier Rule is not implemented.
 type ErrUnsupportedRule struct {
-	Rule
+	Rule Rule
 }
 
 func (e *ErrUnsupportedRule) Error() string {
@@ -68,21 +61,21 @@ func NewErrUnsupportedRule(rule Rule) error {
 // that EOF was meat while parser wanted more
 // input.
 type ErrUnexpectedEOF struct {
-	Position int
-	Rule
+	Rule     Rule
+	Location *Location
 }
 
 func (e *ErrUnexpectedEOF) Error() string {
 	return fmt.Sprintf(
-		"Unexpected EOF at position '%d' while applying '%s' rule",
-		humanizePosition(e.Position),
+		"Unexpected EOF at %q while applying '%s' rule",
+		e.Location,
 		e.Rule.Name(),
 	)
 }
 
 // NewErrUnexpectedEOF constructs new ErrUnexpectedEOF.
-func NewErrUnexpectedEOF(position int, rule Rule) error {
-	return &ErrUnexpectedEOF{position, rule}
+func NewErrUnexpectedEOF(r Rule, l *Location) error {
+	return &ErrUnexpectedEOF{r, l}
 }
 
 //
@@ -91,23 +84,23 @@ func NewErrUnexpectedEOF(position int, rule Rule) error {
 // that token read from current position in input
 // is not expected by the current Rule.
 type ErrUnexpectedToken struct {
+	Rule     Rule
+	Location *Location
 	Token    []byte
-	Position int
-	Rule
 }
 
 func (e *ErrUnexpectedToken) Error() string {
 	return fmt.Sprintf(
-		"Unexpected token '%s' at position '%d' while applying '%s' rule",
+		"Unexpected token '%s' at %q while applying '%s' rule",
 		e.Token,
-		humanizePosition(e.Position),
+		e.Location,
 		e.Rule.Name(),
 	)
 }
 
 // NewErrUnexpectedToken constructs new ErrUnexpectedToken.
-func NewErrUnexpectedToken(token []byte, position int, rule Rule) error {
-	return &ErrUnexpectedToken{token, position, rule}
+func NewErrUnexpectedToken(r Rule, l *Location, token []byte) error {
+	return &ErrUnexpectedToken{r, l, token}
 }
 
 //
@@ -115,21 +108,21 @@ func NewErrUnexpectedToken(token []byte, position int, rule Rule) error {
 // ErrNestingTooDeep is an error which mean
 // the Rule nesting is too deep.
 type ErrNestingTooDeep struct {
-	Nesting  int
-	Position int
+	Location *Location
+	Depth    int
 }
 
 func (e *ErrNestingTooDeep) Error() string {
 	return fmt.Sprintf(
-		"Nesting too deep, counted '%d' levels at position %d",
-		e.Nesting,
-		humanizePosition(e.Position),
+		"Nesting too deep, counted '%d' levels at %q",
+		e.Depth,
+		e.Location,
 	)
 }
 
 // NewErrNestingTooDeep constructs new ErrNestingTooDeep.
-func NewErrNestingTooDeep(nesting int, position int) error {
-	return &ErrNestingTooDeep{nesting, position}
+func NewErrNestingTooDeep(l *Location, depth int) error {
+	return &ErrNestingTooDeep{l, depth}
 }
 
 //
@@ -137,7 +130,7 @@ func NewErrNestingTooDeep(nesting int, position int) error {
 // ErrEmptyRule is an error which mean
 // a Rule with empty content was passed to the parser.
 type ErrEmptyRule struct {
-	Rule
+	Rule   Rule
 	Inside Rule
 }
 

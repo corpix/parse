@@ -4,11 +4,16 @@ import (
 	"fmt"
 )
 
+// Location represents position in input (posirion, line, column) & ast (depth).
 type Location struct {
 	Position int
 	Line     int
 	Column   int
 	Depth    int
+}
+
+func (l *Location) String() string {
+	return fmt.Sprintf("%d:%d", l.Line, l.Column)
 }
 
 // Tree represents a single Rule match with corresponding

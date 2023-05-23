@@ -67,8 +67,8 @@ func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
 	nextDepth := ctx.Location.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(
+			ctx.Location,
 			nextDepth,
-			ctx.Location.Position,
 		)
 	}
 
@@ -79,6 +79,7 @@ func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
 		subChilds   = []*Tree{}
 		pos         = ctx.Location.Position
 		line, col   int
+		loc         *Location
 		err         error
 	)
 repeat:
@@ -88,16 +89,17 @@ repeat:
 		}
 
 		line, col = ctx.Parser.Locate(pos)
+		loc = &Location{
+			Position: pos,
+			Line:     line,
+			Column:   col,
+			Depth:    nextDepth,
+		}
 		subTree, err = r.Rule.Parse(
 			&Context{
-				Rule:   r,
-				Parser: ctx.Parser,
-				Location: &Location{
-					Position: pos,
-					Line:     line,
-					Column:   col,
-					Depth:    nextDepth,
-				},
+				Rule:     r,
+				Parser:   ctx.Parser,
+				Location: loc,
 			},
 			subInput,
 		)
@@ -125,9 +127,9 @@ repeat:
 		movePos := subTree.Region.End - subTree.Region.Start
 		if !r.Variadic && occurrences > r.Times {
 			return nil, NewErrUnexpectedToken(
-				ShowInput(input[pos:]),
-				pos+movePos,
 				r, // FIXME: may we point to the problem here? (we have enough occurrences)
+				subTree.Location,
+				ShowInput(input[pos:]),
 			)
 		}
 
@@ -137,9 +139,9 @@ repeat:
 	}
 	if err != nil && len(subChilds) == 0 { // nothing matched
 		return nil, NewErrUnexpectedToken(
-			input,
-			pos,
 			r, // FIXME: pass sub-error to reason more precisely?
+			loc,
+			input,
 		)
 	}
 	if occurrences < r.Times {
@@ -147,9 +149,9 @@ repeat:
 			return nil, err
 		}
 		return nil, NewErrUnexpectedToken(
-			input,
-			pos,
 			r, // FIXME: point to the real reason (not sufficient amount of occurrences)
+			loc,
+			input,
 		)
 	}
 

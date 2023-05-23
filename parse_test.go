@@ -156,7 +156,7 @@ func TestParse(t *testing.T) {
 				),
 			),
 			nil,
-			NewErrNestingTooDeep(4, 0),
+			NewErrNestingTooDeep(&Location{Depth: 3}, 4),
 			NewParser(ParserOptionMaxDepth(3)),
 		},
 

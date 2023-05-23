@@ -170,8 +170,6 @@ func TestRepetition(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("4"),
-				3,
 				NewRepetitionTimes(
 					"numbers",
 					3,
@@ -182,6 +180,8 @@ func TestRepetition(t *testing.T) {
 						NewTerminal("three", "3"),
 					),
 				),
+				&Location{Position: 3, Column: 3},
+				[]byte("4"),
 			),
 			DefaultParser,
 		},
@@ -199,8 +199,6 @@ func TestRepetition(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("3"),
-				3,
 				NewRepetitionTimes(
 					"numbers",
 					2,
@@ -211,6 +209,8 @@ func TestRepetition(t *testing.T) {
 						NewTerminal("three", "3"),
 					),
 				),
+				&Location{Position: 2, Column: 2, Depth: 1},
+				[]byte("3"),
 			),
 			DefaultParser,
 		},

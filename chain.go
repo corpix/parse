@@ -58,7 +58,6 @@ func (r *Chain) IsFinite() bool {
 	return false
 }
 
-
 // Parse consumes some bytes from input & emits a Tree
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
@@ -71,8 +70,8 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	nextDepth := ctx.Location.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(
+			ctx.Location,
 			nextDepth,
-			ctx.Location.Position,
 		)
 	}
 

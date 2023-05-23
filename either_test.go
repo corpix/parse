@@ -258,14 +258,14 @@ func TestEither(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("4"),
-				0,
 				NewEither(
 					"number",
 					NewTerminal("one", "1"),
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
+				&Location{},
+				[]byte("4"),
 			),
 			DefaultParser,
 		},
@@ -278,13 +278,16 @@ func TestEither(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("2"),
-				1,
 				NewEither(
 					"number",
 					NewTerminal("one", "1"),
 					NewTerminal("two", "2"),
 				),
+				&Location{
+					Position: 1,
+					Column:   1,
+				},
+				[]byte("2"),
 			),
 			DefaultParser,
 		},

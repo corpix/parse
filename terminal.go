@@ -67,17 +67,17 @@ func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
 
 	if utf8.RuneCount(input) < length {
 		return nil, NewErrUnexpectedEOF(
-			ctx.Location.Position,
 			r,
+			ctx.Location,
 		)
 	}
 
 	buf := input[:length]
 	if !bytes.Equal(buf, r.Value) {
 		return nil, NewErrUnexpectedToken(
-			ShowInput(input),
-			ctx.Location.Position,
 			r,
+			ctx.Location,
+			ShowInput(input),
 		)
 	}
 

@@ -200,8 +200,8 @@ func TestWrapper(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedEOF(
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{Depth: 2},
 			),
 			DefaultParser,
 		},
@@ -217,9 +217,9 @@ func TestWrapper(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("bar"),
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{Depth: 2},
+				[]byte("bar"),
 			),
 			DefaultParser,
 		},
@@ -235,8 +235,6 @@ func TestWrapper(t *testing.T) {
 			),
 			nil,
 			NewErrUnexpectedToken(
-				[]byte("baz"),
-				6,
 				NewWrapper(
 					"foo",
 					NewChain(
@@ -245,6 +243,8 @@ func TestWrapper(t *testing.T) {
 						NewTerminal("bar", "bar"),
 					),
 				),
+				&Location{Position: 6, Column: 6},
+				[]byte("baz"),
 			),
 			DefaultParser,
 		},

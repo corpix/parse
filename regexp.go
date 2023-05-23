@@ -63,9 +63,9 @@ func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error) {
 	buf := r.Regexp.Find(input)
 	if buf == nil {
 		return nil, NewErrUnexpectedToken(
-			ShowInput(input),
-			ctx.Location.Position,
 			r,
+			ctx.Location,
+			ShowInput(input),
 		)
 	}
 	regexpRegion := r.Regexp.FindIndex(input)

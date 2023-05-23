@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -150,8 +151,8 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedEOF(
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{},
 			),
 			DefaultParser,
 		},
@@ -160,8 +161,8 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("o", "oó"),
 			nil,
 			NewErrUnexpectedEOF(
-				0,
 				NewTerminal("o", "oó"),
+				&Location{},
 			),
 			DefaultParser,
 		},
@@ -170,9 +171,9 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("o", "oó"),
 			nil,
 			NewErrUnexpectedToken(
-				ShowInput([]byte("oo")),
-				0,
 				NewTerminal("o", "oó"),
+				&Location{},
+				ShowInput([]byte("oo")),
 			),
 			DefaultParser,
 		},
@@ -181,9 +182,9 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				ShowInput([]byte("bar")),
-				0,
 				NewTerminal("foo", "foo"),
+				&Location{},
+				ShowInput([]byte("bar")),
 			),
 			DefaultParser,
 		},
@@ -192,9 +193,9 @@ func TestTerminal(t *testing.T) {
 			NewTerminal("foo", "foo"),
 			nil,
 			NewErrUnexpectedToken(
-				ShowInput([]byte("bar")),
-				3,
 				NewTerminal("foo", "foo"),
+				&Location{Position: 3, Column: 3},
+				ShowInput([]byte("bar")),
 			),
 			DefaultParser,
 		},
@@ -219,20 +220,22 @@ func TestTerminal(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

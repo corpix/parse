@@ -41,7 +41,6 @@ func ParserOptionLineBreak(r Rule) ParserOption {
 	return func(p *Parser) { p.LineBreak = r }
 }
 
-
 // LineRegions construct a slice of Region's for given input.
 // This regions contains ranges of non line-break symbols from left to right.
 // Return value could be used as Parser.LineIndex.
@@ -152,16 +151,22 @@ func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 	}, input)
 	if err != nil {
 		if err == ErrSkipRule {
-			return nil, NewErrUnexpectedEOF(1, r)
+			return nil, NewErrUnexpectedEOF(r, &Location{Position: 1, Column: 1})
 		}
 		return nil, err
 	}
 
 	if tree.Region.End < utf8.RuneCount(input) {
+		pos := tree.Region.End
+		line, col := p.Locate(pos)
 		return nil, NewErrUnexpectedToken(
-			ShowInput(input[tree.Region.End:]),
-			tree.Region.End,
 			r,
+			&Location{
+				Position: pos,
+				Line:     line,
+				Column:   col,
+			},
+			ShowInput(input[pos:]),
 		)
 	}
 

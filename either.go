@@ -72,14 +72,14 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
 	}
 	if len(input) == 0 {
-		return nil, NewErrUnexpectedEOF(ctx.Location.Position, r)
+		return nil, NewErrUnexpectedEOF(r, ctx.Location)
 	}
 
 	nextDepth := ctx.Location.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(
+			ctx.Location,
 			nextDepth,
-			ctx.Location.Position,
 		)
 	}
 
@@ -117,9 +117,9 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 	if subTree == nil {
 		return nil, NewErrUnexpectedToken(
-			input,
-			ctx.Location.Position,
 			r, // FIXME: pass sub-error to reason more precisely?
+			ctx.Location,
+			input,
 		)
 	}
 	if err != nil {
