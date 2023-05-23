@@ -74,7 +74,7 @@ func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
 		subTree     *Tree
 		subChilds   = []*Tree{}
 		pos         = ctx.Location.Position
-		line, col int
+		line, col   int
 		err         error
 	)
 repeat:
