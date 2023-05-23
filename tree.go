@@ -13,7 +13,7 @@ type Location struct {
 }
 
 func (l *Location) String() string {
-	return fmt.Sprintf("%d:%d", l.Line, l.Column)
+	return fmt.Sprintf("%d:%d", l.Line+1, l.Column+1)
 }
 
 // Tree represents a single Rule match with corresponding
