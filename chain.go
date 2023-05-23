@@ -76,7 +76,7 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 		subTrees  = make([]*Tree, len(r.Rules))
 		n         int
 		pos       = ctx.Location.Position
-		movPos    = 0
+		movPos    int
 		line, col int
 		err       error
 	)
