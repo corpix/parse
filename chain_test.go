@@ -1,8 +1,8 @@
 package parse
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
@@ -391,6 +391,7 @@ func TestChain(t *testing.T) {
 						Rule: NewTerminal("space", " "),
 						Location: &Location{
 							Position: 3,
+							Column:   3,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -403,6 +404,7 @@ func TestChain(t *testing.T) {
 						Rule: NewTerminal("bar", "bar"),
 						Location: &Location{
 							Position: 4,
+							Column:   4,
 							Depth:    1,
 						},
 						Region: &Region{

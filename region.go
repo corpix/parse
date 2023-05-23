@@ -4,7 +4,7 @@ package parse
 // It could be a position of '(' and ')' in 'foo(bar)' for example.
 type Region struct {
 	Start int
-	End  int
+	End   int
 }
 
 // TreeRegion constructs a *Region from the one or more *Tree.

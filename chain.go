@@ -72,22 +72,24 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 
 	var (
-		subInput = input
-		subTrees = make([]*Tree, len(r.Rules))
-		n        int
-		pos      = ctx.Location.Position
-		movPos   = 0
-		err      error
+		subInput  = input
+		subTrees  = make([]*Tree, len(r.Rules))
+		n         int
+		pos       = ctx.Location.Position
+		movPos    = 0
+		line, col int
+		err       error
 	)
 	for _, sr := range r.Rules {
+		line, col = ctx.Parser.Locate(pos)
 		subTrees[n], err = sr.Parse(
 			&Context{
 				Rule:   r,
 				Parser: ctx.Parser,
 				Location: &Location{
 					Position: pos,
-					Line:     ctx.Location.Line,   // FIXME
-					Column:   ctx.Location.Column, // FIXME
+					Line:     line,
+					Column:   col,
 					Depth:    nextDepth,
 				},
 			},
@@ -110,12 +112,13 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	subTrees = subTrees[:n] // NOTE: because some Rule's could be skipped
 
 	region := TreeRegion(subTrees...)
+	line, col = ctx.Parser.Locate(ctx.Location.Position)
 	return &Tree{
 		Rule: r,
 		Location: &Location{
 			Position: ctx.Location.Position,
-			Line:     ctx.Location.Line,   // FIXME
-			Column:   ctx.Location.Column, // FIXME
+			Line:     line,
+			Column:   col,
 			Depth:    ctx.Location.Depth,
 		},
 		Region: region,

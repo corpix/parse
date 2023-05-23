@@ -66,12 +66,13 @@ func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 	regexpRegion := r.Regexp.FindIndex(input)
 
+	line, col := ctx.Parser.Locate(ctx.Location.Position)
 	return &Tree{
 		Rule: r,
 		Location: &Location{
 			Position: ctx.Location.Position,
-			Line:     ctx.Location.Line,   // FIXME
-			Column:   ctx.Location.Column, // FIXME
+			Line:     line,
+			Column:   col,
 			Depth:    ctx.Location.Depth,
 		},
 		Region: &Region{

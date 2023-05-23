@@ -80,8 +80,9 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 
 	var (
-		subTree *Tree
-		err     error
+		subTree   *Tree
+		line, col = ctx.Parser.Locate(ctx.Location.Position)
+		err       error
 	)
 	for _, sr := range r.Rules {
 		subTree, err = sr.Parse(
@@ -90,8 +91,8 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 				Parser: ctx.Parser,
 				Location: &Location{
 					Position: ctx.Location.Position,
-					Line:     ctx.Location.Line,   // FIXME
-					Column:   ctx.Location.Column, // FIXME
+					Line:     line,
+					Column:   col,
 					Depth:    nextDepth,
 				},
 			},
@@ -126,8 +127,8 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 		Rule: r,
 		Location: &Location{
 			Position: subTree.Location.Position,
-			Line:     ctx.Location.Line,   // FIXME
-			Column:   ctx.Location.Column, // FIXME
+			Line:     line,
+			Column:   col,
 			Depth:    ctx.Location.Depth,
 		},
 		Region: &region,

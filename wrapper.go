@@ -69,8 +69,9 @@ func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 
 	var (
-		subTree *Tree
-		err     error
+		subTree   *Tree
+		err       error
+		line, col = ctx.Parser.Locate(ctx.Location.Position)
 	)
 
 	subTree, err = r.Rule.Parse(
@@ -79,8 +80,8 @@ func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
 			Parser: ctx.Parser,
 			Location: &Location{
 				Position: ctx.Location.Position,
-				Line:     ctx.Location.Line,   // FIXME
-				Column:   ctx.Location.Column, // FIXME
+				Line:     line,
+				Column:   col,
 				Depth:    nextDepth,
 			},
 		},
@@ -96,8 +97,8 @@ func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
 		Rule: r,
 		Location: &Location{
 			Position: ctx.Location.Position,
-			Line:     ctx.Location.Line,   // FIXME
-			Column:   ctx.Location.Column, // FIXME
+			Line:     line,
+			Column:   col,
 			Depth:    ctx.Location.Depth,
 		},
 		Region: region,

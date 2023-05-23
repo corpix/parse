@@ -205,13 +205,13 @@ func TestTerminal(t *testing.T) {
 			"foo",
 			NewTerminal("foo", "foo"),
 			&Tree{
-				Rule:  NewTerminal("foo", "foo"),
+				Rule:     NewTerminal("foo", "foo"),
 				Location: &Location{},
 				Region: &Region{
 					Start: 0,
 					End:   3,
 				},
-				Data:  []byte("foo"),
+				Data: []byte("foo"),
 			},
 			nil,
 			DefaultParser,

@@ -74,6 +74,7 @@ func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
 		subTree     *Tree
 		subChilds   = []*Tree{}
 		pos         = ctx.Location.Position
+		line, col int
 		err         error
 	)
 repeat:
@@ -82,14 +83,15 @@ repeat:
 			break
 		}
 
+		line, col = ctx.Parser.Locate(pos)
 		subTree, err = r.Rule.Parse(
 			&Context{
 				Rule:   r,
 				Parser: ctx.Parser,
 				Location: &Location{
 					Position: pos,
-					Line:     ctx.Location.Line,   // FIXME
-					Column:   ctx.Location.Column, // FIXME
+					Line:     line,
+					Column:   col,
 					Depth:    nextDepth,
 				},
 			},
@@ -148,12 +150,13 @@ repeat:
 	}
 
 	region := TreeRegion(subChilds...)
+	line, col = ctx.Parser.Locate(ctx.Location.Position)
 	return &Tree{
 		Rule: r,
 		Location: &Location{
 			Position: ctx.Location.Position,
-			Line:     ctx.Location.Line,   // FIXME
-			Column:   ctx.Location.Column, // FIXME
+			Line:     line,
+			Column:   col,
 			Depth:    ctx.Location.Depth,
 		},
 		Region: region,

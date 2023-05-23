@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -305,6 +306,7 @@ func TestWrapper(t *testing.T) {
 								Rule: NewTerminal("space", " "),
 								Location: &Location{
 									Position: 3,
+									Column:   3,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -317,6 +319,7 @@ func TestWrapper(t *testing.T) {
 								Rule: NewTerminal("bar", "bar"),
 								Location: &Location{
 									Position: 4,
+									Column:   4,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -335,20 +338,22 @@ func TestWrapper(t *testing.T) {
 	}
 
 	for k, sample := range samples {
-		tree, err := sample.parser.Parse(
-			sample.rule,
-			[]byte(sample.text),
-		)
-		msg := spew.Sdump(
-			k,
-			sample.rule,
-			sample.text,
-		)
-		if sample.err == nil && err != nil {
-			t.Error(err)
-		} else {
-			assert.EqualValues(t, sample.err, err, msg)
-		}
-		assert.EqualValues(t, sample.tree, tree, msg)
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			tree, err := sample.parser.Parse(
+				sample.rule,
+				[]byte(sample.text),
+			)
+			msg := spew.Sdump(
+				k,
+				sample.rule,
+				sample.text,
+			)
+			if sample.err == nil && err != nil {
+				t.Error(err)
+			} else {
+				assert.EqualValues(t, sample.err, err, msg)
+			}
+			assert.EqualValues(t, sample.tree, tree, msg)
+		})
 	}
 }

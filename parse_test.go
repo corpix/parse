@@ -246,6 +246,7 @@ func TestParse(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 3,
+							Column:   3,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -258,6 +259,7 @@ func TestParse(t *testing.T) {
 								Rule: NewTerminal("bar", "bar"),
 								Location: &Location{
 									Position: 3,
+									Column:   3,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -328,6 +330,7 @@ func TestParse(t *testing.T) {
 						Rule: NewTerminal("left bracket", "("),
 						Location: &Location{
 							Position: 3,
+							Column:   3,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -349,6 +352,7 @@ func TestParse(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 4,
+							Column:   4,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -367,6 +371,7 @@ func TestParse(t *testing.T) {
 								),
 								Location: &Location{
 									Position: 4,
+									Column:   4,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -379,6 +384,7 @@ func TestParse(t *testing.T) {
 										Rule: NewTerminal("one", "1"),
 										Location: &Location{
 											Position: 4,
+											Column:   4,
 											Depth:    3,
 										},
 										Region: &Region{
@@ -399,6 +405,7 @@ func TestParse(t *testing.T) {
 								),
 								Location: &Location{
 									Position: 5,
+									Column:   5,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -411,6 +418,7 @@ func TestParse(t *testing.T) {
 										Rule: NewTerminal("two", "2"),
 										Location: &Location{
 											Position: 5,
+											Column:   5,
 											Depth:    3,
 										},
 										Region: &Region{
@@ -431,6 +439,7 @@ func TestParse(t *testing.T) {
 								),
 								Location: &Location{
 									Position: 6,
+									Column:   6,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -443,6 +452,7 @@ func TestParse(t *testing.T) {
 										Rule: NewTerminal("three", "3"),
 										Location: &Location{
 											Position: 6,
+											Column:   6,
 											Depth:    3,
 										},
 										Region: &Region{
@@ -463,6 +473,7 @@ func TestParse(t *testing.T) {
 								),
 								Location: &Location{
 									Position: 7,
+									Column:   7,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -475,6 +486,7 @@ func TestParse(t *testing.T) {
 										Rule: NewTerminal("four", "4"),
 										Location: &Location{
 											Position: 7,
+											Column:   7,
 											Depth:    3,
 										},
 										Region: &Region{
@@ -491,6 +503,7 @@ func TestParse(t *testing.T) {
 						Rule: NewTerminal("right bracket", ")"),
 						Location: &Location{
 							Position: 8,
+							Column:   8,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -552,6 +565,16 @@ func TestParserLineBreaksLocate(t *testing.T) {
 				{11, 2, 3, 0},
 				{12, 3, 0, 0},
 				{13, 3, 0, 0},
+			},
+		},
+		{
+			"foo bar",
+			DefaultParser,
+			[]*Location{
+				{5, 0, 5, 0},
+				{6, 0, 6, 0},
+				{7, 0, 6, 0},
+				{10, 0, 6, 0},
 			},
 		},
 	}

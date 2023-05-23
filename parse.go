@@ -89,8 +89,17 @@ func (p *Parser) Locate(position int) (int, int) {
 		l    int
 		c    int
 	)
-	if il == 0 || position == 0 { // returning zero if we have no index or position
+	if position == 0 { // returning zero if we have no position
 		return l, c
+	}
+	if il == 0 { // returning position if we have no line index (no line-breaks)
+		return l, position
+	}
+	if il == 1 { // returrning position, scoped to region (one line-break in index)
+		if position > p.LineIndex[0].End {
+			return l, p.LineIndex[0].End
+		}
+		return l, position
 	}
 
 	for h <= t {

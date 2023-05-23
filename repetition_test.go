@@ -384,6 +384,7 @@ func TestRepetition(t *testing.T) {
 						Rule: NewTerminal("f", "f"),
 						Location: &Location{
 							Position: 1,
+							Column:   1,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -444,6 +445,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 1,
+							Column:   1,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -455,6 +457,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("space", " "),
 								Location: &Location{
 									Position: 1,
+									Column:   1,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -470,6 +473,7 @@ func TestRepetition(t *testing.T) {
 						Rule: NewTerminal("f", "f"),
 						Location: &Location{
 							Position: 2,
+							Column:   2,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -531,6 +535,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 1,
+							Column:   1,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -542,6 +547,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("space", " "),
 								Location: &Location{
 									Position: 1,
+									Column:   1,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -554,6 +560,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("space", " "),
 								Location: &Location{
 									Position: 2,
+									Column:   2,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -569,6 +576,7 @@ func TestRepetition(t *testing.T) {
 						Rule: NewTerminal("f", "f"),
 						Location: &Location{
 							Position: 3,
+							Column:   3,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -645,6 +653,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 1,
+							Column:   1,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -657,6 +666,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("two", "2"),
 								Location: &Location{
 									Position: 1,
+									Column:   1,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -676,6 +686,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 2,
+							Column:   2,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -688,6 +699,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("three", "3"),
 								Location: &Location{
 									Position: 2,
+									Column:   2,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -767,6 +779,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 1,
+							Column:   1,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -779,6 +792,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("two", "2"),
 								Location: &Location{
 									Position: 1,
+									Column:   1,
 									Depth:    2,
 								},
 								Region: &Region{
@@ -798,6 +812,7 @@ func TestRepetition(t *testing.T) {
 						),
 						Location: &Location{
 							Position: 2,
+							Column:   2,
 							Depth:    1,
 						},
 						Region: &Region{
@@ -810,6 +825,7 @@ func TestRepetition(t *testing.T) {
 								Rule: NewTerminal("three", "3"),
 								Location: &Location{
 									Position: 2,
+									Column:   2,
 									Depth:    2,
 								},
 								Region: &Region{
