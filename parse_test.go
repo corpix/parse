@@ -166,13 +166,13 @@ func TestParse(t *testing.T) {
 			"",
 			newTestRuleFinite("unsupported"),
 			&Tree{
-				Rule: newTestRuleFinite("unsupported"),
+				Rule:     newTestRuleFinite("unsupported"),
 				Location: &Location{},
 				Region: &Region{
 					Start: 0,
 					End:   0,
 				},
-				Data: []byte{},
+				Data:   []byte{},
 				Childs: []*Tree{},
 			},
 			nil,
@@ -519,6 +519,69 @@ func TestParse(t *testing.T) {
 			)
 			assert.EqualValues(t, sample.err, err, msg)
 			assert.EqualValues(t, sample.tree, tree, msg)
+		})
+	}
+}
+
+func TestParserLineBreaksLocate(t *testing.T) {
+	samples := []struct {
+		text   string
+		parser *Parser
+		locs   []*Location
+	}{
+		{
+			"foo\nbar\nbaz",
+			DefaultParser,
+			[]*Location{
+				{0, 0, 0, 0},
+				{5, 1, 1, 0},
+				{6, 1, 2, 0},
+				{7, 1, 3, 0},
+				{10, 2, 2, 0},
+				{666, 2, 2, 0},
+			},
+		},
+		{
+			"foo\nbar\nbaz\r\nqux",
+			DefaultParser,
+			[]*Location{
+				{5, 1, 1, 0},
+				{6, 1, 2, 0},
+				{7, 1, 3, 0},
+				{10, 2, 2, 0},
+				{11, 2, 3, 0},
+				{12, 3, 0, 0},
+				{13, 3, 0, 0},
+			},
+		},
+	}
+
+	for k, sample := range samples {
+		t.Run(fmt.Sprintf("%d", k), func(t *testing.T) {
+			regions := sample.parser.LineRegions([]byte(sample.text))
+			sample.parser.LineIndex = regions
+			for n, loc := range sample.locs {
+				t.Run(fmt.Sprintf("%d", n), func(t *testing.T) {
+					line, col := sample.parser.Locate(loc.Position)
+					msg := spew.Sdump(loc)
+					_ = msg
+					//spew.Dump(regions)
+					assert.Equal(
+						t, loc.Line, line,
+						// fmt.Sprintf(
+						// 	"line check failed: %q -> %q, %s",
+						// 	sample.text, sample.text[loc.Position:], msg,
+						// ),
+					)
+					assert.Equal(
+						t, loc.Column, col,
+						// fmt.Sprintf(
+						// 	"column check failed: %q -> %q, %s",
+						// 	sample.text, sample.text[loc.Position:], msg,
+						// ),
+					)
+				})
+			}
 		})
 	}
 }

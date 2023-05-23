@@ -25,6 +25,7 @@ var (
 type Parser struct {
 	MaxDepth  int
 	LineBreak Rule
+	LineIndex []*Region
 }
 
 // ParserOption represents a Parser option
@@ -40,12 +41,91 @@ func ParserOptionLineBreak(r Rule) ParserOption {
 	return func(p *Parser) { p.LineBreak = r }
 }
 
+func (p *Parser) LineRegions(input []byte) []*Region {
+	loc := &Location{}
+	ctx := &Context{
+		Parser:   p,
+		Location: loc,
+	}
+
+	var (
+		t       *Tree
+		err     error
+		regions = []*Region{}
+		pos     int
+		n       int
+	)
+	for n < len(input) {
+		loc.Position = n // NOTE: affects ctx
+		t, err = p.LineBreak.Parse(ctx, input[n:])
+		if err == nil {
+			regions = append(regions, &Region{
+				Start: pos,
+				End:   t.Region.Start,
+			})
+			pos = t.Region.End
+			n = t.Region.End
+		} else {
+			switch err.(type) {
+			case *ErrUnexpectedEOF:
+				break
+			}
+			n++
+		}
+	}
+	if len(input[pos:]) > 0 { // no line-break at end of file
+		regions = append(regions, &Region{
+			Start: pos,
+			End:   pos + len(input[pos:]) - 1,
+		})
+	}
+	return regions
+}
+
+func (p *Parser) Locate(position int) (int, int) {
+	var (
+		il   = len(p.LineIndex)
+		h, t = 0, il - 1
+		l    int
+		c    int
+	)
+	if il == 0 || position == 0 { // returning zero if we have no index or position
+		return l, c
+	}
+
+	for h <= t {
+		l = (h + t) / 2
+		if position >= p.LineIndex[l].Start {
+			if position <= p.LineIndex[l].End {
+				break
+			} else {
+				h = l + 1
+			}
+		} else {
+			t = l - 1
+		}
+	}
+	if position > p.LineIndex[l].End {
+		// handle case when position is larger than available regions
+		c = p.LineIndex[l].End - p.LineIndex[l].Start
+	} else {
+		c = position - p.LineIndex[l].Start
+		if c < 0 {
+			// handle case where position points to line-break
+			c = 0
+		}
+	}
+
+	return l, c
+}
+
 // Parse parses input with Rule's.
 func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 	if r == nil {
 		return nil, NewErrEmptyRule(r, nil)
 	}
 
+	p.LineIndex = p.LineRegions(input)
 	tree, err := r.Parse(&Context{
 		Parser:   p,
 		Location: &Location{},
