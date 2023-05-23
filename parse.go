@@ -41,6 +41,11 @@ func ParserOptionLineBreak(r Rule) ParserOption {
 	return func(p *Parser) { p.LineBreak = r }
 }
 
+
+// LineRegions construct a slice of Region's for given input.
+// This regions contains ranges of non line-break symbols from left to right.
+// Return value could be used as Parser.LineIndex.
+// Also Parser.Parse calls Parser.LineRegions for you automatically.
 func (p *Parser) LineRegions(input []byte) []*Region {
 	loc := &Location{}
 	ctx := &Context{
@@ -82,6 +87,10 @@ func (p *Parser) LineRegions(input []byte) []*Region {
 	return regions
 }
 
+// Locate finds a line & column of the given position.
+// It expects Parser.LineIndex to be a sorted slice of Region's
+// of non line-break's.
+// If there is no LineIndex then it returns 0, 0.
 func (p *Parser) Locate(position int) (int, int) {
 	var (
 		il   = len(p.LineIndex)
@@ -129,6 +138,8 @@ func (p *Parser) Locate(position int) (int, int) {
 }
 
 // Parse parses input with Rule's.
+// Calls Parser.LineRegions and store result under Parser.LineIndex.
+// Not safe for concurrent use (and not expected to be used concurrently).
 func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 	if r == nil {
 		return nil, NewErrEmptyRule(r, nil)

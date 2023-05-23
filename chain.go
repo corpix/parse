@@ -58,6 +58,11 @@ func (r *Chain) IsFinite() bool {
 	return false
 }
 
+
+// Parse consumes some bytes from input & emits a Tree
+// using settings defined during creation of the concrete Rule type.
+// May return an error if something goes wrong, should provide some
+// location information to the user which points to position in input.
 func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	if len(r.Rules) == 0 {
 		return nil, NewErrEmptyRule(r, ctx.Rule)

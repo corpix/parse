@@ -55,6 +55,10 @@ func (r *Terminal) IsFinite() bool {
 	return true
 }
 
+// Parse consumes some bytes from input & emits a Tree
+// using settings defined during creation of the concrete Rule type.
+// May return an error if something goes wrong, should provide some
+// location information to the user which points to position in input.
 func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
 	length := utf8.RuneCount(r.Value)
 	if length == 0 {

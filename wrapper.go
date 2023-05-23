@@ -55,6 +55,10 @@ func (r *Wrapper) IsFinite() bool {
 	return false
 }
 
+// Parse consumes some bytes from input & emits a Tree
+// using settings defined during creation of the concrete Rule type.
+// May return an error if something goes wrong, should provide some
+// location information to the user which points to position in input.
 func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
 	if r.Rule == nil {
 		return nil, NewErrEmptyRule(r, r.Rule)

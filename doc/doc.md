@@ -79,6 +79,8 @@ import "github.com/corpix/parse"
 - [type Matcher](<#Matcher>)
 - [type Parser](<#Parser>)
   - [func NewParser(op ...ParserOption) *Parser](<#NewParser>)
+  - [func (p *Parser) LineRegions(input []byte) []*Region](<#Parser.LineRegions>)
+  - [func (p *Parser) Locate(position int) (int, int)](<#Parser.Locate>)
   - [func (p *Parser) Parse(r Rule, input []byte) (*Tree, error)](<#Parser.Parse>)
 - [type ParserOption](<#ParserOption>)
   - [func ParserOptionLineBreak(r Rule) ParserOption](<#ParserOptionLineBreak>)
@@ -300,7 +302,7 @@ func NewErrUnsupportedRule(rule Rule) error
 NewErrUnsupportedRule constructs new ErrUnsupportedRule.
 
 <a name="RuleShow"></a>
-## func [RuleShow](<https://github.com/corpix/parse/blob/master/rule.go#L61>)
+## func [RuleShow](<https://github.com/corpix/parse/blob/master/rule.go#L65>)
 
 ```go
 func RuleShow(rule Rule, parameters string, childs string) string
@@ -447,7 +449,7 @@ type Chain struct {
 ```
 
 <a name="NewChain"></a>
-### func [NewChain](<https://github.com/corpix/parse/blob/master/chain.go#L138>)
+### func [NewChain](<https://github.com/corpix/parse/blob/master/chain.go#L146>)
 
 ```go
 func NewChain(name string, r ...Rule) *Chain
@@ -456,7 +458,7 @@ func NewChain(name string, r ...Rule) *Chain
 NewChain constructs new Chain. Valid Chain could be constructed with \>=2 rules.
 
 <a name="Chain.Add"></a>
-### func \(\*Chain\) [Add](<https://github.com/corpix/parse/blob/master/chain.go#L130>)
+### func \(\*Chain\) [Add](<https://github.com/corpix/parse/blob/master/chain.go#L138>)
 
 ```go
 func (r *Chain) Add(rule Rule)
@@ -501,13 +503,13 @@ func (r *Chain) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Chain.Parse"></a>
-### func \(\*Chain\) [Parse](<https://github.com/corpix/parse/blob/master/chain.go#L61>)
+### func \(\*Chain\) [Parse](<https://github.com/corpix/parse/blob/master/chain.go#L66>)
 
 ```go
 func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Chain.Show"></a>
 ### func \(\*Chain\) [Show](<https://github.com/corpix/parse/blob/master/chain.go#L22>)
@@ -528,7 +530,7 @@ func (r *Chain) String() string
 String returns rule as a string, resolving recursion with \`\<circular\>\` placeholder.
 
 <a name="Context"></a>
-## type [Context](<https://github.com/corpix/parse/blob/master/rule.go#L53-L57>)
+## type [Context](<https://github.com/corpix/parse/blob/master/rule.go#L57-L61>)
 
 
 
@@ -553,7 +555,7 @@ type Either struct {
 ```
 
 <a name="NewASCIIRange"></a>
-### func [NewASCIIRange](<https://github.com/corpix/parse/blob/master/either.go#L158>)
+### func [NewASCIIRange](<https://github.com/corpix/parse/blob/master/either.go#L163>)
 
 ```go
 func NewASCIIRange(name string, from byte, to byte) *Either
@@ -562,7 +564,7 @@ func NewASCIIRange(name string, from byte, to byte) *Either
 NewASCIIRange constructs \*Either\(Terminal, ...\) Rule using specified ASCII range.
 
 <a name="NewEither"></a>
-### func [NewEither](<https://github.com/corpix/parse/blob/master/either.go#L150>)
+### func [NewEither](<https://github.com/corpix/parse/blob/master/either.go#L155>)
 
 ```go
 func NewEither(name string, r ...Rule) *Either
@@ -571,7 +573,7 @@ func NewEither(name string, r ...Rule) *Either
 NewEither constructs \*Either Rule. Valid Either could be constructed with \>=2 rules.
 
 <a name="Either.Add"></a>
-### func \(\*Either\) [Add](<https://github.com/corpix/parse/blob/master/either.go#L142>)
+### func \(\*Either\) [Add](<https://github.com/corpix/parse/blob/master/either.go#L147>)
 
 ```go
 func (r *Either) Add(rule Rule)
@@ -616,13 +618,13 @@ func (r *Either) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Either.Parse"></a>
-### func \(\*Either\) [Parse](<https://github.com/corpix/parse/blob/master/either.go#L66>)
+### func \(\*Either\) [Parse](<https://github.com/corpix/parse/blob/master/either.go#L70>)
 
 ```go
 func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Either.Show"></a>
 ### func \(\*Either\) [Show](<https://github.com/corpix/parse/blob/master/either.go#L27>)
@@ -849,7 +851,7 @@ type Matcher interface {
 ```
 
 <a name="Parser"></a>
-## type [Parser](<https://github.com/corpix/parse/blob/master/parse.go#L25-L28>)
+## type [Parser](<https://github.com/corpix/parse/blob/master/parse.go#L25-L29>)
 
 Parser represents a parser which use Rule's to parse the input.
 
@@ -857,11 +859,12 @@ Parser represents a parser which use Rule's to parse the input.
 type Parser struct {
     MaxDepth  int
     LineBreak Rule
+    LineIndex []*Region
 }
 ```
 
 <a name="NewParser"></a>
-### func [NewParser](<https://github.com/corpix/parse/blob/master/parse.go#L77>)
+### func [NewParser](<https://github.com/corpix/parse/blob/master/parse.go#L177>)
 
 ```go
 func NewParser(op ...ParserOption) *Parser
@@ -869,17 +872,35 @@ func NewParser(op ...ParserOption) *Parser
 
 NewParser constructs new \*Parser.
 
+<a name="Parser.LineRegions"></a>
+### func \(\*Parser\) [LineRegions](<https://github.com/corpix/parse/blob/master/parse.go#L49>)
+
+```go
+func (p *Parser) LineRegions(input []byte) []*Region
+```
+
+LineRegions construct a slice of Region's for given input. This regions contains ranges of non line\-break symbols from left to right. Return value could be used as Parser.LineIndex. Also Parser.Parse calls Parser.LineRegions for you automatically.
+
+<a name="Parser.Locate"></a>
+### func \(\*Parser\) [Locate](<https://github.com/corpix/parse/blob/master/parse.go#L94>)
+
+```go
+func (p *Parser) Locate(position int) (int, int)
+```
+
+Locate finds a line & column of the given position. It expects Parser.LineIndex to be a sorted slice of Region's of non line\-break's. If there is no LineIndex then it returns 0, 0.
+
 <a name="Parser.Parse"></a>
-### func \(\*Parser\) [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L44>)
+### func \(\*Parser\) [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L143>)
 
 ```go
 func (p *Parser) Parse(r Rule, input []byte) (*Tree, error)
 ```
 
-Parse parses input with Rule's.
+Parse parses input with Rule's. Calls Parser.LineRegions and store result under Parser.LineIndex. Not safe for concurrent use \(and not expected to be used concurrently\).
 
 <a name="ParserOption"></a>
-## type [ParserOption](<https://github.com/corpix/parse/blob/master/parse.go#L33>)
+## type [ParserOption](<https://github.com/corpix/parse/blob/master/parse.go#L34>)
 
 ParserOption represents a Parser option which mutates Parser in a way which is acceptable for this option.
 
@@ -888,7 +909,7 @@ type ParserOption func(*Parser)
 ```
 
 <a name="ParserOptionLineBreak"></a>
-### func [ParserOptionLineBreak](<https://github.com/corpix/parse/blob/master/parse.go#L39>)
+### func [ParserOptionLineBreak](<https://github.com/corpix/parse/blob/master/parse.go#L40>)
 
 ```go
 func ParserOptionLineBreak(r Rule) ParserOption
@@ -897,7 +918,7 @@ func ParserOptionLineBreak(r Rule) ParserOption
 
 
 <a name="ParserOptionMaxDepth"></a>
-### func [ParserOptionMaxDepth](<https://github.com/corpix/parse/blob/master/parse.go#L35>)
+### func [ParserOptionMaxDepth](<https://github.com/corpix/parse/blob/master/parse.go#L36>)
 
 ```go
 func ParserOptionMaxDepth(d int) ParserOption
@@ -946,7 +967,7 @@ type Regexp struct {
 ```
 
 <a name="NewRegexp"></a>
-### func [NewRegexp](<https://github.com/corpix/parse/blob/master/regexp.go#L88>)
+### func [NewRegexp](<https://github.com/corpix/parse/blob/master/regexp.go#L93>)
 
 ```go
 func NewRegexp(name string, expr string) *Regexp
@@ -991,13 +1012,13 @@ func (r *Regexp) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Regexp.Parse"></a>
-### func \(\*Regexp\) [Parse](<https://github.com/corpix/parse/blob/master/regexp.go#L58>)
+### func \(\*Regexp\) [Parse](<https://github.com/corpix/parse/blob/master/regexp.go#L62>)
 
 ```go
 func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Regexp.Show"></a>
 ### func \(\*Regexp\) [Show](<https://github.com/corpix/parse/blob/master/regexp.go#L22>)
@@ -1053,7 +1074,7 @@ type Repetition struct {
 ```
 
 <a name="NewRepetition"></a>
-### func [NewRepetition](<https://github.com/corpix/parse/blob/master/repetition.go#L189>)
+### func [NewRepetition](<https://github.com/corpix/parse/blob/master/repetition.go#L196>)
 
 ```go
 func NewRepetition(name string, rule Rule) *Repetition
@@ -1062,7 +1083,7 @@ func NewRepetition(name string, rule Rule) *Repetition
 NewRepetition constructs new \*Repetition which releat one or more times.
 
 <a name="NewRepetitionTimes"></a>
-### func [NewRepetitionTimes](<https://github.com/corpix/parse/blob/master/repetition.go#L168>)
+### func [NewRepetitionTimes](<https://github.com/corpix/parse/blob/master/repetition.go#L175>)
 
 ```go
 func NewRepetitionTimes(name string, times int, rule Rule) *Repetition
@@ -1071,7 +1092,7 @@ func NewRepetitionTimes(name string, times int, rule Rule) *Repetition
 NewRepetitionTimes constructs new \*Repetition which repeats exactly \`times\`.
 
 <a name="NewRepetitionTimesVariadic"></a>
-### func [NewRepetitionTimesVariadic](<https://github.com/corpix/parse/blob/master/repetition.go#L179>)
+### func [NewRepetitionTimesVariadic](<https://github.com/corpix/parse/blob/master/repetition.go#L186>)
 
 ```go
 func NewRepetitionTimesVariadic(name string, times int, rule Rule) *Repetition
@@ -1116,13 +1137,13 @@ func (r *Repetition) Name() string
 Name indicates the Name which was given to the rule on creation. Name could be not unique.
 
 <a name="Repetition.Parse"></a>
-### func \(\*Repetition\) [Parse](<https://github.com/corpix/parse/blob/master/repetition.go#L62>)
+### func \(\*Repetition\) [Parse](<https://github.com/corpix/parse/blob/master/repetition.go#L66>)
 
 ```go
 func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Repetition.Show"></a>
 ### func \(\*Repetition\) [Show](<https://github.com/corpix/parse/blob/master/repetition.go#L25>)
@@ -1143,7 +1164,7 @@ func (r *Repetition) String() string
 String returns rule as a string, resolving recursion with \`\<circular\>\` placeholder.
 
 <a name="Rule"></a>
-## type [Rule](<https://github.com/corpix/parse/blob/master/rule.go#L40-L51>)
+## type [Rule](<https://github.com/corpix/parse/blob/master/rule.go#L40-L55>)
 
 Rule represents a general Rule interface.
 
@@ -1158,6 +1179,10 @@ type Rule interface {
     // not a wrapper for other rules.
     IsFinite() bool
 
+    // Parse consumes some bytes from input & emits a Tree
+    // using settings defined during creation of the concrete Rule type.
+    // May return an error if something goes wrong, should provide some
+    // location information to the user which points to position in input.
     Parse(ctx *Context, input []byte) (*Tree, error)
 }
 ```
@@ -1292,7 +1317,7 @@ type Terminal struct {
 ```
 
 <a name="NewTerminal"></a>
-### func [NewTerminal](<https://github.com/corpix/parse/blob/master/terminal.go#L99>)
+### func [NewTerminal](<https://github.com/corpix/parse/blob/master/terminal.go#L104>)
 
 ```go
 func NewTerminal(name string, v string) *Terminal
@@ -1337,13 +1362,13 @@ func (r *Terminal) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Terminal.Parse"></a>
-### func \(\*Terminal\) [Parse](<https://github.com/corpix/parse/blob/master/terminal.go#L58>)
+### func \(\*Terminal\) [Parse](<https://github.com/corpix/parse/blob/master/terminal.go#L62>)
 
 ```go
 func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Terminal.Show"></a>
 ### func \(\*Terminal\) [Show](<https://github.com/corpix/parse/blob/master/terminal.go#L22>)
@@ -1379,7 +1404,7 @@ type Tree struct {
 ```
 
 <a name="Parse"></a>
-### func [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L72>)
+### func [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L172>)
 
 ```go
 func Parse(rule Rule, input []byte) (*Tree, error)
@@ -1492,7 +1517,7 @@ type Wrapper struct {
 ```
 
 <a name="NewWrapper"></a>
-### func [NewWrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L112>)
+### func [NewWrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L117>)
 
 ```go
 func NewWrapper(name string, r Rule) *Wrapper
@@ -1537,13 +1562,13 @@ func (r *Wrapper) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Wrapper.Parse"></a>
-### func \(\*Wrapper\) [Parse](<https://github.com/corpix/parse/blob/master/wrapper.go#L58>)
+### func \(\*Wrapper\) [Parse](<https://github.com/corpix/parse/blob/master/wrapper.go#L62>)
 
 ```go
 func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error)
 ```
 
-
+Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Wrapper.Show"></a>
 ### func \(\*Wrapper\) [Show](<https://github.com/corpix/parse/blob/master/wrapper.go#L23>)
