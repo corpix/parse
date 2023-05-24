@@ -11,6 +11,7 @@ var _ Rule = new(Terminal)
 type Terminal struct {
 	name  string
 	Value []byte
+	Hooks []RuleParseHook
 }
 
 // Name indicates the name which was given to the rule
@@ -59,7 +60,7 @@ func (r *Terminal) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Terminal) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
 	length := utf8.RuneCount(r.Value)
 	if length == 0 {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
@@ -75,7 +76,7 @@ func (r *Terminal) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*T
 	}
 
 	line, col := ctx.Parser.Locate(ctx.Location.Position)
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -89,12 +90,20 @@ func (r *Terminal) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*T
 		},
 		Depth: ctx.Depth,
 		Data:  buf,
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
 
 // NewTerminal constructs a new *Terminal.
-func NewTerminal(name string, v string) *Terminal {
-	return &Terminal{name, []byte(v)}
+func NewTerminal(name string, v string, hooks ...RuleParseHook) *Terminal {
+	return &Terminal{
+		name:  name,
+		Value: []byte(v),
+		Hooks: hooks,
+	}
 }

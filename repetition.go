@@ -9,6 +9,7 @@ type Repetition struct {
 	Rule     Rule
 	Times    int
 	Variadic bool
+	Hooks    []RuleParseHook
 }
 
 // Name indicates the Name which was given to the rule
@@ -63,7 +64,7 @@ func (r *Repetition) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Repetition) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
 	nextDepth := ctx.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(ctx.Location, nextDepth)
@@ -155,7 +156,7 @@ repeat:
 
 	region := TreeRegion(subChilds...)
 	line, col = ctx.Parser.Locate(ctx.Location.Position)
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -167,33 +168,39 @@ repeat:
 		Depth:  ctx.Depth,
 		Childs: subChilds,
 		Data:   input[:region.End-region.Start],
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
 
 // NewRepetitionTimes constructs new *Repetition which repeats exactly `times`.
-func NewRepetitionTimes(name string, times int, rule Rule) *Repetition {
+func NewRepetitionTimes(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition {
 	return &Repetition{
 		name:     name,
 		Rule:     rule,
 		Times:    times,
 		Variadic: false,
+		Hooks:    hooks,
 	}
 }
 
 // NewRepetitionTimesVariadic constructs new variadic *Repetition
 // which repeats exactly `times` or more.
-func NewRepetitionTimesVariadic(name string, times int, rule Rule) *Repetition {
+func NewRepetitionTimesVariadic(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition {
 	return &Repetition{
 		name:     name,
 		Rule:     rule,
 		Times:    times,
 		Variadic: true,
+		Hooks:    hooks,
 	}
 }
 
 // NewRepetition constructs new *Repetition which releat one or more times.
-func NewRepetition(name string, rule Rule) *Repetition {
-	return NewRepetitionTimesVariadic(name, 1, rule)
+func NewRepetition(name string, rule Rule, hooks ...RuleParseHook) *Repetition {
+	return NewRepetitionTimesVariadic(name, 1, rule, hooks...)
 }

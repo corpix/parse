@@ -38,7 +38,7 @@ func (p RuleParameters) String() string {
 
 //
 
-type RuleParseHook func(ctx *Context, t *Tree) error
+type RuleParseHook = func(ctx *Context, t *Tree) error
 
 // Rule represents a general Rule interface.
 type Rule interface {
@@ -55,7 +55,7 @@ type Rule interface {
 	// using settings defined during creation of the concrete Rule type.
 	// May return an error if something goes wrong, should provide some
 	// location information to the user which points to position in input.
-	Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error)
+	Parse(ctx *Context, input []byte) (*Tree, error)
 }
 
 // RuleShow returns a Rule encoded as a string.

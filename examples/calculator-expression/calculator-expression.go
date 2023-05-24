@@ -35,6 +35,10 @@ func init() {
 		NewTerminal("*", "*"),
 		NewTerminal("/", "/"),
 		NewTerminal("mod", "mod"),
+		func(ctx *Context, tree *Tree) error {
+			fmt.Println("got an operator", string(tree.Data), "at", ctx.Location)
+			return nil
+		},
 	)
 
 	whitespace := NewEither(

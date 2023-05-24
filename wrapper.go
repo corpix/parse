@@ -5,8 +5,9 @@ var _ Rule = new(Wrapper)
 // Wrapper represents a wrapper type for some inner Rule.
 // It could be used to wrap a Rule with custom name.
 type Wrapper struct {
-	name string
-	Rule Rule
+	name  string
+	Rule  Rule
+	Hooks []RuleParseHook
 }
 
 // Name indicates the name which was given to the rule
@@ -59,7 +60,7 @@ func (r *Wrapper) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Wrapper) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
 	if r.Rule == nil {
 		return nil, NewErrEmptyRule(r, r.Rule)
 	}
@@ -98,7 +99,7 @@ func (r *Wrapper) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tr
 	}
 
 	region := TreeRegion(subTree)
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -110,12 +111,20 @@ func (r *Wrapper) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tr
 		Depth:  ctx.Depth,
 		Childs: []*Tree{subTree},
 		Data:   input[:region.End-region.Start],
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
 
 // NewWrapper constructs new Wrapper.
-func NewWrapper(name string, r Rule) *Wrapper {
-	return &Wrapper{name, r}
+func NewWrapper(name string, r Rule, hooks ...RuleParseHook) *Wrapper {
+	return &Wrapper{
+		name:  name,
+		Rule:  r,
+		Hooks: hooks,
+	}
 }

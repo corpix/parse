@@ -1,11 +1,16 @@
 package parse
 
+import (
+	"fmt"
+)
+
 var _ Rule = new(Chain)
 
 // Chain represents a chain of Rule's to match in the data.
 type Chain struct {
 	name  string
 	Rules Rules
+	Hooks []RuleParseHook
 }
 
 // Name indicates the name which was given to the rule
@@ -62,7 +67,7 @@ func (r *Chain) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Chain) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	if len(r.Rules) == 0 {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
 	}
@@ -115,7 +120,7 @@ func (r *Chain) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree
 
 	region := TreeRegion(subTrees...)
 	line, col = ctx.Parser.Locate(ctx.Location.Position)
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -127,7 +132,11 @@ func (r *Chain) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree
 		Depth:  ctx.Depth,
 		Childs: subTrees,
 		Data:   input[:region.End-region.Start],
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
@@ -141,9 +150,24 @@ func (r *Chain) Add(rule Rule) {
 
 // NewChain constructs new Chain.
 // Valid Chain could be constructed with >=2 rules.
-func NewChain(name string, r ...Rule) *Chain {
+func NewChain(name string, rulesOrHooks ...interface{}) *Chain {
+	rules := []Rule{}
+	hooks := []RuleParseHook{}
+	for _, ruleOrHook := range rulesOrHooks {
+		switch v := ruleOrHook.(type) {
+		case Rule:
+			rules = append(rules, v)
+		case nil:
+			rules = append(rules, nil)
+		case RuleParseHook:
+			hooks = append(hooks, v)
+		default:
+			panic(fmt.Sprintf("unsupported type %T", ruleOrHook))
+		}
+	}
 	return &Chain{
-		name,
-		r,
+		name:  name,
+		Rules: rules,
+		Hooks: hooks,
 	}
 }

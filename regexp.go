@@ -11,6 +11,7 @@ type Regexp struct {
 	name   string
 	Regexp *regexp.Regexp
 	Expr   string
+	Hooks  []RuleParseHook
 }
 
 // Name indicates the name which was given to the rule
@@ -59,7 +60,7 @@ func (r *Regexp) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Regexp) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error) {
 	buf := r.Regexp.Find(input)
 	if buf == nil {
 		return nil, NewErrUnexpectedToken(
@@ -71,7 +72,7 @@ func (r *Regexp) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tre
 	regexpRegion := r.Regexp.FindIndex(input)
 
 	line, col := ctx.Parser.Locate(ctx.Location.Position)
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -85,16 +86,21 @@ func (r *Regexp) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tre
 		},
 		Depth: ctx.Depth,
 		Data:  buf,
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
 
 // NewRegexp constructs a new *Regexp.
-func NewRegexp(name string, expr string) *Regexp {
+func NewRegexp(name string, expr string, hooks ...RuleParseHook) *Regexp {
 	return &Regexp{
 		name:   name,
 		Regexp: regexp.MustCompile(expr),
 		Expr:   expr,
+		Hooks:  hooks,
 	}
 }

@@ -11,6 +11,7 @@ var _ Rule = new(Either)
 type Either struct {
 	name  string
 	Rules Rules
+	Hooks []RuleParseHook
 }
 
 // Name indicates the name which was given to the rule
@@ -67,7 +68,7 @@ func (r *Either) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Either) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
+func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 	if len(r.Rules) == 0 {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
 	}
@@ -128,7 +129,7 @@ func (r *Either) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tre
 	}
 
 	region := *subTree.Region
-	return &Tree{
+	tree := &Tree{
 		Rule: r,
 		Location: &Location{
 			Path:     ctx.Location.Path,
@@ -140,7 +141,11 @@ func (r *Either) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tre
 		Depth:  ctx.Depth,
 		Childs: []*Tree{subTree},
 		Data:   input[:subTree.Region.End-subTree.Region.Start],
-	}, nil
+	}
+	for _, hook := range r.Hooks {
+		hook(ctx, tree)
+	}
+	return tree, nil
 }
 
 //
@@ -154,15 +159,28 @@ func (r *Either) Add(rule Rule) {
 
 // NewEither constructs *Either Rule.
 // Valid Either could be constructed with >=2 rules.
-func NewEither(name string, r ...Rule) *Either {
+func NewEither(name string, rulesOrHooks ...interface{}) *Either {
+	rules := []Rule{}
+	hooks := []RuleParseHook{}
+	for _, ruleOrHook := range rulesOrHooks {
+		switch v := ruleOrHook.(type) {
+		case Rule:
+			rules = append(rules, v)
+		case RuleParseHook:
+			hooks = append(hooks, v)
+		default:
+			panic(fmt.Sprintf("unsupported type %T", ruleOrHook))
+		}
+	}
 	return &Either{
-		name,
-		r,
+		name:  name,
+		Rules: rules,
+		Hooks: hooks,
 	}
 }
 
 // NewASCIIRange constructs *Either(Terminal, ...) Rule using specified ASCII range.
-func NewASCIIRange(name string, from byte, to byte) *Either {
+func NewASCIIRange(name string, from byte, to byte, hooks ...RuleParseHook) *Either {
 	if from > to {
 		panic(fmt.Errorf(
 			"invalid range, `from` (%d) should be less than `to` (%d)",
@@ -170,12 +188,16 @@ func NewASCIIRange(name string, from byte, to byte) *Either {
 		))
 	}
 
-	amount := to - from
-	terms := make([]Rule, amount+1)
-	for chr := to; chr >= from; chr-- {
-		terms[amount] = NewTerminal(string(chr), string(chr))
-		amount--
+	rulesOrHooks := make([]interface{}, int(to-from)+1+len(hooks))
+	n := 0
+	for chr := from; chr <= to; chr++ {
+		rulesOrHooks[n] = NewTerminal(string(chr), string(chr))
+		n++
+	}
+	for _, hook := range hooks {
+		rulesOrHooks[n] = hook
+		n++
 	}
 
-	return NewEither(name, terms...)
+	return NewEither(name, rulesOrHooks...)
 }
