@@ -156,7 +156,7 @@ func TestParse(t *testing.T) {
 				),
 			),
 			nil,
-			NewErrNestingTooDeep(&Location{Depth: 3}, 4),
+			NewErrNestingTooDeep(&Location{Path: DefaultParserPath}, 4),
 			NewParser(ParserOptionMaxDepth(3)),
 		},
 
@@ -167,7 +167,7 @@ func TestParse(t *testing.T) {
 			newTestRuleFinite("unsupported"),
 			&Tree{
 				Rule:     newTestRuleFinite("unsupported"),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   0,
@@ -207,7 +207,7 @@ func TestParse(t *testing.T) {
 						NewTerminal("bar", "bar"),
 					),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   6,
@@ -220,21 +220,23 @@ func TestParse(t *testing.T) {
 							NewTerminal("foo", "foo"),
 							NewTerminal("bar", "bar"),
 						),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   3,
 						},
-						Data: []byte("foo"),
+						Depth: 1,
+						Data:  []byte("foo"),
 						Childs: []*Tree{
 							{
 								Rule:     NewTerminal("foo", "foo"),
-								Location: &Location{Depth: 2},
+								Location: &Location{Path: DefaultParserPath},
 								Region: &Region{
 									Start: 0,
 									End:   3,
 								},
-								Data: []byte("foo"),
+								Depth: 2,
+								Data:  []byte("foo"),
 							},
 						},
 					},
@@ -245,28 +247,30 @@ func TestParse(t *testing.T) {
 							NewTerminal("bar", "bar"),
 						),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 3,
 							Column:   3,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 3,
 							End:   6,
 						},
-						Data: []byte("bar"),
+						Depth: 1,
+						Data:  []byte("bar"),
 						Childs: []*Tree{
 							{
 								Rule: NewTerminal("bar", "bar"),
 								Location: &Location{
+									Path:     DefaultParserPath,
 									Position: 3,
 									Column:   3,
-									Depth:    2,
 								},
 								Region: &Region{
 									Start: 3,
 									End:   6,
 								},
-								Data: []byte("bar"),
+								Depth: 2,
+								Data:  []byte("bar"),
 							},
 						},
 					},
@@ -310,7 +314,7 @@ func TestParse(t *testing.T) {
 					),
 					NewTerminal("right bracket", ")"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   9,
@@ -319,25 +323,27 @@ func TestParse(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("foo", "foo"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   3,
 						},
-						Data: []byte("foo"),
+						Depth: 1,
+						Data:  []byte("foo"),
 					},
 					{
 						Rule: NewTerminal("left bracket", "("),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 3,
 							Column:   3,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 3,
 							End:   4,
 						},
-						Data: []byte("("),
+						Depth: 1,
+						Data:  []byte("("),
 					},
 					{
 						Rule: NewRepetition(
@@ -351,15 +357,16 @@ func TestParse(t *testing.T) {
 							),
 						),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 4,
 							Column:   4,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 4,
 							End:   8,
 						},
-						Data: []byte("1234"),
+						Depth: 1,
+						Data:  []byte("1234"),
 						Childs: []*Tree{
 							{
 								Rule: NewEither(
@@ -370,28 +377,30 @@ func TestParse(t *testing.T) {
 									NewTerminal("one", "1"),
 								),
 								Location: &Location{
+									Path:     DefaultParserPath,
 									Position: 4,
 									Column:   4,
-									Depth:    2,
 								},
 								Region: &Region{
 									Start: 4,
 									End:   5,
 								},
-								Data: []byte("1"),
+								Depth: 2,
+								Data:  []byte("1"),
 								Childs: []*Tree{
 									{
 										Rule: NewTerminal("one", "1"),
 										Location: &Location{
+											Path:     DefaultParserPath,
 											Position: 4,
 											Column:   4,
-											Depth:    3,
 										},
 										Region: &Region{
 											Start: 4,
 											End:   5,
 										},
-										Data: []byte("1"),
+										Depth: 3,
+										Data:  []byte("1"),
 									},
 								},
 							},
@@ -404,28 +413,30 @@ func TestParse(t *testing.T) {
 									NewTerminal("one", "1"),
 								),
 								Location: &Location{
+									Path:     DefaultParserPath,
 									Position: 5,
 									Column:   5,
-									Depth:    2,
 								},
 								Region: &Region{
 									Start: 5,
 									End:   6,
 								},
-								Data: []byte("2"),
+								Depth: 2,
+								Data:  []byte("2"),
 								Childs: []*Tree{
 									{
 										Rule: NewTerminal("two", "2"),
 										Location: &Location{
+											Path:     DefaultParserPath,
 											Position: 5,
 											Column:   5,
-											Depth:    3,
 										},
 										Region: &Region{
 											Start: 5,
 											End:   6,
 										},
-										Data: []byte("2"),
+										Depth: 3,
+										Data:  []byte("2"),
 									},
 								},
 							},
@@ -438,28 +449,30 @@ func TestParse(t *testing.T) {
 									NewTerminal("one", "1"),
 								),
 								Location: &Location{
+									Path:     DefaultParserPath,
 									Position: 6,
 									Column:   6,
-									Depth:    2,
 								},
 								Region: &Region{
 									Start: 6,
 									End:   7,
 								},
-								Data: []byte("3"),
+								Depth: 2,
+								Data:  []byte("3"),
 								Childs: []*Tree{
 									{
 										Rule: NewTerminal("three", "3"),
 										Location: &Location{
+											Path:     DefaultParserPath,
 											Position: 6,
 											Column:   6,
-											Depth:    3,
 										},
 										Region: &Region{
 											Start: 6,
 											End:   7,
 										},
-										Data: []byte("3"),
+										Depth: 3,
+										Data:  []byte("3"),
 									},
 								},
 							},
@@ -472,28 +485,30 @@ func TestParse(t *testing.T) {
 									NewTerminal("one", "1"),
 								),
 								Location: &Location{
+									Path:     DefaultParserPath,
 									Position: 7,
 									Column:   7,
-									Depth:    2,
 								},
 								Region: &Region{
 									Start: 7,
 									End:   8,
 								},
-								Data: []byte("4"),
+								Depth: 2,
+								Data:  []byte("4"),
 								Childs: []*Tree{
 									{
 										Rule: NewTerminal("four", "4"),
 										Location: &Location{
+											Path:     DefaultParserPath,
 											Position: 7,
 											Column:   7,
-											Depth:    3,
 										},
 										Region: &Region{
 											Start: 7,
 											End:   8,
 										},
-										Data: []byte("4"),
+										Depth: 3,
+										Data:  []byte("4"),
 									},
 								},
 							},
@@ -502,15 +517,16 @@ func TestParse(t *testing.T) {
 					{
 						Rule: NewTerminal("right bracket", ")"),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 8,
 							Column:   8,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 8,
 							End:   9,
 						},
-						Data: []byte(")"),
+						Depth: 1,
+						Data:  []byte(")"),
 					},
 				},
 			},
@@ -546,35 +562,35 @@ func TestParserLineBreaksLocate(t *testing.T) {
 			"foo\nbar\nbaz",
 			DefaultParser,
 			[]*Location{
-				{0, 0, 0, 0},
-				{5, 1, 1, 0},
-				{6, 1, 2, 0},
-				{7, 1, 3, 0},
-				{10, 2, 2, 0},
-				{666, 2, 2, 0},
+				{DefaultParserPath, 0, 0, 0},
+				{DefaultParserPath, 5, 1, 1},
+				{DefaultParserPath, 6, 1, 2},
+				{DefaultParserPath, 7, 1, 3},
+				{DefaultParserPath, 10, 2, 2},
+				{DefaultParserPath, 666, 2, 2},
 			},
 		},
 		{
 			"foo\nbar\nbaz\r\nqux",
 			DefaultParser,
 			[]*Location{
-				{5, 1, 1, 0},
-				{6, 1, 2, 0},
-				{7, 1, 3, 0},
-				{10, 2, 2, 0},
-				{11, 2, 3, 0},
-				{12, 3, 0, 0},
-				{13, 3, 0, 0},
+				{DefaultParserPath, 5, 1, 1},
+				{DefaultParserPath, 6, 1, 2},
+				{DefaultParserPath, 7, 1, 3},
+				{DefaultParserPath, 10, 2, 2},
+				{DefaultParserPath, 11, 2, 3},
+				{DefaultParserPath, 12, 3, 0},
+				{DefaultParserPath, 13, 3, 0},
 			},
 		},
 		{
 			"foo bar",
 			DefaultParser,
 			[]*Location{
-				{5, 0, 5, 0},
-				{6, 0, 6, 0},
-				{7, 0, 6, 0},
-				{10, 0, 6, 0},
+				{DefaultParserPath, 5, 0, 5},
+				{DefaultParserPath, 6, 0, 6},
+				{DefaultParserPath, 7, 0, 6},
+				{DefaultParserPath, 10, 0, 6},
 			},
 		},
 	}

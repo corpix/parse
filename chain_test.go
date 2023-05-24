@@ -315,7 +315,7 @@ func TestChain(t *testing.T) {
 			nil,
 			NewErrUnexpectedEOF(
 				NewTerminal("foo", "foo"),
-				&Location{Depth: 1},
+				&Location{Path: DefaultParserPath},
 			),
 			DefaultParser,
 		},
@@ -329,7 +329,7 @@ func TestChain(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				NewTerminal("foo", "foo"),
-				&Location{Depth: 1},
+				&Location{Path: DefaultParserPath},
 				[]byte("bar"),
 			),
 			DefaultParser,
@@ -348,7 +348,11 @@ func TestChain(t *testing.T) {
 					NewTerminal("foo", "foo"),
 					NewTerminal("bar", "bar"),
 				),
-				&Location{Position: 6, Line: 0, Column: 6},
+				&Location{
+					Path:     DefaultParserPath,
+					Position: 6,
+					Column:   6,
+				},
 				[]byte("baz"),
 			),
 			DefaultParser,
@@ -371,7 +375,7 @@ func TestChain(t *testing.T) {
 					NewTerminal("space", " "),
 					NewTerminal("bar", "bar"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   7,
@@ -380,38 +384,41 @@ func TestChain(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("foo", "foo"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   3,
 						},
-						Data: []byte("foo"),
+						Depth: 1,
+						Data:  []byte("foo"),
 					},
 					{
 						Rule: NewTerminal("space", " "),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 3,
 							Column:   3,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 3,
 							End:   4,
 						},
-						Data: []byte(" "),
+						Depth: 1,
+						Data:  []byte(" "),
 					},
 					{
 						Rule: NewTerminal("bar", "bar"),
 						Location: &Location{
+							Path:     DefaultParserPath,
 							Position: 4,
 							Column:   4,
-							Depth:    1,
 						},
 						Region: &Region{
 							Start: 4,
 							End:   7,
 						},
-						Data: []byte("bar"),
+						Depth: 1,
+						Data:  []byte("bar"),
 					},
 				},
 			},

@@ -54,12 +54,6 @@ type Rule interface {
 	Parse(ctx *Context, input []byte) (*Tree, error)
 }
 
-type Context struct {
-	Rule     Rule
-	Parser   *Parser
-	Location *Location
-}
-
 // RuleShow returns a Rule encoded as a string.
 // It requires some parts to be prepared(encoded into a string).
 func RuleShow(rule Rule, parameters string, childs string) string {

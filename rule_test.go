@@ -23,9 +23,9 @@ func (r *testRuleFinite) String() string                { return TreerString(r) 
 func (r *testRuleFinite) GetChilds() Treers             { return nil }
 func (r *testRuleFinite) GetParameters() RuleParameters { return RuleParameters{"name": string(*r)} }
 func (r *testRuleFinite) IsFinite() bool                { return true }
-func (r *testRuleFinite) Parse(*Context, []byte) (*Tree, error) {
+func (r *testRuleFinite) Parse(ctx *Context, input []byte) (*Tree, error) {
 	return &Tree{
-		Location: &Location{},
+		Location: &Location{Path: ctx.Location.Path},
 		Region:   &Region{},
 		Rule:     r,
 		Data:     []byte{},
@@ -57,9 +57,9 @@ func (r *testRuleNonFinite) Show(childs string) string {
 func (r *testRuleNonFinite) String() string    { return TreerString(r) }
 func (r *testRuleNonFinite) GetChilds() Treers { return r.rules }
 func (r *testRuleNonFinite) IsFinite() bool    { return false }
-func (r *testRuleNonFinite) Parse(*Context, []byte) (*Tree, error) {
+func (r *testRuleNonFinite) Parse(ctx *Context, input []byte) (*Tree, error) {
 	return &Tree{
-		Location: &Location{},
+		Location: &Location{Path: ctx.Location.Path},
 		Region:   &Region{},
 		Rule:     r,
 		Data:     []byte{},

@@ -74,16 +74,17 @@ func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error) {
 	return &Tree{
 		Rule: r,
 		Location: &Location{
+			Path:     ctx.Location.Path,
 			Position: ctx.Location.Position,
 			Line:     line,
 			Column:   col,
-			Depth:    ctx.Location.Depth,
 		},
 		Region: &Region{
 			Start: ctx.Location.Position + regexpRegion[0],
 			End:   ctx.Location.Position + regexpRegion[1],
 		},
-		Data: buf,
+		Depth: ctx.Depth,
+		Data:  buf,
 	}, nil
 }
 

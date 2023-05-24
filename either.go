@@ -75,7 +75,7 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 		return nil, NewErrUnexpectedEOF(r, ctx.Location)
 	}
 
-	nextDepth := ctx.Location.Depth + 1
+	nextDepth := ctx.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(
 			ctx.Location,
@@ -94,11 +94,12 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 				Rule:   sr,
 				Parser: ctx.Parser,
 				Location: &Location{
+					Path:     ctx.Location.Path,
 					Position: ctx.Location.Position,
 					Line:     line,
 					Column:   col,
-					Depth:    nextDepth,
 				},
+				Depth: nextDepth,
 			},
 			input,
 		)
@@ -130,12 +131,13 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 	return &Tree{
 		Rule: r,
 		Location: &Location{
+			Path:     ctx.Location.Path,
 			Position: subTree.Location.Position,
 			Line:     line,
 			Column:   col,
-			Depth:    ctx.Location.Depth,
 		},
 		Region: &region,
+		Depth:  ctx.Depth,
 		Childs: []*Tree{subTree},
 		Data:   input[:subTree.Region.End-subTree.Region.Start],
 	}, nil

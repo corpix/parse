@@ -264,7 +264,7 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
-				&Location{},
+				&Location{Path: DefaultParserPath},
 				[]byte("4"),
 			),
 			DefaultParser,
@@ -284,6 +284,7 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 				),
 				&Location{
+					Path:     DefaultParserPath,
 					Position: 1,
 					Column:   1,
 				},
@@ -309,7 +310,7 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -318,12 +319,13 @@ func TestEither(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("one", "1"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("1"),
+						Depth: 1,
+						Data:  []byte("1"),
 					},
 				},
 			},
@@ -345,7 +347,7 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("one", "1"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -354,12 +356,13 @@ func TestEither(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("one", "1"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("1"),
+						Depth: 1,
+						Data:  []byte("1"),
 					},
 				},
 			},
@@ -381,7 +384,7 @@ func TestEither(t *testing.T) {
 					NewTerminal("two", "2"),
 					NewTerminal("three", "3"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -390,12 +393,13 @@ func TestEither(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("two", "2"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("2"),
+						Depth: 1,
+						Data:  []byte("2"),
 					},
 				},
 			},
@@ -448,7 +452,7 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -457,12 +461,13 @@ func TestASCIIRange(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("0", "0"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("0"),
+						Depth: 1,
+						Data:  []byte("0"),
 					},
 				},
 			},
@@ -483,7 +488,7 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -492,12 +497,13 @@ func TestASCIIRange(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("1", "1"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("1"),
+						Depth: 1,
+						Data:  []byte("1"),
 					},
 				},
 			},
@@ -518,7 +524,7 @@ func TestASCIIRange(t *testing.T) {
 					NewTerminal("2", "2"),
 					NewTerminal("3", "3"),
 				),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   1,
@@ -527,12 +533,13 @@ func TestASCIIRange(t *testing.T) {
 				Childs: []*Tree{
 					{
 						Rule:     NewTerminal("3", "3"),
-						Location: &Location{Depth: 1},
+						Location: &Location{Path: DefaultParserPath},
 						Region: &Region{
 							Start: 0,
 							End:   1,
 						},
-						Data: []byte("3"),
+						Depth: 1,
+						Data:  []byte("3"),
 					},
 				},
 			},

@@ -67,12 +67,9 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
 	}
 
-	nextDepth := ctx.Location.Depth + 1
+	nextDepth := ctx.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
-		return nil, NewErrNestingTooDeep(
-			ctx.Location,
-			nextDepth,
-		)
+		return nil, NewErrNestingTooDeep(ctx.Location, nextDepth)
 	}
 
 	var (
@@ -91,11 +88,12 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 				Rule:   r,
 				Parser: ctx.Parser,
 				Location: &Location{
+					Path:     ctx.Location.Path,
 					Position: pos,
 					Line:     line,
 					Column:   col,
-					Depth:    nextDepth,
 				},
+				Depth: nextDepth,
 			},
 			subInput,
 		)
@@ -120,12 +118,13 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 	return &Tree{
 		Rule: r,
 		Location: &Location{
+			Path:     ctx.Location.Path,
 			Position: ctx.Location.Position,
 			Line:     line,
 			Column:   col,
-			Depth:    ctx.Location.Depth,
 		},
 		Region: region,
+		Depth:  ctx.Depth,
 		Childs: subTrees,
 		Data:   input[:region.End-region.Start],
 	}, nil

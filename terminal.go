@@ -66,35 +66,29 @@ func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 
 	if utf8.RuneCount(input) < length {
-		return nil, NewErrUnexpectedEOF(
-			r,
-			ctx.Location,
-		)
+		return nil, NewErrUnexpectedEOF(r, ctx.Location)
 	}
 
 	buf := input[:length]
 	if !bytes.Equal(buf, r.Value) {
-		return nil, NewErrUnexpectedToken(
-			r,
-			ctx.Location,
-			ShowInput(input),
-		)
+		return nil, NewErrUnexpectedToken(r, ctx.Location, ShowInput(input))
 	}
 
 	line, col := ctx.Parser.Locate(ctx.Location.Position)
 	return &Tree{
 		Rule: r,
 		Location: &Location{
+			Path:     ctx.Location.Path,
 			Position: ctx.Location.Position,
 			Line:     line,
 			Column:   col,
-			Depth:    ctx.Location.Depth,
 		},
 		Region: &Region{
 			Start: ctx.Location.Position,
 			End:   ctx.Location.Position + length,
 		},
-		Data: buf,
+		Depth: ctx.Depth,
+		Data:  buf,
 	}, nil
 }
 

@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -11,9 +12,11 @@ var (
 		NewTerminal("lf", "\n"),
 		NewTerminal("crlf", "\r\n"),
 	)
+	DefaultParserPath    = "?"
 	DefaultParserOptions = []ParserOption{
 		ParserOptionMaxDepth(DefaultParserMaxDepth),
 		ParserOptionLineBreak(DefaultParserLineBreak),
+		ParserOptionPath(DefaultParserPath),
 	}
 
 	// DefaultParser is a Parser with default settings.
@@ -26,6 +29,7 @@ type Parser struct {
 	MaxDepth  int
 	LineBreak Rule
 	LineIndex []*Region
+	Path      string
 }
 
 // ParserOption represents a Parser option
@@ -33,12 +37,22 @@ type Parser struct {
 // is acceptable for this option.
 type ParserOption func(*Parser)
 
+// ParserOptionMaxDepth set max depth for rule application recursion.
 func ParserOptionMaxDepth(d int) ParserOption {
 	return func(p *Parser) { p.MaxDepth = d }
 }
 
+// ParserOptionLineBreak set parser line-break Rule.
+// Line-breaks used during error reporting,
+// they are not consumed and available for otherr rules.
 func ParserOptionLineBreak(r Rule) ParserOption {
 	return func(p *Parser) { p.LineBreak = r }
+}
+
+// ParserOptionPath set parser path meta-information which
+// is propagated to each Rule.
+func ParserOptionPath(path string) ParserOption {
+	return func(p *Parser) { p.Path = path }
 }
 
 // LineRegions construct a slice of Region's for given input.
@@ -46,7 +60,7 @@ func ParserOptionLineBreak(r Rule) ParserOption {
 // Return value could be used as Parser.LineIndex.
 // Also Parser.Parse calls Parser.LineRegions for you automatically.
 func (p *Parser) LineRegions(input []byte) []*Region {
-	loc := &Location{}
+	loc := &Location{Path: p.Path}
 	ctx := &Context{
 		Parser:   p,
 		Location: loc,
@@ -145,13 +159,14 @@ func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 	}
 
 	p.LineIndex = p.LineRegions(input)
+	loc := &Location{Path: p.Path}
 	tree, err := r.Parse(&Context{
 		Parser:   p,
-		Location: &Location{},
+		Location: loc,
 	}, input)
 	if err != nil {
 		if err == ErrSkipRule {
-			return nil, NewErrUnexpectedEOF(r, &Location{Position: 1, Column: 1})
+			return nil, NewErrUnexpectedEOF(r, loc)
 		}
 		return nil, err
 	}
@@ -162,6 +177,7 @@ func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 		return nil, NewErrUnexpectedToken(
 			r,
 			&Location{
+				Path:     p.Path,
 				Position: pos,
 				Line:     line,
 				Column:   col,
@@ -188,4 +204,25 @@ func NewParser(op ...ParserOption) *Parser {
 		fn(p)
 	}
 	return p
+}
+
+//
+
+type Context struct {
+	Rule     Rule
+	Parser   *Parser
+	Location *Location
+	Depth    int
+}
+
+// Location represents position in input (posirion, line, column).
+type Location struct {
+	Path     string
+	Position int
+	Line     int
+	Column   int
+}
+
+func (l *Location) String() string {
+	return fmt.Sprintf("%s:%d:%d", l.Path, l.Line+1, l.Column+1)
 }

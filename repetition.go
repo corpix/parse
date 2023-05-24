@@ -64,12 +64,9 @@ func (r *Repetition) IsFinite() bool {
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
 func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
-	nextDepth := ctx.Location.Depth + 1
+	nextDepth := ctx.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
-		return nil, NewErrNestingTooDeep(
-			ctx.Location,
-			nextDepth,
-		)
+		return nil, NewErrNestingTooDeep(ctx.Location, nextDepth)
 	}
 
 	var (
@@ -90,16 +87,17 @@ repeat:
 
 		line, col = ctx.Parser.Locate(pos)
 		loc = &Location{
+			Path:     ctx.Location.Path,
 			Position: pos,
 			Line:     line,
 			Column:   col,
-			Depth:    nextDepth,
 		}
 		subTree, err = r.Rule.Parse(
 			&Context{
 				Rule:     r,
 				Parser:   ctx.Parser,
 				Location: loc,
+				Depth:    nextDepth,
 			},
 			subInput,
 		)
@@ -160,12 +158,13 @@ repeat:
 	return &Tree{
 		Rule: r,
 		Location: &Location{
+			Path:     ctx.Location.Path,
 			Position: ctx.Location.Position,
 			Line:     line,
 			Column:   col,
-			Depth:    ctx.Location.Depth,
 		},
 		Region: region,
+		Depth:  ctx.Depth,
 		Childs: subChilds,
 		Data:   input[:region.End-region.Start],
 	}, nil

@@ -153,7 +153,7 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				NewRegexp("foo", "foo"),
-				&Location{},
+				&Location{Path: DefaultParserPath},
 				ShowInput([]byte("")),
 			),
 			DefaultParser,
@@ -164,7 +164,7 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				NewRegexp("foo", "foo"),
-				&Location{},
+				&Location{Path: DefaultParserPath},
 				ShowInput([]byte("bar")),
 			),
 			DefaultParser,
@@ -175,7 +175,11 @@ func TestRegexp(t *testing.T) {
 			nil,
 			NewErrUnexpectedToken(
 				NewRegexp("foo", "foo"),
-				&Location{Position: 3, Column: 3},
+				&Location{
+					Path:     DefaultParserPath,
+					Position: 3,
+					Column:   3,
+				},
 				ShowInput([]byte("bar")),
 			),
 			DefaultParser,
@@ -188,7 +192,7 @@ func TestRegexp(t *testing.T) {
 			NewRegexp("empty", ""),
 			&Tree{
 				Rule:     NewRegexp("empty", ""),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   0,
@@ -203,7 +207,7 @@ func TestRegexp(t *testing.T) {
 			NewRegexp("foo", "foo"),
 			&Tree{
 				Rule:     NewRegexp("foo", "foo"),
-				Location: &Location{},
+				Location: &Location{Path: DefaultParserPath},
 				Region: &Region{
 					Start: 0,
 					End:   3,

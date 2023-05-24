@@ -62,7 +62,8 @@ func init() {
 }
 
 func main() {
-	tree, err := Parse(
+	p := NewParser(ParserOptionPath("calculator-expression.go"))
+	tree, err := p.Parse(
 		expression,
 		[]byte("5+(3*2)"),
 	)
