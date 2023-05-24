@@ -59,7 +59,7 @@ func (r *Wrapper) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error) {
+func (r *Wrapper) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
 	if r.Rule == nil {
 		return nil, NewErrEmptyRule(r, r.Rule)
 	}

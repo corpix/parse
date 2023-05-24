@@ -63,7 +63,7 @@ func (r *Repetition) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error) {
+func (r *Repetition) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
 	nextDepth := ctx.Depth + 1
 	if nextDepth > ctx.Parser.MaxDepth {
 		return nil, NewErrNestingTooDeep(ctx.Location, nextDepth)

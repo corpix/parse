@@ -59,7 +59,7 @@ func (r *Terminal) IsFinite() bool {
 // using settings defined during creation of the concrete Rule type.
 // May return an error if something goes wrong, should provide some
 // location information to the user which points to position in input.
-func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error) {
+func (r *Terminal) Parse(ctx *Context, input []byte, hooks ...RuleParseHook) (*Tree, error) {
 	length := utf8.RuneCount(r.Value)
 	if length == 0 {
 		return nil, NewErrEmptyRule(r, ctx.Rule)
