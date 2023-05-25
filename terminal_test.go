@@ -200,6 +200,7 @@ func TestTerminal(t *testing.T) {
 					Column:   3,
 				},
 				ShowInput([]byte("bar")),
+				NewErrUnmatchedInput([]byte("bar")),
 			),
 			DefaultParser,
 		},

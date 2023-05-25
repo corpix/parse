@@ -249,6 +249,7 @@ func TestWrapper(t *testing.T) {
 					Column:   6,
 				},
 				[]byte("baz"),
+				NewErrUnmatchedInput([]byte("baz")),
 			),
 			DefaultParser,
 		},

@@ -1,6 +1,26 @@
 package parse
 
+import (
+	"fmt"
+)
+
 var _ Rule = new(Repetition)
+
+func NewErrRepetitionTooMuchOccurrences(want, got int) error {
+	return fmt.Errorf(
+		"too much occurences of expression: want %d, got %d",
+		want, got,
+	)
+}
+
+func NewErrRepetitionNotEnoughOccurrences(want, got int) error {
+	return fmt.Errorf(
+		"not enough occurences of expression: want %d, got %d",
+		want, got,
+	)
+}
+
+var ErrRepetitionNothingMatched = fmt.Errorf("nothing matched")
 
 // Repetition is a Rule which is repeating in the input
 // one or more times.
@@ -126,9 +146,10 @@ repeat:
 		movePos := subTree.Region.End - subTree.Region.Start
 		if !r.Variadic && occurrences > r.Times {
 			return nil, NewErrUnexpectedToken(
-				r, // FIXME: may we point to the problem here? (we have enough occurrences)
+				r,
 				subTree.Location,
 				ShowInput(input[pos:]),
+				NewErrRepetitionTooMuchOccurrences(r.Times, occurrences),
 			)
 		}
 
@@ -138,9 +159,10 @@ repeat:
 	}
 	if err != nil && len(subChilds) == 0 { // nothing matched
 		return nil, NewErrUnexpectedToken(
-			r, // FIXME: pass sub-error to reason more precisely?
+			r,
 			loc,
 			input,
+			ErrRepetitionNothingMatched,
 		)
 	}
 	if occurrences < r.Times {
@@ -148,9 +170,10 @@ repeat:
 			return nil, err
 		}
 		return nil, NewErrUnexpectedToken(
-			r, // FIXME: point to the real reason (not sufficient amount of occurrences)
+			r,
 			loc,
 			input,
+			NewErrRepetitionNotEnoughOccurrences(r.Times, occurrences),
 		)
 	}
 

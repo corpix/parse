@@ -87,20 +87,32 @@ type ErrUnexpectedToken struct {
 	Rule     Rule
 	Location *Location
 	Token    []byte
+	Inner    []error
 }
 
 func (e *ErrUnexpectedToken) Error() string {
+	innerErrs := ""
+	for _, innerErr := range e.Inner {
+		innerErrs = ": " + innerErr.Error()
+	}
+
 	return fmt.Sprintf(
-		"Unexpected token '%s' at %q while applying '%s' rule",
+		"Unexpected token '%s' at %q while applying '%s' rule%s",
 		e.Token,
 		e.Location,
 		e.Rule.Name(),
+		innerErrs,
 	)
 }
 
 // NewErrUnexpectedToken constructs new ErrUnexpectedToken.
-func NewErrUnexpectedToken(r Rule, l *Location, token []byte) error {
-	return &ErrUnexpectedToken{r, l, token}
+func NewErrUnexpectedToken(r Rule, l *Location, token []byte, inner ...error) error {
+	return &ErrUnexpectedToken{
+		Rule:     r,
+		Location: l,
+		Token:    token,
+		Inner:    inner,
+	}
 }
 
 //

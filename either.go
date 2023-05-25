@@ -119,9 +119,10 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 	}
 	if subTree == nil {
 		return nil, NewErrUnexpectedToken(
-			r, // FIXME: pass sub-error to reason more precisely?
+			r,
 			ctx.Location,
 			input,
+			err,
 		)
 	}
 	if err != nil {

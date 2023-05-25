@@ -64,13 +64,14 @@ func TreeShow(tree *Tree, rule string, childs string) string {
 		tree.Name(),
 		fmt.Sprintf(
 			indent(
-				"rule: %s\nstart: %d\nend: %d\ndata: %s",
+				"rule: %q\nstart: %d\nend: %d\nlocation: %q\ndata: %q",
 				treerIndentCharacter,
 				treerIndentSize,
 			),
 			rule,
 			tree.Region.Start,
 			tree.Region.End,
+			tree.Location.String(),
 			string(tree.Data),
 		),
 		childs,

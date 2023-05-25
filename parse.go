@@ -23,6 +23,10 @@ var (
 	DefaultParser = NewParser(DefaultParserOptions...)
 )
 
+func NewErrUnmatchedInput(input []byte) error {
+	return fmt.Errorf("there are unmatched input left: %q", string(input))
+}
+
 // Parser represents a parser which use Rule's
 // to parse the input.
 type Parser struct {
@@ -183,6 +187,7 @@ func (p *Parser) Parse(r Rule, input []byte) (*Tree, error) {
 				Column:   col,
 			},
 			ShowInput(input[pos:]),
+			NewErrUnmatchedInput(input[tree.Region.End:]),
 		)
 	}
 
