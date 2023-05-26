@@ -54,6 +54,45 @@ func (t *Tree) String() string {
 	return TreerString(t)
 }
 
+
+// Hash produces a lication which is believed
+// to uniquely identify the node in the tree.
+// This is useful for serialization and graphing.
+func (t *Tree) Hash() string {
+	return fmt.Sprintf("%s:%d", t.Location.String(), t.Depth)
+}
+
+// Graph produce Graphviz compatible code
+// which could be converted to picture using, for example
+// `dot -Tpng > graph.png`.
+func (t *Tree) Graph() string {
+	s := "digraph G {\n"
+	s += "  "
+	s += fmt.Sprintf("%q", t.Hash())
+	s += fmt.Sprintf(`[label=%q];`, string(t.Data))
+	s += "\n"
+	s += t.graph()
+	s += "}"
+	return s
+}
+
+// graph is a helper for Graph, and called in non root nodes.
+func (t *Tree) graph() string {
+	var s string
+	for _, child := range t.Childs {
+		s += "  "
+		s += fmt.Sprintf("%q", child.Hash())
+		s += fmt.Sprintf(`[label=%q];`, string(child.Data))
+		s += "\n"
+		s += "  "
+		s += fmt.Sprintf("%q", t.Hash()) + "->" + fmt.Sprintf("%q", child.Hash())
+		s += fmt.Sprintf(`[label=%q];`, child.Hash()+": "+child.Name())
+		s += "\n"
+		s += child.graph()
+	}
+	return s
+}
+
 //
 
 // TreeShow returns a Tree encoded as a string.

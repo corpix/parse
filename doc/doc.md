@@ -14,11 +14,14 @@ import "github.com/corpix/parse"
 - [func EqualSlicesFoldPrefix(a, prefix []string) bool](<#EqualSlicesFoldPrefix>)
 - [func EqualSlicesFoldSome(a []string, b ...[]string) bool](<#EqualSlicesFoldSome>)
 - [func EqualSlicesFoldSuffix(a, suffix []string) bool](<#EqualSlicesFoldSuffix>)
-- [func NewErrBoundIncomplete(position int, starting, closing []byte) error](<#NewErrBoundIncomplete>)
+- [func NewErrBoundIncomplete(starting, closing []byte, l *Location) error](<#NewErrBoundIncomplete>)
 - [func NewErrEmptyRule(rule Rule, inside Rule) error](<#NewErrEmptyRule>)
-- [func NewErrNestingTooDeep(nesting int, position int) error](<#NewErrNestingTooDeep>)
-- [func NewErrUnexpectedEOF(position int, rule Rule) error](<#NewErrUnexpectedEOF>)
-- [func NewErrUnexpectedToken(token []byte, position int, rule Rule) error](<#NewErrUnexpectedToken>)
+- [func NewErrNestingTooDeep(l *Location, depth int) error](<#NewErrNestingTooDeep>)
+- [func NewErrRepetitionNotEnoughOccurrences(want, got int) error](<#NewErrRepetitionNotEnoughOccurrences>)
+- [func NewErrRepetitionTooMuchOccurrences(want, got int) error](<#NewErrRepetitionTooMuchOccurrences>)
+- [func NewErrUnexpectedEOF(r Rule, l *Location) error](<#NewErrUnexpectedEOF>)
+- [func NewErrUnexpectedToken(r Rule, l *Location, token []byte, inner ...error) error](<#NewErrUnexpectedToken>)
+- [func NewErrUnmatchedInput(input []byte) error](<#NewErrUnmatchedInput>)
 - [func NewErrUnsupportedRule(rule Rule) error](<#NewErrUnsupportedRule>)
 - [func RuleShow(rule Rule, parameters string, childs string) string](<#RuleShow>)
 - [func ShowInput(buf []byte) []byte](<#ShowInput>)
@@ -28,7 +31,6 @@ import "github.com/corpix/parse"
 - [func WalkTreerDFS(tree Treer, fn func(int, Treer) error) error](<#WalkTreerDFS>)
 - [func WalkTreerNameChainBFS(tree Treer, fn func([]string, int, Treer) error) error](<#WalkTreerNameChainBFS>)
 - [func WalkTreerNameChainDFS(tree Treer, fn func([]string, int, Treer) error) error](<#WalkTreerNameChainDFS>)
-- [func humanizePosition(position int) int](<#humanizePosition>)
 - [func indent(s string, character string, size int) string](<#indent>)
 - [func indirectValue(reflectValue reflect.Value) reflect.Value](<#indirectValue>)
 - [func treerString(t Treer, visited map[interface{}]bool) string](<#treerString>)
@@ -36,8 +38,8 @@ import "github.com/corpix/parse"
   - [func NewAllMatcher(matchers []Matcher) AllMatcher](<#NewAllMatcher>)
   - [func (m AllMatcher) Match(chain []string) bool](<#AllMatcher.Match>)
 - [type Chain](<#Chain>)
-  - [func NewChain(name string, r ...Rule) *Chain](<#NewChain>)
-  - [func (r *Chain) Add(rule Rule)](<#Chain.Add>)
+  - [func NewChain(name string, rulesOrHooks ...interface{}) *Chain](<#NewChain>)
+  - [func (r *Chain) Add(rule ...Rule)](<#Chain.Add>)
   - [func (r *Chain) GetChilds() Treers](<#Chain.GetChilds>)
   - [func (r *Chain) GetParameters() RuleParameters](<#Chain.GetParameters>)
   - [func (r *Chain) IsFinite() bool](<#Chain.IsFinite>)
@@ -47,9 +49,9 @@ import "github.com/corpix/parse"
   - [func (r *Chain) String() string](<#Chain.String>)
 - [type Context](<#Context>)
 - [type Either](<#Either>)
-  - [func NewASCIIRange(name string, from byte, to byte) *Either](<#NewASCIIRange>)
-  - [func NewEither(name string, r ...Rule) *Either](<#NewEither>)
-  - [func (r *Either) Add(rule Rule)](<#Either.Add>)
+  - [func NewASCIIRange(name string, from byte, to byte, hooks ...RuleParseHook) *Either](<#NewASCIIRange>)
+  - [func NewEither(name string, rulesOrHooks ...interface{}) *Either](<#NewEither>)
+  - [func (r *Either) Add(rule ...Rule)](<#Either.Add>)
   - [func (r *Either) GetChilds() Treers](<#Either.GetChilds>)
   - [func (r *Either) GetParameters() RuleParameters](<#Either.GetParameters>)
   - [func (r *Either) IsFinite() bool](<#Either.IsFinite>)
@@ -76,6 +78,7 @@ import "github.com/corpix/parse"
   - [func NewLengthMatcher(length int) LengthMatcher](<#NewLengthMatcher>)
   - [func (m LengthMatcher) Match(chain []string) bool](<#LengthMatcher.Match>)
 - [type Location](<#Location>)
+  - [func (l *Location) String() string](<#Location.String>)
 - [type Matcher](<#Matcher>)
 - [type Parser](<#Parser>)
   - [func NewParser(op ...ParserOption) *Parser](<#NewParser>)
@@ -85,11 +88,12 @@ import "github.com/corpix/parse"
 - [type ParserOption](<#ParserOption>)
   - [func ParserOptionLineBreak(r Rule) ParserOption](<#ParserOptionLineBreak>)
   - [func ParserOptionMaxDepth(d int) ParserOption](<#ParserOptionMaxDepth>)
+  - [func ParserOptionPath(path string) ParserOption](<#ParserOptionPath>)
 - [type PrefixMatcher](<#PrefixMatcher>)
   - [func NewPrefixMatcher(prefix []string) PrefixMatcher](<#NewPrefixMatcher>)
   - [func (m PrefixMatcher) Match(chain []string) bool](<#PrefixMatcher.Match>)
 - [type Regexp](<#Regexp>)
-  - [func NewRegexp(name string, expr string) *Regexp](<#NewRegexp>)
+  - [func NewRegexp(name string, expr string, hooks ...RuleParseHook) *Regexp](<#NewRegexp>)
   - [func (r *Regexp) GetChilds() Treers](<#Regexp.GetChilds>)
   - [func (r *Regexp) GetParameters() RuleParameters](<#Regexp.GetParameters>)
   - [func (r *Regexp) IsFinite() bool](<#Regexp.IsFinite>)
@@ -100,9 +104,9 @@ import "github.com/corpix/parse"
 - [type Region](<#Region>)
   - [func TreeRegion(tree ...*Tree) *Region](<#TreeRegion>)
 - [type Repetition](<#Repetition>)
-  - [func NewRepetition(name string, rule Rule) *Repetition](<#NewRepetition>)
-  - [func NewRepetitionTimes(name string, times int, rule Rule) *Repetition](<#NewRepetitionTimes>)
-  - [func NewRepetitionTimesVariadic(name string, times int, rule Rule) *Repetition](<#NewRepetitionTimesVariadic>)
+  - [func NewRepetition(name string, rule Rule, hooks ...RuleParseHook) *Repetition](<#NewRepetition>)
+  - [func NewRepetitionTimes(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition](<#NewRepetitionTimes>)
+  - [func NewRepetitionTimesVariadic(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition](<#NewRepetitionTimesVariadic>)
   - [func (r *Repetition) GetChilds() Treers](<#Repetition.GetChilds>)
   - [func (r *Repetition) GetParameters() RuleParameters](<#Repetition.GetParameters>)
   - [func (r *Repetition) IsFinite() bool](<#Repetition.IsFinite>)
@@ -113,6 +117,7 @@ import "github.com/corpix/parse"
 - [type Rule](<#Rule>)
 - [type RuleParameters](<#RuleParameters>)
   - [func (p RuleParameters) String() string](<#RuleParameters.String>)
+- [type RuleParseHook](<#RuleParseHook>)
 - [type Rules](<#Rules>)
 - [type SomeMatcher](<#SomeMatcher>)
   - [func NewSomeMatcher(matchers []Matcher) SomeMatcher](<#NewSomeMatcher>)
@@ -121,7 +126,7 @@ import "github.com/corpix/parse"
   - [func NewSuffixMatcher(suffix []string) SuffixMatcher](<#NewSuffixMatcher>)
   - [func (m SuffixMatcher) Match(chain []string) bool](<#SuffixMatcher.Match>)
 - [type Terminal](<#Terminal>)
-  - [func NewTerminal(name string, v string) *Terminal](<#NewTerminal>)
+  - [func NewTerminal(name string, v string, hooks ...RuleParseHook) *Terminal](<#NewTerminal>)
   - [func (r *Terminal) GetChilds() Treers](<#Terminal.GetChilds>)
   - [func (r *Terminal) GetParameters() RuleParameters](<#Terminal.GetParameters>)
   - [func (r *Terminal) IsFinite() bool](<#Terminal.IsFinite>)
@@ -132,15 +137,18 @@ import "github.com/corpix/parse"
 - [type Tree](<#Tree>)
   - [func Parse(rule Rule, input []byte) (*Tree, error)](<#Parse>)
   - [func (t *Tree) GetChilds() Treers](<#Tree.GetChilds>)
+  - [func (t *Tree) Graph() string](<#Tree.Graph>)
+  - [func (t *Tree) Hash() string](<#Tree.Hash>)
   - [func (t *Tree) Name() string](<#Tree.Name>)
   - [func (t *Tree) Show(childs string) string](<#Tree.Show>)
   - [func (t *Tree) String() string](<#Tree.String>)
+  - [func (t *Tree) graph() string](<#Tree.graph>)
 - [type Treer](<#Treer>)
   - [func FindFirstDFSPrefix(tree Treer, prefix []string) (Treer, bool)](<#FindFirstDFSPrefix>)
   - [func FindFirstDFSSuffix(tree Treer, suffix []string) (Treer, bool)](<#FindFirstDFSSuffix>)
 - [type Treers](<#Treers>)
 - [type Wrapper](<#Wrapper>)
-  - [func NewWrapper(name string, r Rule) *Wrapper](<#NewWrapper>)
+  - [func NewWrapper(name string, r Rule, hooks ...RuleParseHook) *Wrapper](<#NewWrapper>)
   - [func (r *Wrapper) GetChilds() Treers](<#Wrapper.GetChilds>)
   - [func (r *Wrapper) GetParameters() RuleParameters](<#Wrapper.GetParameters>)
   - [func (r *Wrapper) IsFinite() bool](<#Wrapper.IsFinite>)
@@ -201,14 +209,22 @@ var (
         NewTerminal("lf", "\n"),
         NewTerminal("crlf", "\r\n"),
     )
+    DefaultParserPath    = "?"
     DefaultParserOptions = []ParserOption{
         ParserOptionMaxDepth(DefaultParserMaxDepth),
         ParserOptionLineBreak(DefaultParserLineBreak),
+        ParserOptionPath(DefaultParserPath),
     }
 
     // DefaultParser is a Parser with default settings.
     DefaultParser = NewParser(DefaultParserOptions...)
 )
+```
+
+<a name="ErrRepetitionNothingMatched"></a>
+
+```go
+var ErrRepetitionNothingMatched = fmt.Errorf("nothing matched")
 ```
 
 <a name="EqualSlicesFold"></a>
@@ -248,16 +264,16 @@ func EqualSlicesFoldSuffix(a, suffix []string) bool
 EqualSlicesFoldSuffix checks that a is suffixed or equal with suffix via EqualSlicesFold.
 
 <a name="NewErrBoundIncomplete"></a>
-## func [NewErrBoundIncomplete](<https://github.com/corpix/parse/blob/master/errors.go#L41>)
+## func [NewErrBoundIncomplete](<https://github.com/corpix/parse/blob/master/errors.go#L34>)
 
 ```go
-func NewErrBoundIncomplete(position int, starting, closing []byte) error
+func NewErrBoundIncomplete(starting, closing []byte, l *Location) error
 ```
 
 NewErrBoundIncomplete constructs new ErrBoundIncomplete.
 
 <a name="NewErrEmptyRule"></a>
-## func [NewErrEmptyRule](<https://github.com/corpix/parse/blob/master/errors.go#L160>)
+## func [NewErrEmptyRule](<https://github.com/corpix/parse/blob/master/errors.go#L165>)
 
 ```go
 func NewErrEmptyRule(rule Rule, inside Rule) error
@@ -266,19 +282,37 @@ func NewErrEmptyRule(rule Rule, inside Rule) error
 NewErrEmptyRule constructs new ErrEmptyRule.
 
 <a name="NewErrNestingTooDeep"></a>
-## func [NewErrNestingTooDeep](<https://github.com/corpix/parse/blob/master/errors.go#L131>)
+## func [NewErrNestingTooDeep](<https://github.com/corpix/parse/blob/master/errors.go#L136>)
 
 ```go
-func NewErrNestingTooDeep(nesting int, position int) error
+func NewErrNestingTooDeep(l *Location, depth int) error
 ```
 
 NewErrNestingTooDeep constructs new ErrNestingTooDeep.
 
-<a name="NewErrUnexpectedEOF"></a>
-## func [NewErrUnexpectedEOF](<https://github.com/corpix/parse/blob/master/errors.go#L84>)
+<a name="NewErrRepetitionNotEnoughOccurrences"></a>
+## func [NewErrRepetitionNotEnoughOccurrences](<https://github.com/corpix/parse/blob/master/repetition.go#L16>)
 
 ```go
-func NewErrUnexpectedEOF(position int, rule Rule) error
+func NewErrRepetitionNotEnoughOccurrences(want, got int) error
+```
+
+
+
+<a name="NewErrRepetitionTooMuchOccurrences"></a>
+## func [NewErrRepetitionTooMuchOccurrences](<https://github.com/corpix/parse/blob/master/repetition.go#L9>)
+
+```go
+func NewErrRepetitionTooMuchOccurrences(want, got int) error
+```
+
+
+
+<a name="NewErrUnexpectedEOF"></a>
+## func [NewErrUnexpectedEOF](<https://github.com/corpix/parse/blob/master/errors.go#L77>)
+
+```go
+func NewErrUnexpectedEOF(r Rule, l *Location) error
 ```
 
 NewErrUnexpectedEOF constructs new ErrUnexpectedEOF.
@@ -287,13 +321,22 @@ NewErrUnexpectedEOF constructs new ErrUnexpectedEOF.
 ## func [NewErrUnexpectedToken](<https://github.com/corpix/parse/blob/master/errors.go#L109>)
 
 ```go
-func NewErrUnexpectedToken(token []byte, position int, rule Rule) error
+func NewErrUnexpectedToken(r Rule, l *Location, token []byte, inner ...error) error
 ```
 
 NewErrUnexpectedToken constructs new ErrUnexpectedToken.
 
+<a name="NewErrUnmatchedInput"></a>
+## func [NewErrUnmatchedInput](<https://github.com/corpix/parse/blob/master/parse.go#L26>)
+
+```go
+func NewErrUnmatchedInput(input []byte) error
+```
+
+
+
 <a name="NewErrUnsupportedRule"></a>
-## func [NewErrUnsupportedRule](<https://github.com/corpix/parse/blob/master/errors.go#L61>)
+## func [NewErrUnsupportedRule](<https://github.com/corpix/parse/blob/master/errors.go#L54>)
 
 ```go
 func NewErrUnsupportedRule(rule Rule) error
@@ -302,7 +345,7 @@ func NewErrUnsupportedRule(rule Rule) error
 NewErrUnsupportedRule constructs new ErrUnsupportedRule.
 
 <a name="RuleShow"></a>
-## func [RuleShow](<https://github.com/corpix/parse/blob/master/rule.go#L65>)
+## func [RuleShow](<https://github.com/corpix/parse/blob/master/rule.go#L63>)
 
 ```go
 func RuleShow(rule Rule, parameters string, childs string) string
@@ -320,7 +363,7 @@ func ShowInput(buf []byte) []byte
 ShowInput return a byte slice of input and formats it with ellipsis, preparing it to be printed to human.
 
 <a name="TreeShow"></a>
-## func [TreeShow](<https://github.com/corpix/parse/blob/master/tree.go#L67>)
+## func [TreeShow](<https://github.com/corpix/parse/blob/master/tree.go#L100>)
 
 ```go
 func TreeShow(tree *Tree, rule string, childs string) string
@@ -372,15 +415,6 @@ func WalkTreerNameChainDFS(tree Treer, fn func([]string, int, Treer) error) erro
 ```
 
 WalkTreerNameChainDFS is a walker which reports nesting as chain of Treer node Name's on every iteration and uses WalkerTreerDFS.
-
-<a name="humanizePosition"></a>
-## func [humanizePosition](<https://github.com/corpix/parse/blob/master/errors.go#L17>)
-
-```go
-func humanizePosition(position int) int
-```
-
-humanizePosition is just a little helper which wraps common position operations before it will be showed to human.
 
 <a name="indent"></a>
 ## func [indent](<https://github.com/corpix/parse/blob/master/strings.go#L7>)
@@ -437,7 +471,7 @@ func (m AllMatcher) Match(chain []string) bool
 Match checks that every Matcher.Match\(...\) returns true and returns true too, otherwise it returns false. If no Matcher presented in a slice then it will return false.
 
 <a name="Chain"></a>
-## type [Chain](<https://github.com/corpix/parse/blob/master/chain.go#L6-L9>)
+## type [Chain](<https://github.com/corpix/parse/blob/master/chain.go#L10-L14>)
 
 Chain represents a chain of Rule's to match in the data.
 
@@ -445,29 +479,30 @@ Chain represents a chain of Rule's to match in the data.
 type Chain struct {
     name  string
     Rules Rules
+    Hooks []RuleParseHook
 }
 ```
 
 <a name="NewChain"></a>
-### func [NewChain](<https://github.com/corpix/parse/blob/master/chain.go#L146>)
+### func [NewChain](<https://github.com/corpix/parse/blob/master/chain.go#L153>)
 
 ```go
-func NewChain(name string, r ...Rule) *Chain
+func NewChain(name string, rulesOrHooks ...interface{}) *Chain
 ```
 
 NewChain constructs new Chain. Valid Chain could be constructed with \>=2 rules.
 
 <a name="Chain.Add"></a>
-### func \(\*Chain\) [Add](<https://github.com/corpix/parse/blob/master/chain.go#L138>)
+### func \(\*Chain\) [Add](<https://github.com/corpix/parse/blob/master/chain.go#L145>)
 
 ```go
-func (r *Chain) Add(rule Rule)
+func (r *Chain) Add(rule ...Rule)
 ```
 
 Add appends a Rule to the Chain.
 
 <a name="Chain.GetChilds"></a>
-### func \(\*Chain\) [GetChilds](<https://github.com/corpix/parse/blob/master/chain.go#L38>)
+### func \(\*Chain\) [GetChilds](<https://github.com/corpix/parse/blob/master/chain.go#L43>)
 
 ```go
 func (r *Chain) GetChilds() Treers
@@ -476,7 +511,7 @@ func (r *Chain) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Chain.GetParameters"></a>
-### func \(\*Chain\) [GetParameters](<https://github.com/corpix/parse/blob/master/chain.go#L49>)
+### func \(\*Chain\) [GetParameters](<https://github.com/corpix/parse/blob/master/chain.go#L54>)
 
 ```go
 func (r *Chain) GetParameters() RuleParameters
@@ -485,7 +520,7 @@ func (r *Chain) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Chain.IsFinite"></a>
-### func \(\*Chain\) [IsFinite](<https://github.com/corpix/parse/blob/master/chain.go#L57>)
+### func \(\*Chain\) [IsFinite](<https://github.com/corpix/parse/blob/master/chain.go#L62>)
 
 ```go
 func (r *Chain) IsFinite() bool
@@ -494,7 +529,7 @@ func (r *Chain) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Chain.Name"></a>
-### func \(\*Chain\) [Name](<https://github.com/corpix/parse/blob/master/chain.go#L13>)
+### func \(\*Chain\) [Name](<https://github.com/corpix/parse/blob/master/chain.go#L18>)
 
 ```go
 func (r *Chain) Name() string
@@ -503,7 +538,7 @@ func (r *Chain) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Chain.Parse"></a>
-### func \(\*Chain\) [Parse](<https://github.com/corpix/parse/blob/master/chain.go#L66>)
+### func \(\*Chain\) [Parse](<https://github.com/corpix/parse/blob/master/chain.go#L70>)
 
 ```go
 func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -512,7 +547,7 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Chain.Show"></a>
-### func \(\*Chain\) [Show](<https://github.com/corpix/parse/blob/master/chain.go#L22>)
+### func \(\*Chain\) [Show](<https://github.com/corpix/parse/blob/master/chain.go#L27>)
 
 ```go
 func (r *Chain) Show(childs string) string
@@ -521,7 +556,7 @@ func (r *Chain) Show(childs string) string
 Show this node as a string. You should provide childs as string to this function, it does not care about nesting in a tree, it only shows string representation of itself.
 
 <a name="Chain.String"></a>
-### func \(\*Chain\) [String](<https://github.com/corpix/parse/blob/master/chain.go#L32>)
+### func \(\*Chain\) [String](<https://github.com/corpix/parse/blob/master/chain.go#L37>)
 
 ```go
 func (r *Chain) String() string
@@ -530,7 +565,7 @@ func (r *Chain) String() string
 String returns rule as a string, resolving recursion with \`\<circular\>\` placeholder.
 
 <a name="Context"></a>
-## type [Context](<https://github.com/corpix/parse/blob/master/rule.go#L57-L61>)
+## type [Context](<https://github.com/corpix/parse/blob/master/parse.go#L216-L221>)
 
 
 
@@ -539,11 +574,12 @@ type Context struct {
     Rule     Rule
     Parser   *Parser
     Location *Location
+    Depth    int
 }
 ```
 
 <a name="Either"></a>
-## type [Either](<https://github.com/corpix/parse/blob/master/either.go#L11-L14>)
+## type [Either](<https://github.com/corpix/parse/blob/master/either.go#L11-L15>)
 
 Either represents a list of Rule's to match in the data. One of the rules in a list must match.
 
@@ -551,38 +587,39 @@ Either represents a list of Rule's to match in the data. One of the rules in a l
 type Either struct {
     name  string
     Rules Rules
+    Hooks []RuleParseHook
 }
 ```
 
 <a name="NewASCIIRange"></a>
-### func [NewASCIIRange](<https://github.com/corpix/parse/blob/master/either.go#L163>)
+### func [NewASCIIRange](<https://github.com/corpix/parse/blob/master/either.go#L184>)
 
 ```go
-func NewASCIIRange(name string, from byte, to byte) *Either
+func NewASCIIRange(name string, from byte, to byte, hooks ...RuleParseHook) *Either
 ```
 
 NewASCIIRange constructs \*Either\(Terminal, ...\) Rule using specified ASCII range.
 
 <a name="NewEither"></a>
-### func [NewEither](<https://github.com/corpix/parse/blob/master/either.go#L155>)
+### func [NewEither](<https://github.com/corpix/parse/blob/master/either.go#L163>)
 
 ```go
-func NewEither(name string, r ...Rule) *Either
+func NewEither(name string, rulesOrHooks ...interface{}) *Either
 ```
 
 NewEither constructs \*Either Rule. Valid Either could be constructed with \>=2 rules.
 
 <a name="Either.Add"></a>
-### func \(\*Either\) [Add](<https://github.com/corpix/parse/blob/master/either.go#L147>)
+### func \(\*Either\) [Add](<https://github.com/corpix/parse/blob/master/either.go#L155>)
 
 ```go
-func (r *Either) Add(rule Rule)
+func (r *Either) Add(rule ...Rule)
 ```
 
 Add appends a Rule into Either list.
 
 <a name="Either.GetChilds"></a>
-### func \(\*Either\) [GetChilds](<https://github.com/corpix/parse/blob/master/either.go#L43>)
+### func \(\*Either\) [GetChilds](<https://github.com/corpix/parse/blob/master/either.go#L44>)
 
 ```go
 func (r *Either) GetChilds() Treers
@@ -591,7 +628,7 @@ func (r *Either) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Either.GetParameters"></a>
-### func \(\*Either\) [GetParameters](<https://github.com/corpix/parse/blob/master/either.go#L54>)
+### func \(\*Either\) [GetParameters](<https://github.com/corpix/parse/blob/master/either.go#L55>)
 
 ```go
 func (r *Either) GetParameters() RuleParameters
@@ -600,7 +637,7 @@ func (r *Either) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Either.IsFinite"></a>
-### func \(\*Either\) [IsFinite](<https://github.com/corpix/parse/blob/master/either.go#L62>)
+### func \(\*Either\) [IsFinite](<https://github.com/corpix/parse/blob/master/either.go#L63>)
 
 ```go
 func (r *Either) IsFinite() bool
@@ -609,7 +646,7 @@ func (r *Either) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Either.Name"></a>
-### func \(\*Either\) [Name](<https://github.com/corpix/parse/blob/master/either.go#L18>)
+### func \(\*Either\) [Name](<https://github.com/corpix/parse/blob/master/either.go#L19>)
 
 ```go
 func (r *Either) Name() string
@@ -618,7 +655,7 @@ func (r *Either) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Either.Parse"></a>
-### func \(\*Either\) [Parse](<https://github.com/corpix/parse/blob/master/either.go#L70>)
+### func \(\*Either\) [Parse](<https://github.com/corpix/parse/blob/master/either.go#L71>)
 
 ```go
 func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -627,7 +664,7 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Either.Show"></a>
-### func \(\*Either\) [Show](<https://github.com/corpix/parse/blob/master/either.go#L27>)
+### func \(\*Either\) [Show](<https://github.com/corpix/parse/blob/master/either.go#L28>)
 
 ```go
 func (r *Either) Show(childs string) string
@@ -636,7 +673,7 @@ func (r *Either) Show(childs string) string
 Show this node as a string. You should provide childs as string to this function, it does not care about nesting in a tree, it only shows string representation of itself.
 
 <a name="Either.String"></a>
-### func \(\*Either\) [String](<https://github.com/corpix/parse/blob/master/either.go#L37>)
+### func \(\*Either\) [String](<https://github.com/corpix/parse/blob/master/either.go#L38>)
 
 ```go
 func (r *Either) String() string
@@ -672,7 +709,7 @@ func (m EqualMatcher) Match(chain []string) bool
 Match checks chain has same elements as m.
 
 <a name="ErrBoundIncomplete"></a>
-## type [ErrBoundIncomplete](<https://github.com/corpix/parse/blob/master/errors.go#L25-L29>)
+## type [ErrBoundIncomplete](<https://github.com/corpix/parse/blob/master/errors.go#L18-L22>)
 
 ErrBoundIncomplete is an error which mean that a closing token was not found in the input which is making a requested logical «bound» to be incomplete.
 
@@ -680,12 +717,12 @@ ErrBoundIncomplete is an error which mean that a closing token was not found in 
 type ErrBoundIncomplete struct {
     Starting []byte
     Closing  []byte
-    Position int
+    Location *Location
 }
 ```
 
 <a name="ErrBoundIncomplete.Error"></a>
-### func \(\*ErrBoundIncomplete\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L31>)
+### func \(\*ErrBoundIncomplete\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L24>)
 
 ```go
 func (e *ErrBoundIncomplete) Error() string
@@ -694,19 +731,19 @@ func (e *ErrBoundIncomplete) Error() string
 
 
 <a name="ErrEmptyRule"></a>
-## type [ErrEmptyRule](<https://github.com/corpix/parse/blob/master/errors.go#L139-L142>)
+## type [ErrEmptyRule](<https://github.com/corpix/parse/blob/master/errors.go#L144-L147>)
 
 ErrEmptyRule is an error which mean a Rule with empty content was passed to the parser.
 
 ```go
 type ErrEmptyRule struct {
-    Rule
+    Rule   Rule
     Inside Rule
 }
 ```
 
 <a name="ErrEmptyRule.Error"></a>
-### func \(\*ErrEmptyRule\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L144>)
+### func \(\*ErrEmptyRule\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L149>)
 
 ```go
 func (e *ErrEmptyRule) Error() string
@@ -715,19 +752,19 @@ func (e *ErrEmptyRule) Error() string
 
 
 <a name="ErrNestingTooDeep"></a>
-## type [ErrNestingTooDeep](<https://github.com/corpix/parse/blob/master/errors.go#L117-L120>)
+## type [ErrNestingTooDeep](<https://github.com/corpix/parse/blob/master/errors.go#L122-L125>)
 
 ErrNestingTooDeep is an error which mean the Rule nesting is too deep.
 
 ```go
 type ErrNestingTooDeep struct {
-    Nesting  int
-    Position int
+    Location *Location
+    Depth    int
 }
 ```
 
 <a name="ErrNestingTooDeep.Error"></a>
-### func \(\*ErrNestingTooDeep\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L122>)
+### func \(\*ErrNestingTooDeep\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L127>)
 
 ```go
 func (e *ErrNestingTooDeep) Error() string
@@ -736,19 +773,19 @@ func (e *ErrNestingTooDeep) Error() string
 
 
 <a name="ErrUnexpectedEOF"></a>
-## type [ErrUnexpectedEOF](<https://github.com/corpix/parse/blob/master/errors.go#L70-L73>)
+## type [ErrUnexpectedEOF](<https://github.com/corpix/parse/blob/master/errors.go#L63-L66>)
 
 ErrUnexpectedEOF is an error which mean that EOF was meat while parser wanted more input.
 
 ```go
 type ErrUnexpectedEOF struct {
-    Position int
-    Rule
+    Rule     Rule
+    Location *Location
 }
 ```
 
 <a name="ErrUnexpectedEOF.Error"></a>
-### func \(\*ErrUnexpectedEOF\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L75>)
+### func \(\*ErrUnexpectedEOF\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L68>)
 
 ```go
 func (e *ErrUnexpectedEOF) Error() string
@@ -757,20 +794,21 @@ func (e *ErrUnexpectedEOF) Error() string
 
 
 <a name="ErrUnexpectedToken"></a>
-## type [ErrUnexpectedToken](<https://github.com/corpix/parse/blob/master/errors.go#L93-L97>)
+## type [ErrUnexpectedToken](<https://github.com/corpix/parse/blob/master/errors.go#L86-L91>)
 
 ErrUnexpectedToken is an error which mean that token read from current position in input is not expected by the current Rule.
 
 ```go
 type ErrUnexpectedToken struct {
+    Rule     Rule
+    Location *Location
     Token    []byte
-    Position int
-    Rule
+    Inner    []error
 }
 ```
 
 <a name="ErrUnexpectedToken.Error"></a>
-### func \(\*ErrUnexpectedToken\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L99>)
+### func \(\*ErrUnexpectedToken\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L93>)
 
 ```go
 func (e *ErrUnexpectedToken) Error() string
@@ -779,18 +817,18 @@ func (e *ErrUnexpectedToken) Error() string
 
 
 <a name="ErrUnsupportedRule"></a>
-## type [ErrUnsupportedRule](<https://github.com/corpix/parse/blob/master/errors.go#L49-L51>)
+## type [ErrUnsupportedRule](<https://github.com/corpix/parse/blob/master/errors.go#L42-L44>)
 
 ErrUnsupportedRule is an error which mean that parser support for specifier Rule is not implemented.
 
 ```go
 type ErrUnsupportedRule struct {
-    Rule
+    Rule Rule
 }
 ```
 
 <a name="ErrUnsupportedRule.Error"></a>
-### func \(\*ErrUnsupportedRule\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L53>)
+### func \(\*ErrUnsupportedRule\) [Error](<https://github.com/corpix/parse/blob/master/errors.go#L46>)
 
 ```go
 func (e *ErrUnsupportedRule) Error() string
@@ -826,18 +864,27 @@ func (m LengthMatcher) Match(chain []string) bool
 Match checks chain length is same as int\(m\).
 
 <a name="Location"></a>
-## type [Location](<https://github.com/corpix/parse/blob/master/tree.go#L7-L12>)
+## type [Location](<https://github.com/corpix/parse/blob/master/parse.go#L224-L229>)
 
-
+Location represents position in input \(posirion, line, column\).
 
 ```go
 type Location struct {
+    Path     string
     Position int
     Line     int
     Column   int
-    Depth    int
 }
 ```
+
+<a name="Location.String"></a>
+### func \(\*Location\) [String](<https://github.com/corpix/parse/blob/master/parse.go#L231>)
+
+```go
+func (l *Location) String() string
+```
+
+
 
 <a name="Matcher"></a>
 ## type [Matcher](<https://github.com/corpix/parse/blob/master/matcher.go#L5-L7>)
@@ -851,7 +898,7 @@ type Matcher interface {
 ```
 
 <a name="Parser"></a>
-## type [Parser](<https://github.com/corpix/parse/blob/master/parse.go#L25-L29>)
+## type [Parser](<https://github.com/corpix/parse/blob/master/parse.go#L32-L37>)
 
 Parser represents a parser which use Rule's to parse the input.
 
@@ -860,11 +907,12 @@ type Parser struct {
     MaxDepth  int
     LineBreak Rule
     LineIndex []*Region
+    Path      string
 }
 ```
 
 <a name="NewParser"></a>
-### func [NewParser](<https://github.com/corpix/parse/blob/master/parse.go#L177>)
+### func [NewParser](<https://github.com/corpix/parse/blob/master/parse.go#L203>)
 
 ```go
 func NewParser(op ...ParserOption) *Parser
@@ -873,7 +921,7 @@ func NewParser(op ...ParserOption) *Parser
 NewParser constructs new \*Parser.
 
 <a name="Parser.LineRegions"></a>
-### func \(\*Parser\) [LineRegions](<https://github.com/corpix/parse/blob/master/parse.go#L49>)
+### func \(\*Parser\) [LineRegions](<https://github.com/corpix/parse/blob/master/parse.go#L66>)
 
 ```go
 func (p *Parser) LineRegions(input []byte) []*Region
@@ -882,7 +930,7 @@ func (p *Parser) LineRegions(input []byte) []*Region
 LineRegions construct a slice of Region's for given input. This regions contains ranges of non line\-break symbols from left to right. Return value could be used as Parser.LineIndex. Also Parser.Parse calls Parser.LineRegions for you automatically.
 
 <a name="Parser.Locate"></a>
-### func \(\*Parser\) [Locate](<https://github.com/corpix/parse/blob/master/parse.go#L94>)
+### func \(\*Parser\) [Locate](<https://github.com/corpix/parse/blob/master/parse.go#L111>)
 
 ```go
 func (p *Parser) Locate(position int) (int, int)
@@ -891,7 +939,7 @@ func (p *Parser) Locate(position int) (int, int)
 Locate finds a line & column of the given position. It expects Parser.LineIndex to be a sorted slice of Region's of non line\-break's. If there is no LineIndex then it returns 0, 0.
 
 <a name="Parser.Parse"></a>
-### func \(\*Parser\) [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L143>)
+### func \(\*Parser\) [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L160>)
 
 ```go
 func (p *Parser) Parse(r Rule, input []byte) (*Tree, error)
@@ -900,7 +948,7 @@ func (p *Parser) Parse(r Rule, input []byte) (*Tree, error)
 Parse parses input with Rule's. Calls Parser.LineRegions and store result under Parser.LineIndex. Not safe for concurrent use \(and not expected to be used concurrently\).
 
 <a name="ParserOption"></a>
-## type [ParserOption](<https://github.com/corpix/parse/blob/master/parse.go#L34>)
+## type [ParserOption](<https://github.com/corpix/parse/blob/master/parse.go#L42>)
 
 ParserOption represents a Parser option which mutates Parser in a way which is acceptable for this option.
 
@@ -909,22 +957,31 @@ type ParserOption func(*Parser)
 ```
 
 <a name="ParserOptionLineBreak"></a>
-### func [ParserOptionLineBreak](<https://github.com/corpix/parse/blob/master/parse.go#L40>)
+### func [ParserOptionLineBreak](<https://github.com/corpix/parse/blob/master/parse.go#L52>)
 
 ```go
 func ParserOptionLineBreak(r Rule) ParserOption
 ```
 
-
+ParserOptionLineBreak set parser line\-break Rule. Line\-breaks used during error reporting, they are not consumed and available for otherr rules.
 
 <a name="ParserOptionMaxDepth"></a>
-### func [ParserOptionMaxDepth](<https://github.com/corpix/parse/blob/master/parse.go#L36>)
+### func [ParserOptionMaxDepth](<https://github.com/corpix/parse/blob/master/parse.go#L45>)
 
 ```go
 func ParserOptionMaxDepth(d int) ParserOption
 ```
 
+ParserOptionMaxDepth set max depth for rule application recursion.
 
+<a name="ParserOptionPath"></a>
+### func [ParserOptionPath](<https://github.com/corpix/parse/blob/master/parse.go#L58>)
+
+```go
+func ParserOptionPath(path string) ParserOption
+```
+
+ParserOptionPath set parser path meta\-information which is propagated to each Rule.
 
 <a name="PrefixMatcher"></a>
 ## type [PrefixMatcher](<https://github.com/corpix/parse/blob/master/matcher.go#L65>)
@@ -954,7 +1011,7 @@ func (m PrefixMatcher) Match(chain []string) bool
 Match checks chain has prefix m.
 
 <a name="Regexp"></a>
-## type [Regexp](<https://github.com/corpix/parse/blob/master/regexp.go#L10-L14>)
+## type [Regexp](<https://github.com/corpix/parse/blob/master/regexp.go#L10-L15>)
 
 Regexp is a Rule which should match Go regexp on input.
 
@@ -963,20 +1020,21 @@ type Regexp struct {
     name   string
     Regexp *regexp.Regexp
     Expr   string
+    Hooks  []RuleParseHook
 }
 ```
 
 <a name="NewRegexp"></a>
-### func [NewRegexp](<https://github.com/corpix/parse/blob/master/regexp.go#L93>)
+### func [NewRegexp](<https://github.com/corpix/parse/blob/master/regexp.go#L99>)
 
 ```go
-func NewRegexp(name string, expr string) *Regexp
+func NewRegexp(name string, expr string, hooks ...RuleParseHook) *Regexp
 ```
 
 NewRegexp constructs a new \*Regexp.
 
 <a name="Regexp.GetChilds"></a>
-### func \(\*Regexp\) [GetChilds](<https://github.com/corpix/parse/blob/master/regexp.go#L38>)
+### func \(\*Regexp\) [GetChilds](<https://github.com/corpix/parse/blob/master/regexp.go#L39>)
 
 ```go
 func (r *Regexp) GetChilds() Treers
@@ -985,7 +1043,7 @@ func (r *Regexp) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Regexp.GetParameters"></a>
-### func \(\*Regexp\) [GetParameters](<https://github.com/corpix/parse/blob/master/regexp.go#L45>)
+### func \(\*Regexp\) [GetParameters](<https://github.com/corpix/parse/blob/master/regexp.go#L46>)
 
 ```go
 func (r *Regexp) GetParameters() RuleParameters
@@ -994,7 +1052,7 @@ func (r *Regexp) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Regexp.IsFinite"></a>
-### func \(\*Regexp\) [IsFinite](<https://github.com/corpix/parse/blob/master/regexp.go#L54>)
+### func \(\*Regexp\) [IsFinite](<https://github.com/corpix/parse/blob/master/regexp.go#L55>)
 
 ```go
 func (r *Regexp) IsFinite() bool
@@ -1003,7 +1061,7 @@ func (r *Regexp) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Regexp.Name"></a>
-### func \(\*Regexp\) [Name](<https://github.com/corpix/parse/blob/master/regexp.go#L18>)
+### func \(\*Regexp\) [Name](<https://github.com/corpix/parse/blob/master/regexp.go#L19>)
 
 ```go
 func (r *Regexp) Name() string
@@ -1012,7 +1070,7 @@ func (r *Regexp) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Regexp.Parse"></a>
-### func \(\*Regexp\) [Parse](<https://github.com/corpix/parse/blob/master/regexp.go#L62>)
+### func \(\*Regexp\) [Parse](<https://github.com/corpix/parse/blob/master/regexp.go#L63>)
 
 ```go
 func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -1021,7 +1079,7 @@ func (r *Regexp) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Regexp.Show"></a>
-### func \(\*Regexp\) [Show](<https://github.com/corpix/parse/blob/master/regexp.go#L22>)
+### func \(\*Regexp\) [Show](<https://github.com/corpix/parse/blob/master/regexp.go#L23>)
 
 ```go
 func (r *Regexp) Show(childs string) string
@@ -1030,7 +1088,7 @@ func (r *Regexp) Show(childs string) string
 
 
 <a name="Regexp.String"></a>
-### func \(\*Regexp\) [String](<https://github.com/corpix/parse/blob/master/regexp.go#L32>)
+### func \(\*Regexp\) [String](<https://github.com/corpix/parse/blob/master/regexp.go#L33>)
 
 ```go
 func (r *Regexp) String() string
@@ -1060,7 +1118,7 @@ func TreeRegion(tree ...*Tree) *Region
 TreeRegion constructs a \*Region from the one or more \*Tree.
 
 <a name="Repetition"></a>
-## type [Repetition](<https://github.com/corpix/parse/blob/master/repetition.go#L7-L12>)
+## type [Repetition](<https://github.com/corpix/parse/blob/master/repetition.go#L27-L33>)
 
 Repetition is a Rule which is repeating in the input one or more times.
 
@@ -1070,38 +1128,39 @@ type Repetition struct {
     Rule     Rule
     Times    int
     Variadic bool
+    Hooks    []RuleParseHook
 }
 ```
 
 <a name="NewRepetition"></a>
-### func [NewRepetition](<https://github.com/corpix/parse/blob/master/repetition.go#L196>)
+### func [NewRepetition](<https://github.com/corpix/parse/blob/master/repetition.go#L227>)
 
 ```go
-func NewRepetition(name string, rule Rule) *Repetition
+func NewRepetition(name string, rule Rule, hooks ...RuleParseHook) *Repetition
 ```
 
 NewRepetition constructs new \*Repetition which releat one or more times.
 
 <a name="NewRepetitionTimes"></a>
-### func [NewRepetitionTimes](<https://github.com/corpix/parse/blob/master/repetition.go#L175>)
+### func [NewRepetitionTimes](<https://github.com/corpix/parse/blob/master/repetition.go#L204>)
 
 ```go
-func NewRepetitionTimes(name string, times int, rule Rule) *Repetition
+func NewRepetitionTimes(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition
 ```
 
 NewRepetitionTimes constructs new \*Repetition which repeats exactly \`times\`.
 
 <a name="NewRepetitionTimesVariadic"></a>
-### func [NewRepetitionTimesVariadic](<https://github.com/corpix/parse/blob/master/repetition.go#L186>)
+### func [NewRepetitionTimesVariadic](<https://github.com/corpix/parse/blob/master/repetition.go#L216>)
 
 ```go
-func NewRepetitionTimesVariadic(name string, times int, rule Rule) *Repetition
+func NewRepetitionTimesVariadic(name string, times int, rule Rule, hooks ...RuleParseHook) *Repetition
 ```
 
 NewRepetitionTimesVariadic constructs new variadic \*Repetition which repeats exactly \`times\` or more.
 
 <a name="Repetition.GetChilds"></a>
-### func \(\*Repetition\) [GetChilds](<https://github.com/corpix/parse/blob/master/repetition.go#L41>)
+### func \(\*Repetition\) [GetChilds](<https://github.com/corpix/parse/blob/master/repetition.go#L62>)
 
 ```go
 func (r *Repetition) GetChilds() Treers
@@ -1110,7 +1169,7 @@ func (r *Repetition) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Repetition.GetParameters"></a>
-### func \(\*Repetition\) [GetParameters](<https://github.com/corpix/parse/blob/master/repetition.go#L48>)
+### func \(\*Repetition\) [GetParameters](<https://github.com/corpix/parse/blob/master/repetition.go#L69>)
 
 ```go
 func (r *Repetition) GetParameters() RuleParameters
@@ -1119,7 +1178,7 @@ func (r *Repetition) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Repetition.IsFinite"></a>
-### func \(\*Repetition\) [IsFinite](<https://github.com/corpix/parse/blob/master/repetition.go#L58>)
+### func \(\*Repetition\) [IsFinite](<https://github.com/corpix/parse/blob/master/repetition.go#L79>)
 
 ```go
 func (r *Repetition) IsFinite() bool
@@ -1128,7 +1187,7 @@ func (r *Repetition) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Repetition.Name"></a>
-### func \(\*Repetition\) [Name](<https://github.com/corpix/parse/blob/master/repetition.go#L16>)
+### func \(\*Repetition\) [Name](<https://github.com/corpix/parse/blob/master/repetition.go#L37>)
 
 ```go
 func (r *Repetition) Name() string
@@ -1137,7 +1196,7 @@ func (r *Repetition) Name() string
 Name indicates the Name which was given to the rule on creation. Name could be not unique.
 
 <a name="Repetition.Parse"></a>
-### func \(\*Repetition\) [Parse](<https://github.com/corpix/parse/blob/master/repetition.go#L66>)
+### func \(\*Repetition\) [Parse](<https://github.com/corpix/parse/blob/master/repetition.go#L87>)
 
 ```go
 func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -1146,7 +1205,7 @@ func (r *Repetition) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Repetition.Show"></a>
-### func \(\*Repetition\) [Show](<https://github.com/corpix/parse/blob/master/repetition.go#L25>)
+### func \(\*Repetition\) [Show](<https://github.com/corpix/parse/blob/master/repetition.go#L46>)
 
 ```go
 func (r *Repetition) Show(childs string) string
@@ -1155,7 +1214,7 @@ func (r *Repetition) Show(childs string) string
 Show this node as a string. You should provide childs as string to this function, it does not care about nesting in a tree, it only shows string representation of itself.
 
 <a name="Repetition.String"></a>
-### func \(\*Repetition\) [String](<https://github.com/corpix/parse/blob/master/repetition.go#L35>)
+### func \(\*Repetition\) [String](<https://github.com/corpix/parse/blob/master/repetition.go#L56>)
 
 ```go
 func (r *Repetition) String() string
@@ -1164,7 +1223,7 @@ func (r *Repetition) String() string
 String returns rule as a string, resolving recursion with \`\<circular\>\` placeholder.
 
 <a name="Rule"></a>
-## type [Rule](<https://github.com/corpix/parse/blob/master/rule.go#L40-L55>)
+## type [Rule](<https://github.com/corpix/parse/blob/master/rule.go#L44-L59>)
 
 Rule represents a general Rule interface.
 
@@ -1241,6 +1300,15 @@ func (p RuleParameters) String() string
 
 String encodes a RuleParameters as string.
 
+<a name="RuleParseHook"></a>
+## type [RuleParseHook](<https://github.com/corpix/parse/blob/master/rule.go#L41>)
+
+
+
+```go
+type RuleParseHook = func(ctx *Context, t *Tree) error
+```
+
 <a name="Rules"></a>
 ## type [Rules](<https://github.com/corpix/parse/blob/master/rules.go#L4>)
 
@@ -1305,7 +1373,7 @@ func (m SuffixMatcher) Match(chain []string) bool
 Match checks chain has suffix m.
 
 <a name="Terminal"></a>
-## type [Terminal](<https://github.com/corpix/parse/blob/master/terminal.go#L11-L14>)
+## type [Terminal](<https://github.com/corpix/parse/blob/master/terminal.go#L11-L15>)
 
 Terminal is a Rule which is literal in input.
 
@@ -1313,20 +1381,21 @@ Terminal is a Rule which is literal in input.
 type Terminal struct {
     name  string
     Value []byte
+    Hooks []RuleParseHook
 }
 ```
 
 <a name="NewTerminal"></a>
-### func [NewTerminal](<https://github.com/corpix/parse/blob/master/terminal.go#L104>)
+### func [NewTerminal](<https://github.com/corpix/parse/blob/master/terminal.go#L103>)
 
 ```go
-func NewTerminal(name string, v string) *Terminal
+func NewTerminal(name string, v string, hooks ...RuleParseHook) *Terminal
 ```
 
 NewTerminal constructs a new \*Terminal.
 
 <a name="Terminal.GetChilds"></a>
-### func \(\*Terminal\) [GetChilds](<https://github.com/corpix/parse/blob/master/terminal.go#L38>)
+### func \(\*Terminal\) [GetChilds](<https://github.com/corpix/parse/blob/master/terminal.go#L39>)
 
 ```go
 func (r *Terminal) GetChilds() Treers
@@ -1335,7 +1404,7 @@ func (r *Terminal) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Terminal.GetParameters"></a>
-### func \(\*Terminal\) [GetParameters](<https://github.com/corpix/parse/blob/master/terminal.go#L45>)
+### func \(\*Terminal\) [GetParameters](<https://github.com/corpix/parse/blob/master/terminal.go#L46>)
 
 ```go
 func (r *Terminal) GetParameters() RuleParameters
@@ -1344,7 +1413,7 @@ func (r *Terminal) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Terminal.IsFinite"></a>
-### func \(\*Terminal\) [IsFinite](<https://github.com/corpix/parse/blob/master/terminal.go#L54>)
+### func \(\*Terminal\) [IsFinite](<https://github.com/corpix/parse/blob/master/terminal.go#L55>)
 
 ```go
 func (r *Terminal) IsFinite() bool
@@ -1353,7 +1422,7 @@ func (r *Terminal) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Terminal.Name"></a>
-### func \(\*Terminal\) [Name](<https://github.com/corpix/parse/blob/master/terminal.go#L18>)
+### func \(\*Terminal\) [Name](<https://github.com/corpix/parse/blob/master/terminal.go#L19>)
 
 ```go
 func (r *Terminal) Name() string
@@ -1362,7 +1431,7 @@ func (r *Terminal) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Terminal.Parse"></a>
-### func \(\*Terminal\) [Parse](<https://github.com/corpix/parse/blob/master/terminal.go#L62>)
+### func \(\*Terminal\) [Parse](<https://github.com/corpix/parse/blob/master/terminal.go#L63>)
 
 ```go
 func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -1371,7 +1440,7 @@ func (r *Terminal) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Terminal.Show"></a>
-### func \(\*Terminal\) [Show](<https://github.com/corpix/parse/blob/master/terminal.go#L22>)
+### func \(\*Terminal\) [Show](<https://github.com/corpix/parse/blob/master/terminal.go#L23>)
 
 ```go
 func (r *Terminal) Show(childs string) string
@@ -1380,7 +1449,7 @@ func (r *Terminal) Show(childs string) string
 
 
 <a name="Terminal.String"></a>
-### func \(\*Terminal\) [String](<https://github.com/corpix/parse/blob/master/terminal.go#L32>)
+### func \(\*Terminal\) [String](<https://github.com/corpix/parse/blob/master/terminal.go#L33>)
 
 ```go
 func (r *Terminal) String() string
@@ -1389,7 +1458,7 @@ func (r *Terminal) String() string
 String returns rule as a string, resolving recursion with \`\<circular\>\` placeholder.
 
 <a name="Tree"></a>
-## type [Tree](<https://github.com/corpix/parse/blob/master/tree.go#L17-L23>)
+## type [Tree](<https://github.com/corpix/parse/blob/master/tree.go#L10-L17>)
 
 Tree represents a single Rule match with corresponding information about the input, position and matched Rule. It will be recursive in case of nested Rule match.
 
@@ -1398,13 +1467,14 @@ type Tree struct {
     Rule     Rule
     Location *Location
     Region   *Region
+    Depth    int
     Childs   []*Tree
     Data     []byte
 }
 ```
 
 <a name="Parse"></a>
-### func [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L172>)
+### func [Parse](<https://github.com/corpix/parse/blob/master/parse.go#L198>)
 
 ```go
 func Parse(rule Rule, input []byte) (*Tree, error)
@@ -1413,7 +1483,7 @@ func Parse(rule Rule, input []byte) (*Tree, error)
 Parse is a shortcut to call the DefaultParser.Parse\(\).
 
 <a name="Tree.GetChilds"></a>
-### func \(\*Tree\) [GetChilds](<https://github.com/corpix/parse/blob/master/tree.go#L34>)
+### func \(\*Tree\) [GetChilds](<https://github.com/corpix/parse/blob/master/tree.go#L28>)
 
 ```go
 func (t *Tree) GetChilds() Treers
@@ -1421,8 +1491,26 @@ func (t *Tree) GetChilds() Treers
 
 GetChilds returns a slice of the Treer with children nodes.
 
+<a name="Tree.Graph"></a>
+### func \(\*Tree\) [Graph](<https://github.com/corpix/parse/blob/master/tree.go#L68>)
+
+```go
+func (t *Tree) Graph() string
+```
+
+Graph produce Graphviz compatible code which could be converted to picture using, for example \`dot \-Tpng \> graph.png\`.
+
+<a name="Tree.Hash"></a>
+### func \(\*Tree\) [Hash](<https://github.com/corpix/parse/blob/master/tree.go#L61>)
+
+```go
+func (t *Tree) Hash() string
+```
+
+Hash produces a lication which is believed to uniquely identify the node in the tree. This is useful for serialization and graphing.
+
 <a name="Tree.Name"></a>
-### func \(\*Tree\) [Name](<https://github.com/corpix/parse/blob/master/tree.go#L26>)
+### func \(\*Tree\) [Name](<https://github.com/corpix/parse/blob/master/tree.go#L20>)
 
 ```go
 func (t *Tree) Name() string
@@ -1431,7 +1519,7 @@ func (t *Tree) Name() string
 Name returns current node name.
 
 <a name="Tree.Show"></a>
-### func \(\*Tree\) [Show](<https://github.com/corpix/parse/blob/master/tree.go#L47>)
+### func \(\*Tree\) [Show](<https://github.com/corpix/parse/blob/master/tree.go#L41>)
 
 ```go
 func (t *Tree) Show(childs string) string
@@ -1440,13 +1528,22 @@ func (t *Tree) Show(childs string) string
 Show this node as a string. You should provide childs as string to this function, it does not care about nesting in a tree, it only shows string representation of itself.
 
 <a name="Tree.String"></a>
-### func \(\*Tree\) [String](<https://github.com/corpix/parse/blob/master/tree.go#L59>)
+### func \(\*Tree\) [String](<https://github.com/corpix/parse/blob/master/tree.go#L53>)
 
 ```go
 func (t *Tree) String() string
 ```
 
 
+
+<a name="Tree.graph"></a>
+### func \(\*Tree\) [graph](<https://github.com/corpix/parse/blob/master/tree.go#L80>)
+
+```go
+func (t *Tree) graph() string
+```
+
+graph is a helper for Graph, and called in non root nodes.
 
 <a name="Treer"></a>
 ## type [Treer](<https://github.com/corpix/parse/blob/master/treer.go#L4-L24>)
@@ -1505,28 +1602,29 @@ type Treers []Treer
 ```
 
 <a name="Wrapper"></a>
-## type [Wrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L7-L10>)
+## type [Wrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L7-L11>)
 
 Wrapper represents a wrapper type for some inner Rule. It could be used to wrap a Rule with custom name.
 
 ```go
 type Wrapper struct {
-    name string
-    Rule Rule
+    name  string
+    Rule  Rule
+    Hooks []RuleParseHook
 }
 ```
 
 <a name="NewWrapper"></a>
-### func [NewWrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L117>)
+### func [NewWrapper](<https://github.com/corpix/parse/blob/master/wrapper.go#L124>)
 
 ```go
-func NewWrapper(name string, r Rule) *Wrapper
+func NewWrapper(name string, r Rule, hooks ...RuleParseHook) *Wrapper
 ```
 
 NewWrapper constructs new Wrapper.
 
 <a name="Wrapper.GetChilds"></a>
-### func \(\*Wrapper\) [GetChilds](<https://github.com/corpix/parse/blob/master/wrapper.go#L39>)
+### func \(\*Wrapper\) [GetChilds](<https://github.com/corpix/parse/blob/master/wrapper.go#L40>)
 
 ```go
 func (r *Wrapper) GetChilds() Treers
@@ -1535,7 +1633,7 @@ func (r *Wrapper) GetChilds() Treers
 GetChilds returns a slice of Rule which is children for current Rule.
 
 <a name="Wrapper.GetParameters"></a>
-### func \(\*Wrapper\) [GetParameters](<https://github.com/corpix/parse/blob/master/wrapper.go#L46>)
+### func \(\*Wrapper\) [GetParameters](<https://github.com/corpix/parse/blob/master/wrapper.go#L47>)
 
 ```go
 func (r *Wrapper) GetParameters() RuleParameters
@@ -1544,7 +1642,7 @@ func (r *Wrapper) GetParameters() RuleParameters
 GetParameters returns a KV rule parameters.
 
 <a name="Wrapper.IsFinite"></a>
-### func \(\*Wrapper\) [IsFinite](<https://github.com/corpix/parse/blob/master/wrapper.go#L54>)
+### func \(\*Wrapper\) [IsFinite](<https://github.com/corpix/parse/blob/master/wrapper.go#L55>)
 
 ```go
 func (r *Wrapper) IsFinite() bool
@@ -1553,7 +1651,7 @@ func (r *Wrapper) IsFinite() bool
 IsFinite returns true if this rule is not a wrapper for other rules.
 
 <a name="Wrapper.Name"></a>
-### func \(\*Wrapper\) [Name](<https://github.com/corpix/parse/blob/master/wrapper.go#L14>)
+### func \(\*Wrapper\) [Name](<https://github.com/corpix/parse/blob/master/wrapper.go#L15>)
 
 ```go
 func (r *Wrapper) Name() string
@@ -1562,7 +1660,7 @@ func (r *Wrapper) Name() string
 Name indicates the name which was given to the rule on creation. Name could be not unique.
 
 <a name="Wrapper.Parse"></a>
-### func \(\*Wrapper\) [Parse](<https://github.com/corpix/parse/blob/master/wrapper.go#L62>)
+### func \(\*Wrapper\) [Parse](<https://github.com/corpix/parse/blob/master/wrapper.go#L63>)
 
 ```go
 func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error)
@@ -1571,7 +1669,7 @@ func (r *Wrapper) Parse(ctx *Context, input []byte) (*Tree, error)
 Parse consumes some bytes from input & emits a Tree using settings defined during creation of the concrete Rule type. May return an error if something goes wrong, should provide some location information to the user which points to position in input.
 
 <a name="Wrapper.Show"></a>
-### func \(\*Wrapper\) [Show](<https://github.com/corpix/parse/blob/master/wrapper.go#L23>)
+### func \(\*Wrapper\) [Show](<https://github.com/corpix/parse/blob/master/wrapper.go#L24>)
 
 ```go
 func (r *Wrapper) Show(childs string) string
@@ -1580,7 +1678,7 @@ func (r *Wrapper) Show(childs string) string
 Show this node as a string. You should provide childs as string to this function, it does not care about nesting in a tree, it only shows string representation of itself.
 
 <a name="Wrapper.String"></a>
-### func \(\*Wrapper\) [String](<https://github.com/corpix/parse/blob/master/wrapper.go#L33>)
+### func \(\*Wrapper\) [String](<https://github.com/corpix/parse/blob/master/wrapper.go#L34>)
 
 ```go
 func (r *Wrapper) String() string
