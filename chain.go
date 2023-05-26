@@ -142,8 +142,8 @@ func (r *Chain) Parse(ctx *Context, input []byte) (*Tree, error) {
 //
 
 // Add appends a Rule to the Chain.
-func (r *Chain) Add(rule Rule) {
-	r.Rules = append(r.Rules, rule)
+func (r *Chain) Add(rule ...Rule) {
+	r.Rules = append(r.Rules, rule...)
 }
 
 //

@@ -152,8 +152,8 @@ func (r *Either) Parse(ctx *Context, input []byte) (*Tree, error) {
 //
 
 // Add appends a Rule into Either list.
-func (r *Either) Add(rule Rule) {
-	r.Rules = append(r.Rules, rule)
+func (r *Either) Add(rule ...Rule) {
+	r.Rules = append(r.Rules, rule...)
 }
 
 //
